@@ -1,0 +1,9 @@
+# Copie para .dev.vars (que não vai para o Git) e ajuste.
+# Usado só pelo "npm run dev:server" na sua máquina.
+SESSION_SECRET=troque-por-um-texto-longo-e-aleatorio
+DEV_LOGIN=1
+API_ORIGIN=http://localhost:8787
+WEB_ORIGIN=http://localhost:5173
+# Para testar o login de verdade com o Google localmente:
+# GOOGLE_CLIENT_ID=...apps.googleusercontent.com
+# GOOGLE_CLIENT_SECRET=...

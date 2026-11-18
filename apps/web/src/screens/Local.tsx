@@ -1,0 +1,270 @@
+import { ChessGame, END_REASON_LABEL, TIME_CONTROL_IDS, TIME_CONTROLS, opposite, toPgn, type GameResult, type EndReason, type TimeControlId } from '@checkoru/shared';
+import type { Color, Role } from 'chessops';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { Board, type BoardApi, type Key } from '../components/Board';
+import { Oru } from '../components/Oru';
+import { Page, TopBar } from '../components/Shell';
+import { formatClock } from '../notation';
+import { play, type SoundEvent } from '../sound';
+import { useStore } from '../store';
+import { MoveList, PromotionPicker } from './Game';
+
+type Tc = TimeControlId | 'livre';
+
+interface Clock {
+  white: number;
+  black: number;
+  /** Date.now() de quando o lance atual começou; null = parado. */
+  since: number | null;
+}
+
+function soundFor(san: string): SoundEvent {
+  if (san.includes('+') || san.includes('#')) return 'check';
+  return san.includes('x') ? 'capture' : 'move';
+}
+
+/** Duas pessoas no mesmo aparelho. Não precisa de internet nem de conta. */
+export function Local() {
+  const [tc, setTc] = useState<Tc | null>(null);
+  if (!tc) return <LocalSetup onStart={setTc} />;
+  return <LocalBoard key={tc + Date.now()} tc={tc} onNew={() => setTc(null)} />;
+}
+
+function LocalSetup({ onStart }: { onStart: (tc: Tc) => void }) {
+  const [tc, setTc] = useState<Tc>('10+0');
+  return (
+    <Page>
+      <TopBar title="No mesmo aparelho" sub="sem internet" back="/jogar" />
+      <div className="pad">
+        <p className="muted">Duas pessoas, um celular. Passe o aparelho a cada lance ou deixe o tabuleiro virar sozinho.</p>
+        <h2 className="h2">Ritmo</h2>
+        <div className="tc-grid">
+          {TIME_CONTROL_IDS.map((id) => (
+            <button key={id} className={`tc ${tc === id ? 'on' : ''}`} onClick={() => setTc(id)} aria-pressed={tc === id}>
+              <span className="tc-time">{id}</span>
+              <span className="tc-name">{TIME_CONTROLS[id].category === 'blitz' ? 'Blitz' : 'Rápida'}</span>
+            </button>
+          ))}
+        </div>
+        <button className={`choice ${tc === 'livre' ? 'on' : ''}`} onClick={() => setTc('livre')} aria-pressed={tc === 'livre'}>
+          <span className="choice-title">Sem relógio</span>
+          <span className="choice-sub">com calma, sem pressa</span>
+        </button>
+        <button className="btn primary big" onClick={() => onStart(tc)}>
+          Começar
+        </button>
+      </div>
+    </Page>
+  );
+}
+
+function LocalBoard({ tc, onNew }: { tc: Tc; onNew: () => void }) {
+  const { prefs } = useStore();
+  const timed = tc !== 'livre';
+  const initial = timed ? TIME_CONTROLS[tc].initialMs : 0;
+  const inc = timed ? TIME_CONTROLS[tc].incrementMs : 0;
+  const game = useRef(new ChessGame());
+  const [, setTick] = useState(0);
+  const [clock, setClock] = useState<Clock>({ white: initial, black: initial, since: null });
+  const [end, setEnd] = useState<{ result: GameResult; reason: EndReason } | null>(null);
+  const [flip, setFlip] = useState(true);
+  const [promo, setPromo] = useState<{ from: string; to: string } | null>(null);
+  const [now, setNow] = useState(Date.now());
+  const board = useRef<BoardApi | null>(null);
+  const rerender = () => setTick((t) => t + 1);
+
+  const g = game.current;
+  const turn = g.turn;
+  const left = (c: Color) => (clock.since !== null && c === turn && !end ? clock[c] - (now - clock.since) : clock[c]);
+
+  useEffect(() => {
+    if (!timed) return;
+    const t = window.setInterval(() => setNow(Date.now()), 100);
+    return () => window.clearInterval(t);
+  }, [timed]);
+
+  // Bandeira caiu?
+  useEffect(() => {
+    if (!timed || end || clock.since === null) return;
+    if (left(turn) <= 0) {
+      const r = g.timeoutResult(turn);
+      g.finish(r.result, r.reason);
+      setClock((c) => ({ ...c, [turn]: 0, since: null }));
+      setEnd(r);
+      play(prefs.sounds, 'end');
+    }
+  });
+
+  const playMove = useCallback(
+    (uci: string) => {
+      const mover = g.turn;
+      const at = Date.now();
+      const r = g.play(uci, mover);
+      if (!r.ok) {
+        board.current?.set({ fen: g.fen });
+        return;
+      }
+      play(prefs.sounds, r.end ? 'end' : soundFor(r.move.san));
+      setClock((c) => {
+        if (!timed) return c;
+        // Como no online: o relógio começa depois do primeiro lance das pretas.
+        const spent = c.since === null ? 0 : at - c.since;
+        const next = { ...c, [mover]: Math.max(0, c[mover] - spent) + (c.since === null ? 0 : inc) };
+        next.since = r.end ? null : g.ply >= 2 ? at : null;
+        return next;
+      });
+      if (r.end) setEnd(r.end);
+      rerender();
+    },
+    [g, inc, prefs.sounds, timed],
+  );
+
+  const onUserMove = useCallback(
+    (orig: Key, dest: Key) => {
+      const lastRank = dest[1] === '8' || dest[1] === '1';
+      if (lastRank && isPawnAt(g.fen, orig)) return setPromo({ from: orig, to: dest });
+      playMove(`${orig}${dest}`);
+    },
+    [g, playMove],
+  );
+
+  const choosePromotion = (role: Role | null) => {
+    const p = promo;
+    setPromo(null);
+    if (!p) return;
+    if (!role) return board.current?.set({ fen: g.fen });
+    playMove(`${p.from}${p.to}${{ queen: 'q', rook: 'r', bishop: 'b', knight: 'n' }[role as 'queen']}`);
+  };
+
+  const undo = () => {
+    if (!g.ply || end) return;
+    const ucis = g.moves.slice(0, -1).map((m) => m.uci);
+    game.current = ChessGame.fromUciMoves(ucis);
+    setClock((c) => ({ ...c, since: c.since === null ? null : Date.now() }));
+    rerender();
+  };
+
+  const resign = () => {
+    const r = { result: (turn === 'white' ? '0-1' : '1-0') as GameResult, reason: 'resign' as EndReason };
+    g.finish(r.result, r.reason);
+    setEnd(r);
+    play(prefs.sounds, 'end');
+  };
+
+  const pgn = () =>
+    toPgn(
+      {
+        event: 'Partida no mesmo aparelho',
+        site: 'Checkoru',
+        date: new Date(),
+        white: 'Brancas',
+        black: 'Pretas',
+        result: end?.result ?? '*',
+        timeControl: timed ? `${initial / 1000}+${inc / 1000}` : '-',
+      },
+      g.moves,
+    );
+
+  const download = () => {
+    const url = URL.createObjectURL(new Blob([pgn()], { type: 'application/x-chess-pgn' }));
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `checkoru-${new Date().toISOString().slice(0, 10)}.pgn`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const orientation: Color = flip ? turn : 'white';
+  const top = opposite(orientation);
+  const last = g.moves[g.moves.length - 1];
+  const winner = end?.result === '1-0' ? 'Brancas vencem' : end?.result === '0-1' ? 'Pretas vencem' : 'Empate';
+
+  return (
+    <div className="page game-page">
+      <TopBar title="No mesmo aparelho" sub={timed ? TIME_CONTROLS[tc].label : 'sem relógio'} back={onNew} />
+      <div className="game-body">
+        <SideBar color={top} ms={left(top)} timed={timed} active={!end && turn === top} />
+        <Board
+          onReady={(api) => (board.current = api)}
+          config={{
+            fen: g.fen,
+            orientation,
+            turnColor: turn,
+            lastMove: last ? ([last.uci.slice(0, 2), last.uci.slice(2, 4)] as Key[]) : undefined,
+            check: last?.san.includes('+') || last?.san.includes('#') ? turn : false,
+            viewOnly: !!end,
+            movable: { free: false, color: end ? undefined : turn, dests: g.legalDests() as Map<Key, Key[]>, events: { after: onUserMove } },
+          }}
+        />
+        <SideBar color={orientation} ms={left(orientation)} timed={timed} active={!end && turn === orientation} />
+        <MoveList moves={g.moves} />
+
+        {end && (
+          <div className="card end-panel" role="status">
+            <Oru mood="feliz" size={64} face="var(--surface)" />
+            <div>
+              <h2 className="h1">{winner}</h2>
+              <p className="muted">{END_REASON_LABEL[end.reason]}</p>
+            </div>
+            <div className="end-actions">
+              <button className="btn primary" onClick={onNew}>
+                Nova partida
+              </button>
+              <button className="btn" onClick={download}>
+                Baixar PGN
+              </button>
+            </div>
+          </div>
+        )}
+
+        <label className="switch">
+          <span>Virar o tabuleiro a cada lance</span>
+          <input type="checkbox" checked={flip} onChange={(e) => setFlip(e.target.checked)} />
+        </label>
+      </div>
+
+      {!end && (
+        <div className="actions">
+          <button className="btn" onClick={undo} disabled={!g.ply}>
+            Voltar lance
+          </button>
+          <button className="btn" onClick={resign}>
+            {turn === 'white' ? 'Brancas desistem' : 'Pretas desistem'}
+          </button>
+        </div>
+      )}
+
+      {promo && <PromotionPicker color={turn} onPick={choosePromotion} />}
+    </div>
+  );
+}
+
+function isPawnAt(fen: string, square: string): boolean {
+  const rows = fen.split(' ')[0]!.split('/');
+  const file = square.charCodeAt(0) - 97;
+  const rank = Number(square[1]);
+  const row = rows[8 - rank] ?? '';
+  let f = 0;
+  for (const ch of row) {
+    if (/\d/.test(ch)) f += Number(ch);
+    else {
+      if (f === file) return ch === 'P' || ch === 'p';
+      f++;
+    }
+  }
+  return false;
+}
+
+function SideBar({ color, ms, timed, active }: { color: Color; ms: number; timed: boolean; active: boolean }) {
+  const low = timed && active && ms < 10_000;
+  return (
+    <div className="player-bar">
+      <div className="player-id">
+        <span className={`dot ${color}`} style={{ width: 22, height: 22 }} />
+        <p className="player-name">{color === 'white' ? 'Brancas' : 'Pretas'}</p>
+        {active && <span className="player-status">joga agora</span>}
+      </div>
+      {timed && <span className={`clock ${active ? 'active' : ''} ${low ? 'low' : ''}`}>{formatClock(ms)}</span>}
+    </div>
+  );
+}

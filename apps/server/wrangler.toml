@@ -1,0 +1,42 @@
+# Configuração do servidor na Cloudflare (plano gratuito).
+# Antes do primeiro deploy, siga docs/CONFIGURAR.md.
+
+name = "checkoru-api"
+main = "src/index.ts"
+compatibility_date = "2025-11-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "checkoru"
+# Troque pelo ID que o comando `npx wrangler d1 create checkoru` mostrar.
+database_id = "00000000-0000-0000-0000-000000000000"
+migrations_dir = "migrations"
+
+[[durable_objects.bindings]]
+name = "LOBBY"
+class_name = "Lobby"
+
+[[durable_objects.bindings]]
+name = "GAME"
+class_name = "GameRoom"
+
+# O plano gratuito só aceita Durable Objects com SQLite.
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["Lobby", "GameRoom"]
+
+[vars]
+# Endereço do site (Cloudflare Pages).
+WEB_ORIGIN = "https://checkoru.pages.dev"
+# Endereço deste servidor, usado no retorno do login do Google.
+API_ORIGIN = "https://checkoru-api.SEU-USUARIO.workers.dev"
+# Esquema de link do app Android (checkoru://).
+APP_SCHEME = "checkoru"
+# ID do cliente OAuth criado no Google Cloud (não é segredo).
+GOOGLE_CLIENT_ID = ""
+# Login de teste sem Google. Deixe "0" em produção.
+DEV_LOGIN = "0"
+
+# Segredos (nunca no repositório):
+#   npx wrangler secret put GOOGLE_CLIENT_SECRET
+#   npx wrangler secret put SESSION_SECRET

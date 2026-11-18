@@ -1,0 +1,21 @@
+{
+  "name": "checkoru",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Checkoru: xadrez online, análise e treino. Código aberto.",
+  "license": "AGPL-3.0-or-later",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "test": "npm run test --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "build": "npm run build --workspace=@checkoru/web",
+    "dev:web": "npm run dev --workspace=@checkoru/web",
+    "dev:server": "npm run dev --workspace=@checkoru/server"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

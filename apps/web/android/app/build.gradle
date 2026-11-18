@@ -1,0 +1,84 @@
+apply plugin: 'com.android.application'
+
+android {
+    namespace = "app.checkoru"
+    compileSdk = rootProject.ext.compileSdkVersion
+    defaultConfig {
+        applicationId "app.checkoru"
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
+        // No GitHub Actions cada build ganha um número maior, para o celular aceitar a atualização.
+        versionCode((System.getenv("GITHUB_RUN_NUMBER") ?: "1").toInteger())
+        versionName "0.1.0"
+        resValue "string", "app_name", "Checkoru"
+        resValue "string", "title_activity_main", "Checkoru"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        aaptOptions {
+             // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
+             // Default: https://android.googlesource.com/platform/frameworks/base/+/282e181b58cf72b6ca770dc7ca5f91f135444502/tools/aapt/AaptAssets.cpp#61
+            ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
+        }
+    }
+    // A chave de assinatura vem de variáveis de ambiente (nunca do repositório).
+    signingConfigs {
+        // Chave SÓ para os APKs de teste (pública de propósito, como a "debug" do Android).
+        // Assim cada APK de teste instala por cima do anterior. Nunca use para publicar.
+        teste {
+            storeFile file("../teste.keystore")
+            storePassword "checkoru-teste"
+            keyAlias "teste"
+            keyPassword "checkoru-teste"
+        }
+        release {
+            def keystore = System.getenv("CHECKORU_KEYSTORE")
+            if (keystore) {
+                storeFile file(keystore)
+                storePassword System.getenv("CHECKORU_KEYSTORE_PASSWORD")
+                keyAlias System.getenv("CHECKORU_KEY_ALIAS")
+                keyPassword System.getenv("CHECKORU_KEY_PASSWORD")
+            }
+        }
+    }
+    // F-Droid: não incluir o bloco de dependências criptografado do Google Play.
+    dependenciesInfo {
+        includeInApk = false
+        includeInBundle = false
+    }
+    buildTypes {
+        // APK de teste: instala ao lado do app oficial, com outro nome.
+        debug {
+            applicationIdSuffix ".teste"
+            versionNameSuffix "-teste"
+            signingConfig signingConfigs.teste
+            resValue "string", "app_name", "Checkoru teste"
+            resValue "string", "title_activity_main", "Checkoru teste"
+        }
+        release {
+            if (System.getenv("CHECKORU_KEYSTORE")) signingConfig signingConfigs.release
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+repositories {
+    flatDir{
+        dirs '../capacitor-cordova-android-plugins/src/main/libs', 'libs'
+    }
+}
+
+dependencies {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation "androidx.appcompat:appcompat:$androidxAppCompatVersion"
+    implementation "androidx.coordinatorlayout:coordinatorlayout:$androidxCoordinatorLayoutVersion"
+    implementation "androidx.core:core-splashscreen:$coreSplashScreenVersion"
+    implementation project(':capacitor-android')
+    testImplementation "junit:junit:$junitVersion"
+    androidTestImplementation "androidx.test.ext:junit:$androidxJunitVersion"
+    androidTestImplementation "androidx.test.espresso:espresso-core:$androidxEspressoCoreVersion"
+    implementation project(':capacitor-cordova-android-plugins')
+}
+
+apply from: 'capacitor.build.gradle'
+
+// Sem Google Play Services nem Firebase: o app precisa ser aceito pelo F-Droid.

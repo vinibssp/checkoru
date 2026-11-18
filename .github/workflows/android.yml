@@ -1,0 +1,102 @@
+# APKs do Android, gerados de graça no GitHub.
+#
+# Teste (a cada push na main, ou manual em Actions > Android > Run workflow):
+#   "Checkoru teste", com modo sem conta e partida no mesmo aparelho.
+#   Fica sempre no mesmo link: Releases > "Versão de teste" > checkoru-teste.apk
+#   Cada APK instala por cima do anterior.
+#
+# Lançamento (em cada tag "v*", ex.: v0.1.0): APK oficial assinado, anexado à Release da versão.
+#   Precisa dos segredos ANDROID_KEYSTORE_BASE64, ANDROID_KEYSTORE_PASSWORD, ANDROID_KEY_ALIAS, ANDROID_KEY_PASSWORD.
+name: Android
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: android-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    env:
+      TESTE: ${{ !startsWith(github.ref, 'refs/tags/v') }}
+      VITE_API_URL: ${{ vars.VITE_API_URL || 'https://servidor-ainda-nao-configurado.invalid' }}
+      VITE_WEB_URL: ${{ vars.VITE_WEB_URL }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - uses: gradle/actions/setup-gradle@v4
+
+      - run: npm ci
+
+      - name: Site dentro do app
+        working-directory: apps/web
+        run: |
+          if [ "$TESTE" = "true" ]; then export VITE_TEST_BUILD=1; fi
+          npm run android:sync
+
+      - name: APK de teste
+        if: ${{ env.TESTE == 'true' }}
+        working-directory: apps/web/android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon
+          mkdir -p ../../../out
+          cp app/build/outputs/apk/debug/app-debug.apk ../../../out/checkoru-teste.apk
+
+      - name: Chave de lançamento
+        if: ${{ env.TESTE != 'true' }}
+        env:
+          KEYSTORE: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: |
+          if [ -z "$KEYSTORE" ]; then echo "Falta o segredo ANDROID_KEYSTORE_BASE64 (veja docs/CONFIGURAR.md)"; exit 1; fi
+          echo "$KEYSTORE" | base64 -d > "$RUNNER_TEMP/checkoru.jks"
+
+      - name: APK de lançamento
+        if: ${{ env.TESTE != 'true' }}
+        working-directory: apps/web/android
+        env:
+          CHECKORU_KEYSTORE: ${{ runner.temp }}/checkoru.jks
+          CHECKORU_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          CHECKORU_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          CHECKORU_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleRelease --no-daemon
+          mkdir -p ../../../out
+          cp app/build/outputs/apk/release/app-release.apk "../../../out/checkoru-${GITHUB_REF_NAME}.apk"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: checkoru-apk
+          path: out/*.apk
+
+      - name: Atualiza o link fixo da versão de teste
+        if: ${{ env.TESTE == 'true' && github.ref == 'refs/heads/main' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release delete teste --yes --cleanup-tag || true
+          gh release create teste out/checkoru-teste.apk --prerelease --target "$GITHUB_SHA" \
+            --title "Versão de teste" \
+            --notes "APK de teste gerado em $(date -u '+%d/%m/%Y %H:%M') UTC a partir de ${GITHUB_SHA::7}. Instala por cima da versão de teste anterior."
+
+      - name: Anexa à Release da versão
+        if: ${{ env.TESTE != 'true' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" out/*.apk --title "Checkoru $GITHUB_REF_NAME" --generate-notes || gh release upload "$GITHUB_REF_NAME" out/*.apk --clobber
