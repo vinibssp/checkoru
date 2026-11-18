@@ -60,6 +60,9 @@ npm run e2e --workspace=@checkoru/server   # com o servidor local rodando
 Cada push na `main` gera um APK de teste em **Releases → Versão de teste** (`checkoru-teste.apk`).
 Ele abre mesmo sem servidor: use **Testar sem conta** e jogue no mesmo aparelho.
 
+No computador, a mesma versão de teste fica em `https://SEU-USUARIO.github.io/checkoru/`, atualizada a cada push,
+depois de ligar o GitHub Pages uma vez (Settings → Pages → Source: **GitHub Actions**).
+
 ## Publicar (grátis)
 
 O passo a passo completo, do zero, está em [docs/CONFIGURAR.md](docs/CONFIGURAR.md):

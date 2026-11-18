@@ -1,0 +1,66 @@
+# Versão de teste do site no GitHub Pages (de graça), atualizada a cada push na main.
+#
+# Mesma coisa do APK de teste: modo sem conta, bots, análise, puzzles e partida no mesmo aparelho.
+# Endereço: https://<dono>.github.io/<repositório>/  (ex.: https://vinibssp.github.io/checkoru/)
+#
+# Para ligar (uma vez só): Settings > Pages > Build and deployment > Source: "GitHub Actions".
+# Enquanto não estiver ligado, este workflow só monta o site e pula a publicação.
+name: Site de teste
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: site-teste
+  cancel-in-progress: true
+
+jobs:
+  site:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    env:
+      VITE_TEST_BUILD: 1
+      VITE_API_URL: ${{ vars.VITE_API_URL || 'https://servidor-ainda-nao-configurado.invalid' }}
+      VITE_WEB_URL: ${{ vars.VITE_WEB_URL }}
+    steps:
+      - name: Pages está ligado?
+        id: pages
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh api "repos/$GITHUB_REPOSITORY/pages" --silent 2>/dev/null; then
+            echo "on=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "on=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::GitHub Pages ainda não está ligado: Settings > Pages > Source: GitHub Actions."
+          fi
+
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Montar o site
+        working-directory: apps/web
+        run: |
+          npx vite build --outDir ../../site
+          find ../../site -name '*.map' -delete
+          touch ../../site/.nojekyll
+
+      - if: ${{ steps.pages.outputs.on == 'true' }}
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+      - if: ${{ steps.pages.outputs.on == 'true' }}
+        id: deploy
+        uses: actions/deploy-pages@v4

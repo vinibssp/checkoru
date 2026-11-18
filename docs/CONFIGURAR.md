@@ -131,6 +131,12 @@ Abra no celular, baixe e instale (o Android pede para permitir "instalar apps de
 - Login e partidas online passam a funcionar quando a variável `VITE_API_URL` existir (passo 5).
 - É assinado com `apps/web/android/teste.keystore`, uma chave pública de propósito, só para testes.
 
+### Site de teste no computador (automático)
+
+O workflow **Site de teste** publica a mesma versão de teste no GitHub Pages, de graça, a cada push na `main`:
+`https://SEU-USUARIO.github.io/checkoru/`. Para ligar, uma vez só: **Settings → Pages → Build and deployment →
+Source: GitHub Actions** e depois **Actions → Site de teste → Run workflow**. Antes disso ele só monta o site.
+
 ### APK oficial
 
 1. Crie a chave de assinatura **uma vez** e guarde-a muito bem (sem ela não dá para atualizar o app):
