@@ -25,7 +25,7 @@ Site e app Android, de código aberto e sem anúncios.
 | Importar partidas: PGN/FEN, arquivo, Lichess, Chess.com e o próprio histórico | pronto |
 | Jogar contra a Oru: 6 bots (~400 a ~2800), dica, desfazer, sem internet | pronto |
 | Puzzles sem internet: 20 mil do banco do Lichess, puzzle do dia, por tema, corrida de 3 min e rating de puzzles | pronto |
-| Aulas e jogos famosos | depois |
+| Aprender: 18 aulas interativas (do zero ao mate da escada) e 8 jogos famosos comentados, com modo adivinhar | pronto |
 
 ## Como rodar na sua máquina
 

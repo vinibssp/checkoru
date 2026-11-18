@@ -13,6 +13,10 @@ export interface Puzzle {
   moves: string[];
   rating: number;
   themes: string[];
+  /** Aulas: o aluno joga primeiro (sem o lance que "arma" a posição). */
+  userFirst?: boolean;
+  /** Outros primeiros lances aceitos (só em tarefas de um lance). */
+  alt?: string[];
 }
 
 type Row = [string, string, string, number, string];
@@ -168,6 +172,7 @@ export interface PuzzleState {
 }
 
 export function startState(p: Puzzle): PuzzleState {
+  if (p.userFirst) return { step: 0, fen: p.fen, player: p.fen.split(' ')[1] === 'w' ? 'white' : 'black', done: p.moves.length === 0 };
   const fen = applyUci(p.fen, p.moves[0]!);
   return { step: 1, fen, player: fen.split(' ')[1] === 'w' ? 'white' : 'black', done: p.moves.length <= 1 };
 }
@@ -207,7 +212,11 @@ export type MoveVerdict = 'certo' | 'errado' | 'resolvido';
 export function checkMove(p: Puzzle, s: PuzzleState, uci: string): { verdict: MoveVerdict; state: PuzzleState } {
   const expected = p.moves[s.step];
   const after = applyUci(s.fen, uci);
-  const sameMove = expected === uci || (expected && expected.slice(0, 4) === uci.slice(0, 4) && expected.length === 4 && uci.length === 5 && uci[4] === 'q');
+  const firstStep = p.userFirst ? 0 : 1;
+  const sameMove =
+    expected === uci ||
+    (expected && expected.slice(0, 4) === uci.slice(0, 4) && expected.length === 4 && uci.length === 5 && uci[4] === 'q') ||
+    (s.step === firstStep && !!p.alt?.includes(uci));
   if (!sameMove && !isMate(after)) return { verdict: 'errado', state: s };
   const step = s.step + 1;
   const solved = isMate(after) || step >= p.moves.length;

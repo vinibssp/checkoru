@@ -79,13 +79,21 @@ faixa de 100 pontos, de 400 a 2999. O resultado (~20 mil puzzles, 2,8 MB) vai em
 arquivo por faixa, e é carregado sob demanda: funciona sem internet. Um teste confere que todos têm solução válida.
 O rating de puzzles é um Elo simples guardado no aparelho. O puzzle do dia é escolhido pela data, igual para todos.
 
+## Aulas e jogos famosos
+
+As aulas ficam em `apps/web/src/learn/lessons.ts`: cada passo é uma explicação (posição, texto, setas) ou uma
+tarefa (lances que o aluno precisa achar, com a resposta da casa entre eles). As tarefas usam o mesmo motor dos
+puzzles. Os jogos famosos ficam em `learn/famous.ts`, com comentários por lance. `learn/learn.test.ts` confere
+que toda posição é legal, que toda solução funciona e que todo comentário cai num lance que existe. Para criar uma
+aula nova, basta acrescentar um item na lista.
+
 ## Custos e limites
 
 O plano gratuito da Cloudflare dá 100 mil requisições por dia (mensagens de WebSocket contam 1 a cada 20) e 5 GB no D1. As salas hibernam entre lances, então partidas paradas não gastam CPU. A análise com motor vai rodar no aparelho (Stockfish em WebAssembly), sem custo de servidor.
 
 ## Próximos passos
 
-1. Aulas e jogos famosos comentados.
+1. Mais aulas (finais de torre, aberturas) e mais jogos famosos.
 2. Importar partida a partir de uma foto do tabuleiro.
 3. Revanche, amigos e bloqueio pelo app.
 4. Rating de puzzles salvo na conta (hoje fica no aparelho).

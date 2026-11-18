@@ -707,3 +707,111 @@ cg-board square.last-move {
   color: var(--danger);
   letter-spacing: 4px;
 }
+
+/* ---------- Aprender ---------- */
+
+.lesson-progress {
+  width: 160px;
+  height: 8px;
+  margin-top: 6px;
+  background: var(--rule);
+}
+
+.lesson-progress span {
+  display: block;
+  height: 100%;
+  background: var(--accent2);
+}
+
+.lesson-list {
+  display: grid;
+  gap: 10px;
+}
+
+.lesson-card {
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+}
+
+.lesson-card > span:last-child {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.lesson-check {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 2px solid var(--rule);
+  font-weight: 700;
+  color: var(--on-accent);
+}
+
+.lesson-card.feita .lesson-check {
+  background: var(--accent2);
+  border-color: var(--accent2);
+}
+
+.lesson-year {
+  flex: none;
+  font-family: var(--font-digits);
+  font-size: 22px;
+  color: var(--score);
+  min-width: 48px;
+}
+
+.lesson-steps {
+  flex: none;
+  display: flex;
+  gap: 4px;
+  padding: 6px 12px 0;
+}
+
+.lesson-steps span {
+  flex: 1;
+  height: 5px;
+  background: var(--rule);
+}
+
+.lesson-steps .feito {
+  background: var(--accent2);
+}
+
+.lesson-steps .agora {
+  background: var(--accent);
+}
+
+.lesson-status {
+  font-weight: 500;
+  font-size: 15px;
+  line-height: 1.35;
+  min-height: 72px;
+}
+
+.lesson-feedback {
+  display: block;
+  margin-top: 4px;
+  font-weight: 700;
+}
+
+.lesson-page .board-frame {
+  --game-chrome: calc(300px + var(--safe-top) + var(--safe-bottom));
+}
+
+.famous-page .board-frame {
+  --game-chrome: calc(380px + var(--safe-top) + var(--safe-bottom));
+}
+
+.mv.j-nota {
+  text-decoration: underline dotted var(--accent3);
+  text-underline-offset: 3px;
+}
+
+.lesson-status > :first-child {
+  flex: none;
+}

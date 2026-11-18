@@ -8,12 +8,12 @@ import { Home } from './screens/Home';
 import { Legal } from './screens/Legal';
 import { Analysis } from './screens/Analysis';
 import { Bots } from './screens/Bots';
+import { FamousScreen, Learn, LessonScreen } from './screens/Learn';
 import { PuzzleScreen, Rush, Train } from './screens/Puzzles';
 import { Analyze } from './screens/Analyze';
 import { Local } from './screens/Local';
 import { LoginReturn } from './screens/LoginReturn';
 import { Play } from './screens/Play';
-import { Soon } from './screens/Soon';
 import { Toca } from './screens/Toca';
 import { Welcome } from './screens/Welcome';
 import { useStore } from './store';
@@ -73,7 +73,11 @@ export function App() {
     case 'corrida':
       return <Rush />;
     case 'aprender':
-      return <Soon key={section} section="aprender" />;
+      return <Learn />;
+    case 'aula':
+      return <LessonScreen key={route.query.toString()} />;
+    case 'jogo':
+      return <FamousScreen key={route.query.toString()} />;
     case 'toca':
       return <Toca />;
     case 'personalizar':

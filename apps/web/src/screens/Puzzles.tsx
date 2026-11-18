@@ -3,6 +3,7 @@ import { Chess } from 'chessops/chess';
 import { chessgroundDests } from 'chessops/compat';
 import { parseFen } from 'chessops/fen';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { DrawShape } from '@lichess-org/chessground/draw';
 import { Board, type BoardApi, type Key } from '../components/Board';
 import { Oru, type Mood } from '../components/Oru';
 import { Page, TopBar } from '../components/Shell';
@@ -92,15 +93,25 @@ export function Train() {
 
 type Feedback = { kind: 'vez' | 'certo' | 'errado' | 'resolvido' | 'solucao'; text: string };
 
-function turnColor(fen: string): Color {
+export function turnColor(fen: string): Color {
   return fen.split(' ')[1] === 'w' ? 'white' : 'black';
 }
 
-function dests(fen: string): Map<Key, Key[]> {
+export function dests(fen: string): Map<Key, Key[]> {
   const setup = parseFen(fen);
   if (setup.isErr) return new Map();
   const pos = Chess.fromSetup(setup.value);
   return pos.isOk ? (chessgroundDests(pos.value) as Map<Key, Key[]>) : new Map();
+}
+
+function roleAt(fen: string, sq: string): Role | undefined {
+  const setup = parseFen(fen);
+  if (setup.isErr) return undefined;
+  return setup.value.board.get((Number(sq[1]) - 1) * 8 + sq.charCodeAt(0) - 97)?.role;
+}
+
+function isKing(fen: string, sq: string): boolean {
+  return roleAt(fen, sq) === 'king';
 }
 
 function isPawn(fen: string, sq: string): boolean {
@@ -112,7 +123,10 @@ function isPawn(fen: string, sq: string): boolean {
 }
 
 /** Controla um puzzle: lance de abertura, conferência, resposta, dica e solução. */
-function usePuzzle(puzzle: Puzzle | null, opts: { onFirstResult: (won: boolean) => void; onSolved: () => void; onMistake?: () => void }) {
+export function usePuzzle(
+  puzzle: Puzzle | null,
+  opts: { onFirstResult: (won: boolean) => void; onSolved: () => void; onMistake?: () => void; shapes?: DrawShape[] },
+) {
   const { prefs } = useStore();
   const [state, setState] = useState<PuzzleState | null>(null);
   const [fen, setFen] = useState<string>('');
@@ -139,9 +153,14 @@ function usePuzzle(puzzle: Puzzle | null, opts: { onFirstResult: (won: boolean) 
     // Mostra a posição, e o adversário faz o primeiro lance.
     setFen(puzzle.fen);
     setLast(undefined);
-    setLocked(true);
     const s = startState(puzzle);
     setState(s);
+    if (puzzle.userFirst) {
+      setLocked(false);
+      setFeedback(null);
+      return;
+    }
+    setLocked(true);
     setFeedback({ kind: 'vez', text: `${s.player === 'white' ? 'Brancas' : 'Pretas'} jogam. Ache o melhor lance.` });
     later(() => {
       const first = puzzle.moves[0]!;
@@ -205,6 +224,9 @@ function usePuzzle(puzzle: Puzzle | null, opts: { onFirstResult: (won: boolean) 
   );
 
   const onUserMove = (orig: Key, dest: Key) => {
+    // Roque arrastando o rei até a torre: vira o lance de sempre (e1g1, e1c1...).
+    const castle: Record<string, string> = { e1h1: 'e1g1', e1a1: 'e1c1', e8h8: 'e8g8', e8a8: 'e8c8' };
+    if (castle[orig + dest] && isKing(state?.fen ?? '', orig)) return tryMove(castle[orig + dest]!);
     if ((dest[1] === '8' || dest[1] === '1') && isPawn(state?.fen ?? '', orig)) return setPromo({ from: orig, to: dest });
     tryMove(`${orig}${dest}`);
   };
@@ -262,7 +284,7 @@ function usePuzzle(puzzle: Puzzle | null, opts: { onFirstResult: (won: boolean) 
           events: { after: onUserMove },
         },
         premovable: { enabled: true },
-        drawable: { autoShapes: hint ? [{ orig: hint, brush: 'green' }] : [] },
+        drawable: { autoShapes: [...(opts.shapes ?? []), ...(hint ? [{ orig: hint, brush: 'green' }] : [])] },
       }}
     />
   );
