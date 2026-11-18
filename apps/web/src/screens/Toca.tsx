@@ -1,8 +1,9 @@
 import { END_REASON_LABEL, type EndReason } from '@checkoru/shared';
 import { useEffect, useState } from 'react';
-import { api, API_URL, type GameListItem } from '../api';
+import { api, type GameListItem } from '../api';
 import { Avatar } from '../components/Oru';
 import { Page, TopBar } from '../components/Shell';
+import { AnalyseCheckoruButton } from './Analyze';
 import { useStore } from '../store';
 
 export function GameRow({ game, myId }: { game: GameListItem; myId: string }) {
@@ -24,9 +25,7 @@ export function GameRow({ game, myId }: { game: GameListItem; myId: string }) {
           {diff !== null && game.rated ? ` · ${diff >= 0 ? '+' : ''}${diff}` : ''}
         </span>
       </span>
-      <a className="btn small" href={`${API_URL}/api/games/${game.id}/pgn`} target="_blank" rel="noreferrer">
-        PGN
-      </a>
+      <AnalyseCheckoruButton id={game.id} />
     </li>
   );
 }

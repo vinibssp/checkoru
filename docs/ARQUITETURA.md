@@ -53,14 +53,25 @@ Mudança no banco = novo arquivo `000N_descricao.sql` na pasta `migrations`. Nun
 - Sons: sintetizados com Web Audio, sem arquivos.
 - As preferências ficam no aparelho e são sincronizadas com a conta. A foto de fundo fica só no aparelho.
 
+## Análise
+
+- Motor: Stockfish 19 "lite" em WebAssembly (`apps/web/public/engine/`), num Web Worker. Nada vai para o servidor.
+- Ao abrir uma partida, cada posição é avaliada (profundidade 12, no máximo 1,5 s cada). Depois, a posição na tela
+  é analisada mais fundo (profundidade 18).
+- `src/analysis.ts` (puro, com testes): leitura de PGN/FEN, chance de vitória, classificação dos lances
+  (imprecisão, erro, capivarada: perda de 5, 10 e 15 pontos de chance), precisão e os textos da Oru.
+- Importação (`src/importers.ts`): APIs públicas do Lichess e do Chess.com, sem login. No Android usa HTTP
+  nativo; no site, o Chess.com passa por `/api/chesscom/...` (repasse só-leitura com cache), porque nem sempre
+  libera acesso direto do navegador.
+
 ## Custos e limites
 
 O plano gratuito da Cloudflare dá 100 mil requisições por dia (mensagens de WebSocket contam 1 a cada 20) e 5 GB no D1. As salas hibernam entre lances, então partidas paradas não gastam CPU. A análise com motor vai rodar no aparelho (Stockfish em WebAssembly), sem custo de servidor.
 
 ## Próximos passos
 
-1. Análise com Stockfish no aparelho e importação de PGN (arquivo, Lichess, Chess.com).
-2. Jogar contra a Oru (motor com níveis).
+1. Jogar contra a Oru (motor com níveis, usando o mesmo Stockfish).
+2. Importar partida a partir de uma foto do tabuleiro.
 3. Puzzles (banco aberto do Lichess, CC0) e corrida de puzzles.
 4. Aulas e jogos famosos comentados.
 5. Revanche, amigos e bloqueio pelo app.

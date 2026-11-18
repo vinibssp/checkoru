@@ -81,6 +81,8 @@ async function route(request: Request, env: Env): Promise<Response> {
     return json({ available: !taken, message: taken ? 'Esse nome já está em uso.' : 'Disponível' });
   }
 
+  if (path.startsWith('/api/chesscom/') && method === 'GET') return chessComRelay(path.slice('/api/chesscom/'.length));
+
   if (path.startsWith('/api/games/')) {
     const [, , , gameId, extra] = path.split('/');
     if (!gameId || !/^[a-z0-9]{6,32}$/.test(gameId)) return json({ error: 'Partida inválida' }, 400);
@@ -196,6 +198,22 @@ async function mePayload(env: Env, user: UserRow) {
     user: { id: user.id, username: user.username, avatar: user.avatar, country: user.country, chatEnabled: user.chat_enabled === 1 },
     ratings: { blitz: view(ratings.blitz), rapid: view(ratings.rapid) },
   };
+}
+
+/**
+ * Repasse só-leitura para a API pública do Chess.com, que nem sempre libera acesso direto
+ * do navegador (CORS). Aceita apenas a lista de meses e as partidas de um mês, com cache de 10 min.
+ */
+async function chessComRelay(rest: string): Promise<Response> {
+  if (!/^player\/[a-z0-9_-]{2,30}\/games\/(archives|\d{4}\/\d{2})$/i.test(rest)) return json({ error: 'Caminho não permitido' }, 400);
+  const upstream = `https://api.chess.com/pub/${rest.toLowerCase()}`;
+  const cache = (caches as unknown as { default: Cache }).default;
+  const hit = await cache.match(upstream);
+  if (hit) return new Response(hit.body, hit);
+  const res = await fetch(upstream, { headers: { 'User-Agent': 'Checkoru (https://github.com/vinibssp/checkoru)', Accept: 'application/json' } });
+  const out = new Response(res.body, { status: res.status, headers: { 'Content-Type': 'application/json', 'Cache-Control': 'public, max-age=600' } });
+  if (res.ok) await cache.put(upstream, out.clone());
+  return out;
 }
 
 function bearer(request: Request): string | null {

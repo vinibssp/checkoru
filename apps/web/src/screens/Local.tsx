@@ -8,6 +8,8 @@ import { formatClock } from '../notation';
 import { play, type SoundEvent } from '../sound';
 import { useStore } from '../store';
 import { MoveList, PromotionPicker } from './Game';
+import { gameFromUcis } from '../analysis';
+import { openAnalysis } from '../currentAnalysis';
 
 type Tc = TimeControlId | 'livre';
 
@@ -221,8 +223,22 @@ function LocalBoard({ tc, onNew }: { tc: Tc; onNew: () => void }) {
               <button className="btn primary" onClick={onNew}>
                 Nova partida
               </button>
+              <button
+                className="btn"
+                onClick={() =>
+                  openAnalysis({
+                    game: gameFromUcis(
+                      g.moves.map((m) => m.uci),
+                      { source: 'No mesmo aparelho', result: end.result },
+                    ),
+                    you: null,
+                  })
+                }
+              >
+                Analisar
+              </button>
               <button className="btn" onClick={download}>
-                Baixar PGN
+                PGN
               </button>
             </div>
           </div>

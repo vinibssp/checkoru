@@ -55,6 +55,11 @@ export function Home() {
           </a>
         )}
 
+        <a className="card link-card analyse-card" href="#/analisar">
+          <span className="choice-title">Analisar uma partida</span>
+          <span className="choice-sub">do Checkoru, Lichess, Chess.com ou PGN · motor no aparelho</span>
+        </a>
+
         <div className="ratings">
           <div className="rating-box">
             <span className="rating-label">Blitz</span>

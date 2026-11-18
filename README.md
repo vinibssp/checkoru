@@ -21,7 +21,8 @@ Site e app Android, de código aberto e sem anúncios.
 | Histórico e download do PGN | pronto |
 | Partida no mesmo aparelho (sem internet) | pronto |
 | Personalização: fundo (cores ou sua foto), tabuleiro (temas ou cores livres), peças, sons | pronto |
-| Análise com motor, importar partidas | próxima versão |
+| Análise com Stockfish no aparelho: avaliação, melhor lance, resumo com precisão e revisão dos erros | pronto |
+| Importar partidas: PGN/FEN, arquivo, Lichess, Chess.com e o próprio histórico | pronto |
 | Puzzles, aulas, jogos famosos, jogar contra a Oru | depois |
 
 ## Como rodar na sua máquina

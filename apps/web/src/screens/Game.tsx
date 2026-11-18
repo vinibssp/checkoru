@@ -20,6 +20,7 @@ import { Avatar, Oru } from '../components/Oru';
 import { TopBar } from '../components/Shell';
 import { formatClock, sanPt } from '../notation';
 import { pieceImage } from '../pieces';
+import { AnalyseCheckoruButton } from './Analyze';
 import { navigate } from '../router';
 import { play, type SoundEvent } from '../sound';
 import { useStore } from '../store';
@@ -589,9 +590,10 @@ function EndPanel({ game, you, onClose }: { game: GameSnapshot; you: Color | nul
         <button className="btn primary" onClick={() => navigate(`/jogar?tc=${encodeURIComponent(game.tc)}`)}>
           Nova partida
         </button>
+        {end.reason !== 'aborted' && game.moves.length > 0 && <AnalyseCheckoruButton id={game.id} className="btn" label="Analisar a partida" />}
         {end.reason !== 'aborted' && (
           <a className="btn" href={`${API_URL}/api/games/${game.id}/pgn`} target="_blank" rel="noreferrer">
-            Baixar PGN
+            PGN
           </a>
         )}
         {opp && (
