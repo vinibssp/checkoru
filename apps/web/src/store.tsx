@@ -160,6 +160,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     for (const [k, v] of Object.entries(cssVars(prefs))) root.style.setProperty(k, v);
     root.style.setProperty('--bg-image', background ? `url("${background}")` : 'none');
     root.dataset.theme = prefs.theme;
+    root.dataset.estilo = themeOf(prefs).style;
     root.style.colorScheme = themeOf(prefs).dark ? 'dark' : 'light';
     document.querySelector('meta[name="theme-color"]')?.setAttribute('content', cssVars(prefs)['--bg']!);
     let style = document.getElementById('piece-set') as HTMLStyleElement | null;

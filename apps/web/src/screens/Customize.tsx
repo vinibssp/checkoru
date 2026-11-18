@@ -3,7 +3,8 @@ import { Page, TopBar } from '../components/Shell';
 import { pieceImage } from '../pieces';
 import { play, preload, type SoundEvent } from '../sound';
 import { useStore } from '../store';
-import { BOARDS, boardColors, PIECE_SETS, SOUND_DESCRIPTIONS, SOUND_SETS, THEMES, themeOf, type PieceSetId, type Prefs, type SoundSetId } from '../themes';
+import { BOARDS, boardColors, PIECE_SETS, SOUND_DESCRIPTIONS, SOUND_SETS, themeOf, type PieceSetId, type Prefs, type SoundSetId } from '../themes';
+import { ThemeGrid } from '../components/ThemePicker';
 import { Oru } from '../components/Oru';
 
 const MAX_BG_BYTES = 1_500_000;
@@ -65,24 +66,10 @@ export function Customize() {
           <MiniBoard />
           <Oru size={72} mood="feliz" />
         </div>
-        <p className="muted">Tudo aqui muda o app inteiro na hora e fica salvo na sua conta.</p>
+        <p className="muted">Tudo aqui muda o app inteiro na hora e fica salvo na sua conta. Cada tema já vem com peças e sons que combinam; se você trocar, sua escolha fica.</p>
 
         <h2 className="h2">Tema do app</h2>
-        <div className="theme-grid" role="radiogroup" aria-label="Tema do app">
-          {Object.entries(THEMES).map(([id, t]) => (
-            <button key={id} role="radio" aria-checked={prefs.theme === id} className={`theme-pick ${prefs.theme === id ? 'on' : ''}`} onClick={() => setPrefs({ theme: id })}>
-              <span className="theme-sample" style={{ background: t.vars['--bg'] }} aria-hidden="true">
-                <i style={{ background: t.vars['--accent'] }} />
-                <i style={{ background: t.vars['--accent2'] }} />
-                <i style={{ background: t.vars['--accent3'] }} />
-                <i style={{ background: t.board.light }} />
-                <i style={{ background: t.board.dark }} />
-              </span>
-              <span className="theme-name">{t.name}</span>
-              <span className="theme-desc">{t.desc}</span>
-            </button>
-          ))}
-        </div>
+        <ThemeGrid />
 
         <h2 className="h2">Foto de fundo</h2>
         <div className="swatches">

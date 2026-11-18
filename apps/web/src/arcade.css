@@ -43,9 +43,9 @@ body::after {
 .sound-name {
   font-family: var(--font-display);
   font-style: normal;
-  font-weight: 400;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
+  font-weight: var(--display-weight);
+  letter-spacing: var(--display-spacing);
+  text-transform: var(--display-case);
 }
 
 .h1 {
@@ -54,8 +54,9 @@ body::after {
 }
 
 .h2 {
-  font-family: var(--font-display);
-  font-weight: 400;
+  font-family: var(--btn-font);
+  font-weight: var(--btn-weight);
+  text-transform: uppercase;
   font-size: 14px;
   letter-spacing: 0.08em;
   color: var(--sub);
@@ -95,10 +96,11 @@ body::after {
   font-family: var(--font-digits);
   font-weight: 400;
   letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums;
 }
 
 .clock {
-  font-size: 30px;
+  font-size: calc(30px * var(--digits-scale));
   line-height: 1;
   padding: 4px 10px;
   min-width: 96px;
@@ -123,22 +125,22 @@ body::after {
 
 .rating-num,
 .acc {
-  font-size: 34px;
+  font-size: calc(34px * var(--digits-scale));
   color: var(--score);
 }
 
 .big-clock {
-  font-size: 52px;
+  font-size: calc(52px * var(--digits-scale));
   color: var(--score);
 }
 
 .tc-time {
-  font-size: 28px;
+  font-size: calc(28px * var(--digits-scale));
   line-height: 1;
 }
 
 .eval-chip {
-  font-size: 24px;
+  font-size: calc(24px * var(--digits-scale));
 }
 
 /* ---------- Botões ---------- */
@@ -148,10 +150,10 @@ body::after {
 .btn-guest,
 .chip,
 .icon-text {
-  font-family: var(--font-display);
-  font-weight: 400;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  font-family: var(--btn-font);
+  font-weight: var(--btn-weight);
+  letter-spacing: var(--btn-spacing);
+  text-transform: var(--btn-case);
   border: var(--btn-border);
   border-radius: var(--btn-radius);
   box-shadow: var(--btn-shadow);
@@ -222,10 +224,10 @@ body::after {
   box-shadow: var(--btn-shadow);
   clip-path: var(--btn-clip);
   background: var(--surface);
-  font-family: var(--font-display);
-  font-weight: 400;
+  font-family: var(--btn-font);
+  font-weight: var(--btn-weight);
   font-size: 14px;
-  text-transform: uppercase;
+  text-transform: var(--btn-case);
   margin: 2px 4px 6px 2px;
 }
 
@@ -522,6 +524,10 @@ cg-board square.last-move {
   animation: blink 1.2s steps(2, start) infinite;
 }
 
+[data-estilo='tradicional'] .press-start {
+  display: none;
+}
+
 @keyframes blink {
   to {
     visibility: hidden;
@@ -697,7 +703,7 @@ cg-board square.last-move {
 
 .rush-score {
   font-family: var(--font-digits);
-  font-size: 40px;
+  font-size: calc(40px * var(--digits-scale));
   color: var(--score);
   min-width: 60px;
 }
@@ -814,4 +820,116 @@ cg-board square.last-move {
 
 .lesson-status > :first-child {
   flex: none;
+}
+
+/* ---------- Escolha de tema ---------- */
+
+.theme-group {
+  margin: 14px 0 8px;
+}
+
+.theme-grid.compact {
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 10px;
+}
+
+.theme-pick.on {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.theme-sample2 {
+  width: 100%;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 10px;
+  border-radius: 6px;
+  border: 1px solid color-mix(in srgb, currentColor 18%, transparent);
+}
+
+.theme-mini-board {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  width: 30px;
+  height: 30px;
+  flex: none;
+}
+
+.theme-mini-board i {
+  display: block;
+}
+
+.theme-sample-name {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.theme-sample-btn {
+  margin-left: auto;
+  width: 26px;
+  height: 14px;
+  border-radius: 3px;
+}
+
+.theme-name {
+  text-transform: none;
+  font-family: var(--font-ui);
+  font-weight: 700;
+}
+
+.home-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-right: -8px;
+}
+
+.theme-modal {
+  align-items: flex-end;
+  padding: 0;
+  z-index: 60;
+}
+
+.theme-sheet {
+  width: 100%;
+  max-width: 560px;
+  max-height: 82dvh;
+  border-radius: 14px 14px 0 0;
+  padding-bottom: calc(12px + var(--safe-bottom));
+}
+
+.theme-sheet-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.theme-sheet-body {
+  overflow-y: auto;
+  min-height: 0;
+  padding: 2px 4px 4px;
+}
+
+.theme-intro {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+.theme-intro .pad {
+  flex: 1;
+  padding-top: calc(16px + var(--safe-top));
+}
+
+.theme-intro-go {
+  position: sticky;
+  bottom: 0;
+  padding-bottom: calc(10px + var(--safe-bottom));
+}
+
+.theme-intro-go .btn {
+  width: 100%;
+  max-width: 420px;
 }

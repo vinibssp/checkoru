@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { api, type GameListItem } from '../api';
 import { Oru } from '../components/Oru';
 import { Page } from '../components/Shell';
+import { ThemeButton } from '../components/ThemePicker';
 import { useStore } from '../store';
 import { GameRow } from './Toca';
 
@@ -30,7 +31,10 @@ export function Home() {
   return (
     <Page>
       <div className="pad">
-        <p className="eyebrow">{date}</p>
+        <div className="home-top">
+          <p className="eyebrow">{date}</p>
+          <ThemeButton />
+        </div>
         <div className="hello">
           <h1 className="h1">
             {greeting()}, {me.user.username}.

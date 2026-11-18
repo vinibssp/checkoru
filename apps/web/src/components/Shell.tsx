@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { navigate, useRoute } from '../router';
+import { ThemeButton } from './ThemePicker';
 
 export function TopBar({ title, sub, back, right }: { title: string; sub?: string; back?: string | (() => void); right?: ReactNode }) {
   return (
@@ -17,7 +18,7 @@ export function TopBar({ title, sub, back, right }: { title: string; sub?: strin
         <span className="title">{title}</span>
         {sub && <span className="sub">{sub}</span>}
       </span>
-      {right ?? <span className="icon-btn" />}
+      {right ?? (back ? <span className="icon-btn" /> : <ThemeButton />)}
     </header>
   );
 }

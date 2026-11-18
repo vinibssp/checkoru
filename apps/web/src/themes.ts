@@ -1,5 +1,6 @@
 // Tudo que o jogador pode personalizar.
-// Temas do app (identidade "arcade"): cores, fontes, formato de botões e cartões, tabuleiro e efeitos de tela.
+// Temas do app: dois tradicionais e oito "arcade". Cada um define cores, fontes, formato de botões e cartões,
+// tabuleiro, efeitos de tela, e as peças e sons que combinam com ele.
 // Cada tema vira um conjunto de variáveis CSS; nada no CSS tem cor fixa.
 
 export interface BoardTheme {
@@ -15,9 +16,13 @@ export interface BoardTheme {
 export interface AppTheme {
   name: string;
   desc: string;
+  style: 'tradicional' | 'arcade';
   /** Tema escuro? (barra do sistema e formulários) */
   dark: boolean;
   board: BoardTheme;
+  /** Peças e sons que combinam com o tema (aplicados ao escolher o tema). */
+  pieces: PieceSetId;
+  sounds: SoundSetId;
   vars: Record<string, string>;
 }
 
@@ -26,15 +31,88 @@ const PIXEL = "'Pixelify Sans', system-ui, sans-serif";
 const GROTESK = "'Space Grotesk', system-ui, sans-serif";
 const TERMINAL = "'VT323', ui-monospace, monospace";
 const SILK = "'Silkscreen', ui-monospace, monospace";
+const SERIF = "'Playfair Display', Georgia, 'Times New Roman', serif";
+const INTER = "'Inter', system-ui, sans-serif";
+
+/** Texto dos temas arcade: títulos e botões em maiúsculas, na fonte de display. Os tradicionais trocam isso. */
+const ARCADE_TEXT: Record<string, string> = {
+  '--display-case': 'uppercase',
+  '--display-weight': '400',
+  '--display-spacing': '0.02em',
+  '--btn-font': 'var(--font-display)',
+  '--btn-case': 'uppercase',
+  '--btn-weight': '400',
+  '--btn-spacing': '0.04em',
+  '--digits-scale': '1',
+};
+
+const CLASSIC_TEXT: Record<string, string> = {
+  '--display-case': 'none',
+  '--display-weight': '700',
+  '--display-spacing': '0',
+  '--btn-font': 'var(--font-ui)',
+  '--btn-case': 'none',
+  '--btn-weight': '600',
+  '--btn-spacing': '0',
+  '--digits-scale': '0.8',
+  '--overlay': 'none',
+  '--glow': 'none',
+  '--size-adjust': 'none',
+  '--btn-clip': 'none',
+  '--card-clip': 'none',
+};
 
 const notch = (c: string, s = 4) => `0 -${s}px 0 0 ${c}, 0 ${s}px 0 0 ${c}, -${s}px 0 0 0 ${c}, ${s}px 0 0 0 ${c}`;
 const SCANLINES_LIGHT = 'repeating-linear-gradient(to bottom, rgba(255,255,255,0.035) 0px, rgba(255,255,255,0.035) 1px, transparent 1px, transparent 3px)';
 const SCANLINES_DARK = 'repeating-linear-gradient(to bottom, rgba(0,0,0,0.22) 0px, rgba(0,0,0,0.22) 1px, transparent 1px, transparent 3px)';
 
 export const THEMES: Record<string, AppTheme> = {
+  classico: {
+    name: 'Clássico',
+    desc: 'madeira e creme, como um tabuleiro de casa',
+    style: 'tradicional',
+    dark: false,
+    pieces: 'classicas',
+    sounds: 'madeira',
+    board: { name: 'Clássico', light: '#EEDCBA', dark: '#B07D52', frame: '#6B4428', hlLight: '#F2D57A', hlDark: '#D2A94A' },
+    vars: {
+      ...CLASSIC_TEXT,
+      '--bg': '#F4EFE6', '--surface': '#FFFFFF', '--ink': '#2B2420', '--sub': '#6B5F55', '--rule': '#E0D6C6',
+      '--accent': '#7A4A26', '--on-accent': '#FFFFFF', '--accent2': '#3E7C59', '--accent3': '#C08A2E', '--score': '#7A4A26',
+      '--clock-on': '#2B2420', '--clock-on-ink': '#FFFFFF', '--nav': '#FFFFFF', '--danger': '#B3261E',
+      '--owl-body': '#5A3A22', '--owl-face': '#F4EFE6',
+      '--font-display': SERIF, '--font-ui': INTER, '--font-digits': INTER,
+      '--btn-border': '1px solid #D5C8B5', '--btn-radius': '10px', '--btn-shadow': '0 1px 2px rgba(43,36,32,0.12)',
+      '--card-border': '1px solid #E3D9CA', '--card-radius': '12px', '--card-shadow': '0 1px 3px rgba(43,36,32,0.08)',
+      '--board-frame': '0 0 0 3px #6B4428, 0 3px 12px rgba(43,36,32,0.28)',
+    },
+  },
+  torneio: {
+    name: 'Torneio',
+    desc: 'escuro e verde, como num clube',
+    style: 'tradicional',
+    dark: true,
+    pieces: 'classicas',
+    sounds: 'madeira',
+    board: { name: 'Torneio', light: '#E9EDCC', dark: '#6F9A4F', frame: '#15181A', hlLight: '#F4F67E', hlDark: '#BBCB3B' },
+    vars: {
+      ...CLASSIC_TEXT,
+      '--bg': '#1F2326', '--surface': '#2B3034', '--ink': '#ECEDEA', '--sub': '#A7ADA8', '--rule': '#3B4247',
+      '--accent': '#7FB24A', '--on-accent': '#14200B', '--accent2': '#5B9BD5', '--accent3': '#E3B341', '--score': '#E3B341',
+      '--clock-on': '#ECEDEA', '--clock-on-ink': '#1F2326', '--nav': '#25292D', '--danger': '#E5534B',
+      '--owl-body': '#ECEDEA', '--owl-face': '#2B3034',
+      '--font-display': INTER, '--font-ui': INTER, '--font-digits': INTER,
+      '--btn-border': '0', '--btn-radius': '8px', '--btn-shadow': '0 2px 0 rgba(0,0,0,0.35)',
+      '--card-border': '0', '--card-radius': '10px', '--card-shadow': 'none',
+      '--board-frame': '0 3px 14px rgba(0,0,0,0.45)',
+    },
+  },
   fliperama: {
     name: 'Fliperama',
     desc: 'neon de noite',
+    style: 'arcade',
+    pieces: 'pixel',
+    sounds: 'retro',
     dark: true,
     board: { name: 'Fliperama', light: '#E9DFC6', dark: '#5D4FB8', frame: '#FF4F8B', hlLight: '#FFC93C', hlDark: '#E0A92A' },
     vars: {
@@ -52,6 +130,9 @@ export const THEMES: Record<string, AppTheme> = {
   cartucho: {
     name: 'Cartucho',
     desc: 'plástico e contorno grosso',
+    style: 'arcade',
+    pieces: 'pixel',
+    sounds: 'retro',
     dark: false,
     board: { name: 'Cartucho', light: '#F6E6BF', dark: '#D9893B', frame: '#1B1B1B', hlLight: '#F7C948', hlDark: '#E0AA2A' },
     vars: {
@@ -69,6 +150,9 @@ export const THEMES: Record<string, AppTheme> = {
   fosforo: {
     name: 'Fósforo',
     desc: 'tela verde de portátil',
+    style: 'arcade',
+    pieces: 'pixel',
+    sounds: 'retro',
     dark: false,
     board: { name: 'Fósforo', light: '#8BAC0F', dark: '#306230', frame: '#0F380F', hlLight: '#C4D64A', hlDark: '#6E8A1F' },
     vars: {
@@ -86,6 +170,9 @@ export const THEMES: Record<string, AppTheme> = {
   letreiro: {
     name: 'Letreiro',
     desc: 'luzes de fliperama de rua',
+    style: 'arcade',
+    pieces: 'pixel',
+    sounds: 'retro',
     dark: true,
     board: { name: 'Letreiro', light: '#F2E3C6', dark: '#B23A48', frame: '#FFC845', hlLight: '#FFC845', hlDark: '#E0A62A' },
     vars: {
@@ -103,6 +190,9 @@ export const THEMES: Record<string, AppTheme> = {
   disquete: {
     name: 'Disquete',
     desc: 'computador dos anos 90',
+    style: 'arcade',
+    pieces: 'contorno',
+    sounds: 'efeitos',
     dark: false,
     board: { name: 'Disquete', light: '#DFDFDF', dark: '#3A6EA5', frame: '#404040', hlLight: '#FFFF80', hlDark: '#C8C850' },
     vars: {
@@ -121,6 +211,9 @@ export const THEMES: Record<string, AppTheme> = {
   ambar: {
     name: 'Âmbar',
     desc: 'terminal de fósforo laranja',
+    style: 'arcade',
+    pieces: 'pixel',
+    sounds: 'futurista',
     dark: true,
     board: { name: 'Âmbar', light: '#E09A00', dark: '#5C3B00', frame: '#FFB000', hlLight: '#FFE08A', hlDark: '#B07A10' },
     vars: {
@@ -138,6 +231,9 @@ export const THEMES: Record<string, AppTheme> = {
   bala: {
     name: 'Bala de goma',
     desc: 'pastel e arredondado',
+    style: 'arcade',
+    pieces: 'recorte',
+    sounds: 'piano',
     dark: false,
     board: { name: 'Bala de goma', light: '#FFF1F5', dark: '#C8B6FF', frame: '#2B2140', hlLight: '#FFE066', hlDark: '#E8C64A' },
     vars: {
@@ -155,6 +251,9 @@ export const THEMES: Record<string, AppTheme> = {
   turbo: {
     name: 'Turbo',
     desc: 'corrida dos anos 90',
+    style: 'arcade',
+    pieces: 'pixel',
+    sounds: 'futurista',
     dark: true,
     board: { name: 'Turbo', light: '#E8EEF7', dark: '#1E6BFF', frame: '#FF2E4D', hlLight: '#FFD23F', hlDark: '#E0B21F' },
     vars: {
@@ -171,7 +270,7 @@ export const THEMES: Record<string, AppTheme> = {
   },
 };
 
-export const DEFAULT_THEME = 'fliperama';
+export const DEFAULT_THEME = 'classico';
 
 export const BOARDS: Record<string, BoardTheme> = {
   bosque: { name: 'Bosque', light: '#E7E0C6', dark: '#8C9F6A', frame: '#6E4F35', hlLight: '#EED78A', hlDark: '#C3AF57' },
@@ -234,8 +333,8 @@ export const DEFAULT_PREFS: Prefs = {
   board: 'tema',
   customLight: null,
   customDark: null,
-  pieces: 'pixel',
-  sounds: 'retro',
+  pieces: 'classicas',
+  sounds: 'madeira',
   coords: true,
   showDests: true,
   volume: 0.8,
@@ -277,6 +376,7 @@ export function cssVars(prefs: Prefs): Record<string, string> {
   const t = themeOf(prefs);
   const b = boardColors(prefs);
   return {
+    ...ARCADE_TEXT,
     ...t.vars,
     '--sq-light': b.light,
     '--sq-dark': b.dark,
@@ -284,4 +384,25 @@ export function cssVars(prefs: Prefs): Record<string, string> {
     '--sq-hl-dark': b.hlDark,
     '--frame': b.frame,
   };
+}
+
+/** Grupos para escolher o tema. */
+export const THEME_GROUPS: { title: string; ids: string[] }[] = [
+  { title: 'Tradicionais', ids: Object.keys(THEMES).filter((id) => THEMES[id]!.style === 'tradicional') },
+  { title: 'Arcade', ids: Object.keys(THEMES).filter((id) => THEMES[id]!.style === 'arcade') },
+];
+
+/**
+ * O que muda ao escolher um tema. Peças e sons acompanham o tema, a não ser que o jogador
+ * já tenha trocado por conta própria (aí ficam como ele deixou). `fresh` aplica tudo (primeira vez).
+ */
+export function themePatch(prefs: Prefs, id: string, fresh = false): Partial<Prefs> {
+  const next = THEMES[id];
+  if (!next) return {};
+  const prev = themeOf(prefs);
+  const patch: Partial<Prefs> = { theme: id };
+  if (fresh || prefs.pieces === prev.pieces) patch.pieces = next.pieces;
+  if (fresh || prefs.sounds === prev.sounds) patch.sounds = next.sounds;
+  if (fresh) Object.assign(patch, { board: 'tema', customLight: null, customDark: null });
+  return patch;
 }

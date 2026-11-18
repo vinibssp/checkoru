@@ -1,5 +1,6 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Oru } from './components/Oru';
+import { themeChosen, ThemeIntro } from './components/ThemePicker';
 import { navigate, useRoute } from './router';
 import { CreateAccount } from './screens/CreateAccount';
 import { Customize } from './screens/Customize';
@@ -24,6 +25,7 @@ export function App() {
   const route = useRoute();
   const { me } = useStore();
   const [section, arg] = route.parts;
+  const [themed, setThemed] = useState(themeChosen);
 
   // Quem abre um convite sem login volta para ele depois de entrar.
   useEffect(() => {
@@ -40,6 +42,9 @@ export function App() {
   // Páginas abertas a todos.
   if (section === 'entrar') return <LoginReturn />;
   if (section === 'termos' || section === 'privacidade') return <Legal kind={section} />;
+
+  // Primeira vez no aparelho: escolher o visual.
+  if (!themed) return <ThemeIntro onDone={() => setThemed(true)} />;
 
   if (me === undefined) {
     return (

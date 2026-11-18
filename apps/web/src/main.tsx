@@ -1,4 +1,8 @@
 import '@fontsource/bungee/400.css';
+import '@fontsource/inter/400.css';
+import '@fontsource/inter/600.css';
+import '@fontsource/inter/700.css';
+import '@fontsource/playfair-display/700.css';
 import '@fontsource/pixelify-sans/400.css';
 import '@fontsource/pixelify-sans/600.css';
 import '@fontsource/silkscreen/400.css';
