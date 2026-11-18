@@ -87,6 +87,14 @@ puzzles. Os jogos famosos ficam em `learn/famous.ts`, com comentários por lance
 que toda posição é legal, que toda solução funciona e que todo comentário cai num lance que existe. Para criar uma
 aula nova, basta acrescentar um item na lista.
 
+## Amigos, revanche e bloqueio
+
+Seguir é de um lado só (como no Lichess). Um desafio direto cria a sala na hora, mas só o convidado pode entrar;
+o convite fica na tabela `direct_challenges` e o app confere a cada 15 s se chegou algum. Recusar avisa a sala, que
+anula a partida e avisa quem estava esperando. A revanche acontece dentro da própria sala que terminou: quando os
+dois pedem, ela cria a próxima partida com as cores trocadas e manda os dois para lá. Bloquear desfaz o seguir,
+cancela convites e impede que a fila junte os dois (a fila recebe a lista de bloqueados de cada jogador).
+
 ## Custos e limites
 
 O plano gratuito da Cloudflare dá 100 mil requisições por dia (mensagens de WebSocket contam 1 a cada 20) e 5 GB no D1. As salas hibernam entre lances, então partidas paradas não gastam CPU. A análise com motor vai rodar no aparelho (Stockfish em WebAssembly), sem custo de servidor.
@@ -95,6 +103,5 @@ O plano gratuito da Cloudflare dá 100 mil requisições por dia (mensagens de W
 
 1. Mais aulas (finais de torre, aberturas) e mais jogos famosos.
 2. Importar partida a partir de uma foto do tabuleiro.
-3. Revanche, amigos e bloqueio pelo app.
-4. Rating de puzzles salvo na conta (hoje fica no aparelho).
-5. Anti-trapaça: análise das partidas suspeitas em lote, pelo GitHub Actions.
+3. Rating de puzzles salvo na conta (hoje fica no aparelho).
+4. Anti-trapaça: análise das partidas suspeitas em lote, pelo GitHub Actions.

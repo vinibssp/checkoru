@@ -87,3 +87,42 @@ export async function wsTicket(): Promise<string> {
   const { ticket } = await api<{ ticket: string }>('/api/ws-ticket', { method: 'POST' });
   return ticket;
 }
+
+// ---------- Amigos ----------
+
+export interface PublicUser {
+  id: string;
+  username: string;
+  avatar: string | null;
+  blitz: number;
+  rapid: number;
+}
+
+export interface Profile extends PublicUser {
+  provisional: { blitz: boolean; rapid: boolean };
+  games: number;
+  joinedAt: number;
+  following: boolean;
+  followsYou: boolean;
+  blocked: boolean;
+}
+
+export interface IncomingChallenge {
+  id: string;
+  tc: string;
+  createdAt: number;
+  from: PublicUser;
+}
+
+export const social = {
+  search: (q: string) => api<{ users: PublicUser[] }>(`/api/users?q=${encodeURIComponent(q)}`).then((r) => r.users),
+  profile: (username: string) => api<Profile>(`/api/users/${encodeURIComponent(username)}`),
+  following: () => api<{ users: PublicUser[] }>('/api/me/follows').then((r) => r.users),
+  blocked: () => api<{ users: PublicUser[] }>('/api/me/blocks').then((r) => r.users),
+  setFollow: (id: string, on: boolean) => api(`/api/follows/${id}`, { method: on ? 'PUT' : 'DELETE' }),
+  setBlock: (id: string, on: boolean) => api(`/api/blocks/${id}`, { method: on ? 'PUT' : 'DELETE' }),
+  challenge: (to: string, tc: string, color: string) =>
+    api<{ gameId: string }>('/api/challenges', { method: 'POST', body: { tc, to, color: color === 'random' ? undefined : color } }),
+  incoming: () => api<{ challenges: IncomingChallenge[] }>('/api/me/challenges').then((r) => r.challenges),
+  answer: (id: string, accept: boolean) => api(`/api/challenges/${id}/${accept ? 'aceitar' : 'recusar'}`, { method: 'POST' }),
+};

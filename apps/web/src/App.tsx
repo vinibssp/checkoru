@@ -10,6 +10,7 @@ import { Legal } from './screens/Legal';
 import { Analysis } from './screens/Analysis';
 import { Bots } from './screens/Bots';
 import { FamousScreen, Learn, LessonScreen } from './screens/Learn';
+import { Blocked, Friends, PlayerProfile } from './screens/Friends';
 import { PuzzleScreen, Rush, Train } from './screens/Puzzles';
 import { Analyze } from './screens/Analyze';
 import { Local } from './screens/Local';
@@ -85,6 +86,12 @@ export function App() {
       return <FamousScreen key={route.query.toString()} />;
     case 'toca':
       return <Toca />;
+    case 'amigos':
+      return <Friends />;
+    case 'bloqueados':
+      return <Blocked />;
+    case 'jogador':
+      return arg ? <PlayerProfile key={arg} username={decodeURIComponent(arg)} /> : <Friends />;
     case 'personalizar':
       return <Customize />;
     default:

@@ -118,4 +118,46 @@ describe('RoomCore', () => {
     expect(restored.chess.ply).toBe(1);
     expect(restored.handle('black', { t: 'move', uci: 'c7c5', ply: 1 }, 2_000).out[0]?.msg.t).toBe('move');
   });
+
+  it('revanche: um pede, o outro aceita, e a sala avisa a nova partida', () => {
+    const room = newRoom();
+    expect(room.handle('white', { t: 'rematch' }, 1_000).out).toHaveLength(0); // ainda jogando
+    room.handle('white', { t: 'resign' }, 1_000);
+    const offer = room.handle('white', { t: 'rematch' }, 2_000);
+    expect(offer.out[0]?.msg).toEqual({ t: 'rematch-offer', by: 'white' });
+    expect(room.handle('white', { t: 'rematch' }, 2_100).out).toHaveLength(0); // repetir não faz nada
+    const accept = room.handle('black', { t: 'rematch' }, 3_000);
+    expect(accept.rematch).toBe(true);
+    const ready = room.rematchReady('g2');
+    expect(ready.out[0]?.msg).toEqual({ t: 'rematch-ready', gameId: 'g2' });
+    expect(room.snapshot(4_000).rematchId).toBe('g2');
+    // Quem chegar depois recebe o link direto.
+    expect(room.handle('white', { t: 'rematch' }, 5_000).out[0]?.msg).toEqual({ t: 'rematch-ready', gameId: 'g2' });
+  });
+
+  it('revanche recusada', () => {
+    const room = newRoom();
+    room.handle('white', { t: 'resign' }, 1_000);
+    room.handle('black', { t: 'rematch' }, 2_000);
+    const no = room.handle('white', { t: 'rematch-decline' }, 3_000);
+    expect(no.out[0]?.msg).toEqual({ t: 'rematch-declined', by: 'white' });
+    expect(room.snapshot(3_000).rematchBy).toBeNull();
+  });
+
+  it('desafio direto só aceita o convidado', () => {
+    const room = RoomCore.createChallenge('g3', '10+0', p('ana'), 'white', 0, { id: 'bia', username: 'bia' });
+    expect(room.join(p('caio'), 1_000).out).toHaveLength(0);
+    expect(room.state.status).toBe('waiting');
+    expect(room.snapshot(1_000).invited).toBe('bia');
+    room.join(p('bia'), 2_000);
+    expect(room.state.status).toBe('playing');
+    expect(room.state.black?.id).toBe('bia');
+  });
+
+  it('desafio direto recusado anula a sala', () => {
+    const room = RoomCore.createChallenge('g4', '10+0', p('ana'), 'white', 0, { id: 'bia', username: 'bia' });
+    const fx = room.abortWaiting(1_000);
+    expect(room.state.end?.reason).toBe('aborted');
+    expect(fx.finished).toBe(false);
+  });
 });

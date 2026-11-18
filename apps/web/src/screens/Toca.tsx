@@ -18,7 +18,11 @@ export function GameRow({ game, myId }: { game: GameListItem; myId: string }) {
       <span className={`result-tag ${draw ? 'draw' : won ? 'win' : 'loss'}`}>{label}</span>
       <span className="game-row-main">
         <span>
-          vs <b>{opp}</b> · {game.tc}
+          vs{' '}
+          <a className="plain-link" href={`#/jogador/${encodeURIComponent(opp)}`}>
+            <b>{opp}</b>
+          </a>{' '}
+          · {game.tc}
         </span>
         <span className="muted small">
           {END_REASON_LABEL[game.reason as EndReason] ?? game.reason} · {new Date(game.ended_at).toLocaleDateString('pt-BR')}
@@ -58,6 +62,10 @@ export function Toca() {
           </div>
         </div>
 
+        <a className="card link-card" href="#/amigos">
+          <span className="choice-title">Amigos</span>
+          <span className="choice-sub">seguir, desafiar e bloquear</span>
+        </a>
         <a className="card link-card" href="#/personalizar">
           <span className="choice-title">Temas e skins</span>
           <span className="choice-sub">fundo, tabuleiro, peças e sons</span>

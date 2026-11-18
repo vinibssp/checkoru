@@ -15,6 +15,7 @@ Site e app Android, de código aberto e sem anúncios.
 | Nome de usuário e avatar | pronto |
 | Partida online com rating Glicko-2 (blitz e rápida) | pronto |
 | Convite por link para jogar com um amigo | pronto |
+| Amigos: procurar, seguir, desafiar direto pelo app, revanche no fim da partida e bloqueio | pronto |
 | Relógio com acréscimo e compensação de atraso | pronto |
 | Reconexão e vitória por abandono | pronto |
 | Chat com filtro e mensagens rápidas | pronto |

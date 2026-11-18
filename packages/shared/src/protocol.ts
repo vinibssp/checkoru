@@ -45,6 +45,12 @@ export interface GameSnapshot {
   drawOfferBy: Color | null;
   connected: { white: boolean; black: boolean };
   end: EndView | null;
+  /** Quem pediu revanche (depois do fim). */
+  rematchBy?: Color | null;
+  /** Partida da revanche, quando os dois aceitaram. */
+  rematchId?: string | null;
+  /** Desafio direto: nome de quem foi convidado. */
+  invited?: string | null;
 }
 
 // ---------- Fila (lobby) ----------
@@ -67,7 +73,10 @@ export type GameClientMsg =
   | { t: 'draw-decline' }
   | { t: 'claim-victory' }
   | { t: 'chat'; text: string }
-  | { t: 'ping'; at: number };
+  | { t: 'ping'; at: number }
+  /** Pede revanche, ou aceita a que o outro pediu. */
+  | { t: 'rematch' }
+  | { t: 'rematch-decline' };
 
 export type GameServerMsg =
   | { t: 'snapshot'; game: GameSnapshot; you: Color | null }
@@ -78,6 +87,9 @@ export type GameServerMsg =
   | { t: 'opponent'; connected: boolean; claimableAt: number | null }
   | { t: 'chat'; from: Color; text: string }
   | { t: 'pong'; at: number; serverNow: number }
+  | { t: 'rematch-offer'; by: Color }
+  | { t: 'rematch-declined'; by: Color }
+  | { t: 'rematch-ready'; gameId: string }
   | { t: 'error'; message: string };
 
 export function parseJson<T>(raw: unknown): T | null {

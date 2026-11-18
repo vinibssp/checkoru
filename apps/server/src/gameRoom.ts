@@ -2,7 +2,8 @@ import { DurableObject } from 'cloudflare:workers';
 import type { Color } from 'chessops';
 import { TIME_CONTROLS, parseJson, type GameClientMsg, type TimeControlId } from '@checkoru/shared';
 import type { Env } from './env';
-import { saveFinishedGame, type Ratings } from './db';
+import { getRatings, saveFinishedGame, type Ratings } from './db';
+import { isBlocked } from './social';
 import { RoomCore, type Effects, type RoomState, type SeatPlayer } from './room';
 
 interface Attachment {
@@ -33,10 +34,22 @@ export class GameRoom extends DurableObject<Env> {
   }
 
   /** Desafio por link: a sala espera o amigo entrar. */
-  async initChallenge(params: { id: string; tc: TimeControlId; creator: SeatPlayer; color: Color }): Promise<void> {
+  async initChallenge(params: {
+    id: string;
+    tc: TimeControlId;
+    creator: SeatPlayer;
+    color: Color;
+    invited?: { id: string; username: string } | null;
+  }): Promise<void> {
     if (this.core) return;
-    this.core = RoomCore.createChallenge(params.id, params.tc, params.creator, params.color, Date.now());
+    this.core = RoomCore.createChallenge(params.id, params.tc, params.creator, params.color, Date.now(), params.invited ?? null);
     await this.persist();
+  }
+
+  /** O convidado recusou: quem estava esperando fica sabendo na hora. */
+  async decline(): Promise<void> {
+    if (!this.core) return;
+    await this.apply(this.core.abortWaiting(Date.now()));
   }
 
   override async fetch(request: Request): Promise<Response> {
@@ -114,6 +127,30 @@ export class GameRoom extends DurableObject<Env> {
     if (effects.finished && this.core) {
       await saveFinishedGame(this.env.DB, this.core.state, this.env.WEB_ORIGIN);
     }
+    if (effects.rematch) await this.createRematch();
+  }
+
+  /** Os dois aceitaram a revanche: nova sala, mesmo ritmo, cores trocadas, ratings atualizados. */
+  private async createRematch(): Promise<void> {
+    const s = this.core?.state;
+    if (!this.core || !s?.white || !s.black) return;
+    if (await isBlocked(this.env.DB, s.white.id, s.black.id)) {
+      this.dispatch(this.core.handle('white', { t: 'rematch-decline' }, Date.now()));
+      return;
+    }
+    const category = TIME_CONTROLS[s.tc].category;
+    const [rw, rb] = await Promise.all([getRatings(this.env.DB, s.white.id), getRatings(this.env.DB, s.black.id)]);
+    const gameId = crypto.randomUUID().replace(/-/g, '').slice(0, 12);
+    const stub = this.env.GAME.get(this.env.GAME.idFromName(gameId));
+    await stub.init({
+      id: gameId,
+      tc: s.tc,
+      rated: s.rated,
+      white: { ...s.black, rating: rb[category] },
+      black: { ...s.white, rating: rw[category] },
+    });
+    this.dispatch(this.core.rematchReady(gameId));
+    await this.persist();
   }
 
   private dispatch(effects: Effects): void {
@@ -125,7 +162,8 @@ export class GameRoom extends DurableObject<Env> {
         const att = ws.deserializeAttachment() as Attachment;
         if (to === 'all' || att.color === to) {
           try {
-            ws.send(data);
+            // A fotografia diz a cada um qual é a sua cor (quem criou o desafio continua sendo jogador).
+            ws.send(msg.t === 'snapshot' ? JSON.stringify({ ...msg, you: att.color }) : data);
           } catch {
             // Ignora conexões que caíram no meio do envio.
           }

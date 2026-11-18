@@ -60,6 +60,11 @@ export interface RoomState {
   disconnectedSince: { white: number | null; black: number | null };
   end: EndView | null;
   ratingsAfter: { white: Rating; black: Rating } | null;
+  /** Desafio direto: só esta pessoa pode entrar. */
+  invitedId?: string | null;
+  invitedName?: string | null;
+  rematchBy?: Color | null;
+  rematchId?: string | null;
 }
 
 export type Target = 'all' | Color;
@@ -71,6 +76,8 @@ export interface Effects {
   out: Outgoing[];
   /** Preenchido quando a partida acabou agora e precisa ir para o banco. */
   finished: boolean;
+  /** Os dois querem revanche: a sala cria a próxima partida. */
+  rematch?: boolean;
 }
 
 /** Desafio por link expira se ninguém entrar em 10 minutos. */
@@ -95,10 +102,19 @@ export class RoomCore {
     return core;
   }
 
-  static createChallenge(id: string, tc: TimeControlId, creator: SeatPlayer, color: Color, now: number): RoomCore {
+  static createChallenge(
+    id: string,
+    tc: TimeControlId,
+    creator: SeatPlayer,
+    color: Color,
+    now: number,
+    invited: { id: string; username: string } | null = null,
+  ): RoomCore {
     const core = new RoomCore(RoomCore.blank(id, tc, false, now));
     core.state[color] = creator;
     core.state.creatorId = creator.id;
+    core.state.invitedId = invited?.id ?? null;
+    core.state.invitedName = invited?.username ?? null;
     return core;
   }
 
@@ -140,6 +156,7 @@ export class RoomCore {
   join(player: SeatPlayer, now: number): Effects {
     const s = this.state;
     if (s.status !== 'waiting' || player.id === s.creatorId) return none();
+    if (s.invitedId && player.id !== s.invitedId) return none();
     const seat: Color = s.white ? 'black' : 'white';
     s[seat] = player;
     s.status = 'playing';
@@ -163,6 +180,7 @@ export class RoomCore {
 
   handle(color: Color | null, msg: GameClientMsg, now: number, lagMs = 0): Effects {
     if (msg.t === 'ping') return { out: [{ to: color ?? 'all', msg: { t: 'pong', at: msg.at, serverNow: now } }], finished: false };
+    if (msg.t === 'rematch' || msg.t === 'rematch-decline') return this.rematchMsg(color, msg.t === 'rematch');
     if (!color || this.state.status !== 'playing') return none();
     switch (msg.t) {
       case 'move':
@@ -192,6 +210,34 @@ export class RoomCore {
       default:
         return none();
     }
+  }
+
+  /** Convidado recusou o desafio direto: a sala avisa quem estava esperando. */
+  abortWaiting(now: number): Effects {
+    return this.state.status === 'waiting' ? this.finish('*', 'aborted', now) : none();
+  }
+
+  private rematchMsg(color: Color | null, wants: boolean): Effects {
+    const s = this.state;
+    if (!color || s.status !== 'ended' || !s.white || !s.black) return none();
+    if (s.rematchId) return { out: [{ to: color, msg: { t: 'rematch-ready', gameId: s.rematchId } }], finished: false };
+    const other = opposite(color);
+    if (!wants) {
+      if ((s.rematchBy ?? null) === null) return none();
+      s.rematchBy = null;
+      return { out: [{ to: 'all', msg: { t: 'rematch-declined', by: color } }], finished: false };
+    }
+    if (s.rematchBy === other) return { out: [], finished: false, rematch: true };
+    if (s.rematchBy === color) return none();
+    s.rematchBy = color;
+    return { out: [{ to: 'all', msg: { t: 'rematch-offer', by: color } }], finished: false };
+  }
+
+  /** Revanche criada: cores trocadas. */
+  rematchReady(gameId: string): Effects {
+    this.state.rematchId = gameId;
+    this.state.rematchBy = null;
+    return { out: [{ to: 'all', msg: { t: 'rematch-ready', gameId } }], finished: false };
   }
 
   /** Chamado pelo alarme: tempo esgotado, primeiro lance que não veio, desafio expirado. */
@@ -245,6 +291,9 @@ export class RoomCore {
       drawOfferBy: s.drawOfferBy,
       connected: { white: s.disconnectedSince.white === null, black: s.disconnectedSince.black === null },
       end: s.end,
+      rematchBy: s.rematchBy ?? null,
+      rematchId: s.rematchId ?? null,
+      invited: s.invitedName ?? null,
     };
   }
 

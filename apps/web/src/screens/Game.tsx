@@ -160,6 +160,17 @@ export function Game({ id }: { id: string }) {
         case 'chat':
           setChat((c) => [...c.slice(-49), { from: msg.from, text: msg.text }]);
           break;
+        case 'rematch-offer':
+          setView((v) => (v ? { ...v, game: { ...v.game, rematchBy: msg.by } } : v));
+          if (viewRef.current?.you && msg.by !== viewRef.current.you) setEndOpen(true);
+          break;
+        case 'rematch-declined':
+          setView((v) => (v ? { ...v, game: { ...v.game, rematchBy: null } } : v));
+          if (viewRef.current?.you && msg.by !== viewRef.current.you) setNotice('Revanche recusada.');
+          break;
+        case 'rematch-ready':
+          navigate(`/partida/${msg.gameId}`);
+          break;
         case 'pong':
           lag.current = Math.min(300, (performance.now() - msg.at) / 2);
           setView((v) => (v ? { ...v, offset: msg.serverNow - Date.now() } : v));
@@ -337,7 +348,7 @@ export function Game({ id }: { id: string }) {
         <div className="sheets">
         {notice && <p className="notice">{notice}</p>}
 
-        {game.status === 'waiting' && <WaitingFriend id={game.id} />}
+        {game.status === 'waiting' && (game.invited ? <WaitingInvite name={game.invited} /> : <WaitingFriend id={game.id} />)}
 
         {playing && you && game.drawOfferBy && game.drawOfferBy !== you && (
           <div className="banner">
@@ -362,7 +373,7 @@ export function Game({ id }: { id: string }) {
 
         {chatOpen && you && <ChatBox lines={chat} you={you} onSend={(text) => send({ t: 'chat', text })} enabled={me?.user.chatEnabled !== false} onClose={() => setChatOpen(false)} />}
 
-        {game.status === 'ended' && game.end && (endOpen ? <EndPanel game={game} you={you} onClose={() => setEndOpen(false)} /> : null)}
+        {game.status === 'ended' && game.end && (endOpen ? <EndPanel game={game} you={you} send={send} onClose={() => setEndOpen(false)} /> : null)}
         </div>
 
       {playing && you && (
@@ -552,12 +563,24 @@ function ChatBox({ lines, you, onSend, enabled, onClose }: { lines: ChatLine[]; 
   );
 }
 
-function EndPanel({ game, you, onClose }: { game: GameSnapshot; you: Color | null; onClose: () => void }) {
+function WaitingInvite({ name }: { name: string }) {
+  return (
+    <div className="card waiting">
+      <p className="lead">Esperando {name} aceitar o desafio…</p>
+      <p className="muted small">O convite aparece no app de {name} e vale por 10 minutos.</p>
+    </div>
+  );
+}
+
+function EndPanel({ game, you, send, onClose }: { game: GameSnapshot; you: Color | null; send: (msg: GameClientMsg) => void; onClose: () => void }) {
   const end = game.end!;
   const [reported, setReported] = useState(false);
   const winner: Color | null = end.result === '1-0' ? 'white' : end.result === '0-1' ? 'black' : null;
-  const title =
-    end.reason === 'aborted' ? 'Partida abortada' : !winner ? 'Empate' : you === null ? `Vitória das ${winner === 'white' ? 'brancas' : 'pretas'}` : winner === you ? 'Vitória!' : 'Derrota';
+  const declined = end.reason === 'aborted' && !!game.invited && (!game.white || !game.black);
+  const title = declined
+    ? 'Desafio recusado'
+    : end.reason === 'aborted'
+      ? 'Partida abortada' : !winner ? 'Empate' : you === null ? `Vitória das ${winner === 'white' ? 'brancas' : 'pretas'}` : winner === you ? 'Vitória!' : 'Derrota';
   const mood = !winner || !you ? 'padrão' : winner === you ? 'feliz' : 'triste';
   const opp = you ? game[you === 'white' ? 'black' : 'white'] : null;
 
@@ -587,14 +610,35 @@ function EndPanel({ game, you, onClose }: { game: GameSnapshot; you: Color | nul
           {you && end.ratingDiff && ` · rating ${end.ratingDiff[you] >= 0 ? '+' : ''}${end.ratingDiff[you]}`}
         </p>
       </div>
+      {you && opp && !declined && game.rematchBy && game.rematchBy !== you && (
+        <div className="banner rematch-banner">
+          <span>{opp.username} quer revanche.</span>
+          <button className="btn small primary" onClick={() => send({ t: 'rematch' })}>
+            Aceitar
+          </button>
+          <button className="btn small" onClick={() => send({ t: 'rematch-decline' })}>
+            Recusar
+          </button>
+        </div>
+      )}
       <div className="end-actions">
-        <button className="btn primary" onClick={() => navigate(`/jogar?tc=${encodeURIComponent(game.tc)}`)}>
+        {you && opp && !declined && game.rematchBy !== (you === 'white' ? 'black' : 'white') && (
+          <button className="btn primary" disabled={game.rematchBy === you} onClick={() => send({ t: 'rematch' })}>
+            {game.rematchBy === you ? 'Revanche pedida…' : 'Revanche'}
+          </button>
+        )}
+        <button className={`btn ${you && opp && !declined ? '' : 'primary'}`} onClick={() => navigate(`/jogar?tc=${encodeURIComponent(game.tc)}`)}>
           Nova partida
         </button>
         {end.reason !== 'aborted' && game.moves.length > 0 && <AnalyseCheckoruButton id={game.id} className="btn" label="Analisar a partida" />}
         {end.reason !== 'aborted' && (
           <a className="btn" href={`${API_URL}/api/games/${game.id}/pgn`} target="_blank" rel="noreferrer">
             PGN
+          </a>
+        )}
+        {opp && (
+          <a className="btn link" href={`#/jogador/${encodeURIComponent(opp.username)}`}>
+            Perfil de {opp.username}
           </a>
         )}
         {opp && (

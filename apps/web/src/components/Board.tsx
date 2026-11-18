@@ -43,6 +43,21 @@ export function Board({ config, onReady }: { config: Config; onReady?: (api: Api
     cg.current?.set(full);
   });
 
+  // O tabuleiro pode mudar de lugar sem mudar de tamanho (ex.: a barra do adversário aparece).
+  // O chessground guarda a posição antiga e erraria a casa do toque; então, antes de cada toque,
+  // ele mede de novo (a escuta em captura roda antes da do chessground).
+  useEffect(() => {
+    const host = el.current;
+    if (!host) return;
+    const fresh = () => cg.current?.state.dom.bounds.clear();
+    host.addEventListener('mousedown', fresh, true);
+    host.addEventListener('touchstart', fresh, { capture: true, passive: true });
+    return () => {
+      host.removeEventListener('mousedown', fresh, true);
+      host.removeEventListener('touchstart', fresh, true);
+    };
+  }, []);
+
   return (
     <div className="board-frame">
       <div className="board-square">

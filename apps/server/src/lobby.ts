@@ -18,6 +18,8 @@ import type { SeatPlayer } from './room';
 interface Attachment {
   player: Omit<SeatPlayer, 'rating'>;
   ratings: Ratings;
+  /** Bloqueados em qualquer sentido: nunca pareia com eles. */
+  blocked?: string[];
   tc: TimeControlId | null;
   since: number;
 }
@@ -29,7 +31,7 @@ export class Lobby extends DurableObject<Env> {
   override async fetch(request: Request): Promise<Response> {
     if (request.headers.get('Upgrade') !== 'websocket') return new Response('Esperava WebSocket', { status: 426 });
     const header = request.headers.get('X-Player');
-    const info = header ? (JSON.parse(header) as Pick<Attachment, 'player' | 'ratings'>) : null;
+    const info = header ? (JSON.parse(header) as Pick<Attachment, 'player' | 'ratings' | 'blocked'>) : null;
     if (!info) return new Response('Sem jogador', { status: 401 });
 
     // Uma conexão por jogador: fecha abas antigas.
@@ -73,14 +75,17 @@ export class Lobby extends DurableObject<Env> {
     const now = Date.now();
     const sockets = new Map<string, { ws: WebSocket; att: Attachment }>();
     const seeks: Seek[] = [];
+    const blocked = new Map<string, Set<string>>();
     for (const ws of this.ctx.getWebSockets()) {
       const att = ws.deserializeAttachment() as Attachment | null;
       if (!att?.tc) continue;
       sockets.set(att.player.id, { ws, att });
+      blocked.set(att.player.id, new Set(att.blocked ?? []));
       seeks.push({ userId: att.player.id, tc: att.tc, since: att.since, rating: att.ratings[TIME_CONTROLS[att.tc].category].rating });
     }
 
-    for (const { a, b } of findPairs(seeks, now)) {
+    const avoid = (a: string, b: string) => !!blocked.get(a)?.has(b) || !!blocked.get(b)?.has(a);
+    for (const { a, b } of findPairs(seeks, now, avoid)) {
       const sa = sockets.get(a.userId)!;
       const sb = sockets.get(b.userId)!;
       const tc = a.tc;

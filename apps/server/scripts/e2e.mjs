@@ -118,6 +118,84 @@ await friend.opened;
 const fsnap = await friend.next((m) => m.t === 'snapshot');
 assert(fsnap.you === 'black' && fsnap.game.status === 'playing' && !fsnap.game.rated, 'desafio por link: amigo entra de pretas, sem rating');
 
-for (const s of [...lobbies, ...Object.values(seats).map((x) => x.s), friend]) s.ws.close();
+// ---------- Revanche ----------
+seats.white.s.send({ t: 'rematch' });
+const offer = await seats.black.s.next((m) => m.t === 'rematch-offer');
+assert(offer.by === 'white', 'pretas recebem o pedido de revanche');
+seats.black.s.send({ t: 'rematch' });
+const ready = await Promise.all([seats.white.s, seats.black.s].map((s) => s.next((m) => m.t === 'rematch-ready')));
+assert(ready[0].gameId === ready[1].gameId && ready[0].gameId !== gameId, 'revanche criada para os dois');
+const reSnap = await call(`/api/games/${ready[0].gameId}`);
+assert(reSnap.white.id === seats.black.player.id && reSnap.rated, 'na revanche as cores trocam e vale rating');
+
+// ---------- Amigos ----------
+const [ana, bia] = players;
+const found = await call(`/api/users?q=${bia.name.slice(0, 4)}`, { token: ana.token });
+assert(found.users.some((u) => u.id === bia.id), 'busca encontra pelo começo do nome');
+await call(`/api/follows/${bia.id}`, { token: ana.token, method: 'PUT' });
+const prof = await call(`/api/users/${bia.name}`, { token: ana.token });
+assert(prof.following && !prof.blocked && prof.games === 1, 'perfil mostra que segue e quantas partidas');
+const following = await call('/api/me/follows', { token: ana.token });
+assert(following.users.length === 1 && following.users[0].username === bia.name, 'lista de amigos');
+
+// Desafio direto recusado: quem esperava fica sabendo.
+const d1 = await call('/api/challenges', { token: ana.token, method: 'POST', body: { tc: '3+2', to: bia.id } });
+const { ticket: t3 } = await call('/api/ws-ticket', { token: ana.token, method: 'POST' });
+const waiting = socket(`${WS}/api/games/${d1.gameId}?ticket=${encodeURIComponent(t3)}`);
+await waiting.opened;
+const wsnap = await waiting.next((m) => m.t === 'snapshot');
+assert(wsnap.game.status === 'waiting' && wsnap.game.invited === bia.name, 'desafio direto espera a convidada');
+const inbox = await call('/api/me/challenges', { token: bia.token });
+assert(inbox.challenges.some((c) => c.id === d1.gameId && c.from.username === ana.name), 'convidada vê o desafio');
+await call(`/api/challenges/${d1.gameId}/recusar`, { token: bia.token, method: 'POST' });
+const aborted = await waiting.next((m) => m.t === 'end');
+assert(aborted.end.reason === 'aborted', 'recusa avisa quem estava esperando');
+const inbox2 = await call('/api/me/challenges', { token: bia.token });
+assert(!inbox2.challenges.some((c) => c.id === d1.gameId), 'desafio recusado some da lista');
+
+// Desafio direto aceito.
+const d2 = await call('/api/challenges', { token: ana.token, method: 'POST', body: { tc: '5+0', to: bia.id } });
+await call(`/api/challenges/${d2.gameId}/aceitar`, { token: bia.token, method: 'POST' });
+const { ticket: t4 } = await call('/api/ws-ticket', { token: bia.token, method: 'POST' });
+const joiner = socket(`${WS}/api/games/${d2.gameId}?ticket=${encodeURIComponent(t4)}`);
+await joiner.opened;
+const jsnap = await joiner.next((m) => m.t === 'snapshot');
+assert(jsnap.game.status === 'playing' && jsnap.you !== null, 'convidada entra na partida');
+
+// ---------- Bloqueio ----------
+await call(`/api/blocks/${ana.id}`, { token: bia.token, method: 'PUT' });
+const blockedRes = await fetch(`${API}/api/challenges`, {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${ana.token}` },
+  body: JSON.stringify({ tc: '5+0', to: bia.id }),
+});
+assert(blockedRes.status === 403, 'quem foi bloqueado não consegue desafiar');
+const found2 = await call(`/api/users?q=${bia.name}`, { token: ana.token });
+assert(!found2.users.some((u) => u.id === bia.id), 'quem bloqueou some da busca de quem foi bloqueado');
+const following2 = await call('/api/me/follows', { token: ana.token });
+assert(following2.users.length === 0, 'bloquear desfaz o seguir');
+const blocks = await call('/api/me/blocks', { token: bia.token });
+assert(blocks.users.length === 1 && blocks.users[0].id === ana.id, 'lista de bloqueados');
+// Bloqueados não são pareados na fila.
+const lob2 = [];
+for (const p of [ana, bia]) {
+  const { ticket } = await call('/api/ws-ticket', { token: p.token, method: 'POST' });
+  const s = socket(`${WS}/api/lobby?ticket=${encodeURIComponent(ticket)}`);
+  await s.opened;
+  s.send({ t: 'seek', tc: '3+2' });
+  lob2.push(s);
+}
+let paired = false;
+try {
+  await lob2[0].next((m) => m.t === 'matched', 5000);
+  paired = true;
+} catch {
+  /* esperado */
+}
+assert(!paired, 'fila não junta quem se bloqueou');
+await call(`/api/blocks/${ana.id}`, { token: bia.token, method: 'DELETE' });
+assert((await call('/api/me/blocks', { token: bia.token })).users.length === 0, 'desbloquear');
+
+for (const s of [...lobbies, ...lob2, ...Object.values(seats).map((x) => x.s), friend, waiting, joiner]) s.ws.close();
 console.log('\nTudo certo.');
 process.exit(0);

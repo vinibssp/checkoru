@@ -5,6 +5,7 @@ import { Page } from '../components/Shell';
 import { ThemeButton } from '../components/ThemePicker';
 import { useStore } from '../store';
 import { GameRow } from './Toca';
+import { IncomingChallenges } from './Friends';
 
 function greeting(): string {
   const h = new Date().getHours();
@@ -41,6 +42,8 @@ export function Home() {
           </h1>
           <Oru size={64} mood={new Date().getHours() < 5 ? 'dormindo' : 'padrão'} />
         </div>
+
+        <IncomingChallenges />
 
         {guest ? (
           <>

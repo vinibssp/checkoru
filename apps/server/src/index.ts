@@ -26,6 +26,22 @@ import {
   type UserRow,
 } from './db';
 import type { Env } from './env';
+import {
+  answerChallenge,
+  block,
+  blockedEitherWay,
+  createDirectChallenge,
+  follow,
+  getProfile,
+  incomingChallenges,
+  isBlocked,
+  listBlocked,
+  listFollowing,
+  searchUsers,
+  unblock,
+  unfollow,
+  userExists,
+} from './social';
 
 export { Lobby } from './lobby';
 export { GameRoom } from './gameRoom';
@@ -106,7 +122,8 @@ async function route(request: Request, env: Env): Promise<Response> {
     const player = ticket ? await playerInfo(env, ticket.uid) : null;
     if (!player) return json({ error: 'Faça login para jogar online' }, 401);
     const headers = new Headers(request.headers);
-    headers.set('X-Player', JSON.stringify({ player: { id: player.id, username: player.username, avatar: player.avatar }, ratings: player.ratings }));
+    const blocked = await blockedEitherWay(env.DB, player.id);
+    headers.set('X-Player', JSON.stringify({ player: { id: player.id, username: player.username, avatar: player.avatar }, ratings: player.ratings, blocked }));
     const stub = env.LOBBY.get(env.LOBBY.idFromName('global'));
     return stub.fetch(new Request(request.url, { method: request.method, headers }));
   }
@@ -158,9 +175,13 @@ async function route(request: Request, env: Env): Promise<Response> {
 
   if (path === '/api/challenges' && method === 'POST') {
     if (!user.username) return json({ error: 'Escolha um nome de usuário primeiro' }, 403);
-    const body = await readJson<{ tc?: string; color?: string }>(request);
+    const body = await readJson<{ tc?: string; color?: string; to?: string }>(request);
     if (!isTimeControlId(body?.tc)) return json({ error: 'Ritmo inválido' }, 400);
     const color: Color = body?.color === 'white' || body?.color === 'black' ? body.color : Math.random() < 0.5 ? 'white' : 'black';
+    // Desafio direto: só a pessoa convidada entra, e ela vê o convite no app.
+    const invited = body?.to ? await userExists(env.DB, body.to) : null;
+    if (body?.to && (!invited || invited.id === user.id)) return json({ error: 'Jogador não encontrado' }, 404);
+    if (invited && (await isBlocked(env.DB, user.id, invited.id))) return json({ error: 'Não é possível desafiar essa pessoa' }, 403);
     const ratings = await getRatings(env.DB, user.id);
     const gameId = crypto.randomUUID().replace(/-/g, '').slice(0, 12);
     const stub = env.GAME.get(env.GAME.idFromName(gameId));
@@ -169,8 +190,49 @@ async function route(request: Request, env: Env): Promise<Response> {
       tc: body.tc,
       color,
       creator: { id: user.id, username: user.username, avatar: user.avatar, rating: ratings[TIME_CONTROLS[body.tc].category] },
+      invited,
     });
+    if (invited) await createDirectChallenge(env.DB, gameId, user.id, invited.id, body.tc);
     return json({ gameId, url: `${env.WEB_ORIGIN}/#/partida/${gameId}` });
+  }
+
+  if (path === '/api/me/challenges' && method === 'GET') return json({ challenges: await incomingChallenges(env.DB, user.id) });
+
+  const answer = path.match(/^\/api\/challenges\/([a-z0-9]{6,32})\/(aceitar|recusar)$/);
+  if (answer && method === 'POST') {
+    const [, gameId, verb] = answer;
+    const ok = await answerChallenge(env.DB, gameId!, user.id, verb === 'aceitar' ? 'aceito' : 'recusado');
+    if (!ok) return json({ error: 'Esse desafio não está mais aberto' }, 409);
+    if (verb === 'recusar') await env.GAME.get(env.GAME.idFromName(gameId!)).decline();
+    return json({ ok: true, gameId });
+  }
+
+  // ---------- Amigos e bloqueios ----------
+
+  if (path === '/api/users' && method === 'GET') return json({ users: await searchUsers(env.DB, user.id, url.searchParams.get('q') ?? '') });
+
+  const profile = path.match(/^\/api\/users\/([^/]{1,40})$/);
+  if (profile && method === 'GET') {
+    const p = await getProfile(env.DB, user.id, decodeURIComponent(profile[1]!));
+    return p ? json(p) : json({ error: 'Jogador não encontrado' }, 404);
+  }
+
+  if (path === '/api/me/follows' && method === 'GET') return json({ users: await listFollowing(env.DB, user.id) });
+  if (path === '/api/me/blocks' && method === 'GET') return json({ users: await listBlocked(env.DB, user.id) });
+
+  const rel = path.match(/^\/api\/(follows|blocks)\/([0-9a-f-]{36})$/);
+  if (rel && (method === 'PUT' || method === 'DELETE')) {
+    const [, kind, targetId] = rel;
+    if (targetId === user.id) return json({ error: 'Não dá para fazer isso consigo mesmo' }, 400);
+    if (!(await userExists(env.DB, targetId!))) return json({ error: 'Jogador não encontrado' }, 404);
+    if (kind === 'follows') {
+      if (method === 'PUT') {
+        if (await isBlocked(env.DB, user.id, targetId!)) return json({ error: 'Não é possível seguir essa pessoa' }, 403);
+        await follow(env.DB, user.id, targetId!);
+      } else await unfollow(env.DB, user.id, targetId!);
+    } else if (method === 'PUT') await block(env.DB, user.id, targetId!);
+    else await unblock(env.DB, user.id, targetId!);
+    return json({ ok: true });
   }
 
   if (path === '/api/reports' && method === 'POST') {
@@ -240,7 +302,7 @@ function withCors(response: Response, origin: string | null, env: Env): Response
     res.headers.set('Access-Control-Allow-Origin', origin);
     res.headers.set('Vary', 'Origin');
     res.headers.set('Access-Control-Allow-Headers', 'Authorization, Content-Type');
-    res.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, OPTIONS');
+    res.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
     res.headers.set('Access-Control-Max-Age', '86400');
   }
   return res;
