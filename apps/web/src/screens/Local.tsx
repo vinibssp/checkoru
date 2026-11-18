@@ -68,6 +68,7 @@ function LocalBoard({ tc, onNew }: { tc: Tc; onNew: () => void }) {
   const [clock, setClock] = useState<Clock>({ white: initial, black: initial, since: null });
   const [end, setEnd] = useState<{ result: GameResult; reason: EndReason } | null>(null);
   const [flip, setFlip] = useState(true);
+  const [endOpen, setEndOpen] = useState(true);
   const [promo, setPromo] = useState<{ from: string; to: string } | null>(null);
   const [now, setNow] = useState(Date.now());
   const board = useRef<BoardApi | null>(null);
@@ -182,8 +183,10 @@ function LocalBoard({ tc, onNew }: { tc: Tc; onNew: () => void }) {
   return (
     <div className="page game-page">
       <TopBar title="No mesmo aparelho" sub={timed ? TIME_CONTROLS[tc].label : 'sem relógio'} back={onNew} />
+      <MoveList moves={g.moves} />
       <div className="game-body">
         <SideBar color={top} ms={left(top)} timed={timed} active={!end && turn === top} />
+        <div className="board-zone">
         <Board
           onReady={(api) => (board.current = api)}
           config={{
@@ -196,11 +199,19 @@ function LocalBoard({ tc, onNew }: { tc: Tc; onNew: () => void }) {
             movable: { free: false, color: end ? undefined : turn, dests: g.legalDests() as Map<Key, Key[]>, events: { after: onUserMove } },
           }}
         />
+        </div>
         <SideBar color={orientation} ms={left(orientation)} timed={timed} active={!end && turn === orientation} />
-        <MoveList moves={g.moves} />
+      </div>
 
-        {end && (
+      <div className="game-bottom">
+        <div className="sheets">
+        {end && endOpen && (
           <div className="card end-panel" role="status">
+            <button className="sheet-close" aria-label="Fechar e ver o tabuleiro" onClick={() => setEndOpen(false)}>
+              <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round">
+                <path d="M6 6l12 12M18 6L6 18" />
+              </svg>
+            </button>
             <Oru mood="feliz" size={64} face="var(--surface)" />
             <div>
               <h2 className="h1">{winner}</h2>
@@ -216,23 +227,38 @@ function LocalBoard({ tc, onNew }: { tc: Tc; onNew: () => void }) {
             </div>
           </div>
         )}
-
-        <label className="switch">
-          <span>Virar o tabuleiro a cada lance</span>
-          <input type="checkbox" checked={flip} onChange={(e) => setFlip(e.target.checked)} />
-        </label>
-      </div>
-
-      {!end && (
-        <div className="actions">
-          <button className="btn" onClick={undo} disabled={!g.ply}>
-            Voltar lance
-          </button>
-          <button className="btn" onClick={resign}>
-            {turn === 'white' ? 'Brancas desistem' : 'Pretas desistem'}
-          </button>
         </div>
-      )}
+
+        <div className="actions">
+          <button className={`btn icon-text ${flip ? 'on' : ''}`} onClick={() => setFlip((f) => !f)} aria-pressed={flip} title="Virar o tabuleiro a cada lance">
+            <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M7 4v13M7 17l-3-3M7 17l3-3M17 20V7M17 7l-3 3M17 7l3 3" />
+            </svg>
+            Virar
+          </button>
+          {end ? (
+            <>
+              {!endOpen && (
+                <button className="btn" onClick={() => setEndOpen(true)}>
+                  Resultado
+                </button>
+              )}
+              <button className="btn primary" onClick={onNew}>
+                Nova partida
+              </button>
+            </>
+          ) : (
+            <>
+              <button className="btn" onClick={undo} disabled={!g.ply}>
+                Desfazer
+              </button>
+              <button className="btn" onClick={resign}>
+                Desistir
+              </button>
+            </>
+          )}
+        </div>
+      </div>
 
       {promo && <PromotionPicker color={turn} onPick={choosePromotion} />}
     </div>

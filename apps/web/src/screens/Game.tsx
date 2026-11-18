@@ -61,6 +61,7 @@ export function Game({ id }: { id: string }) {
   const [notice, setNotice] = useState<string | null>(null);
   const [promo, setPromo] = useState<{ from: string; to: string } | null>(null);
   const [confirmResign, setConfirmResign] = useState(false);
+  const [endOpen, setEndOpen] = useState(true);
   const [now, setNow] = useState(Date.now());
   const sock = useRef<WebSocket | null>(null);
   const lag = useRef(0);
@@ -292,6 +293,7 @@ export function Game({ id }: { id: string }) {
         }
       />
 
+      <MoveList moves={game.moves} />
       <div className="game-body">
         <PlayerBar
           player={game[opp]}
@@ -302,6 +304,7 @@ export function Game({ id }: { id: string }) {
           diff={game.end?.ratingDiff?.[opp]}
         />
 
+        <div className="board-zone">
         <Board
           onReady={(api) => (board.current = api)}
           config={{
@@ -320,6 +323,7 @@ export function Game({ id }: { id: string }) {
             premovable: { enabled: true },
           }}
         />
+        </div>
 
         <PlayerBar
           player={game[orientation]}
@@ -330,9 +334,10 @@ export function Game({ id }: { id: string }) {
           diff={game.end?.ratingDiff?.[orientation]}
           lowSound={you === orientation ? prefs.sounds : undefined}
         />
+      </div>
 
-        <MoveList moves={game.moves} />
-
+      <div className="game-bottom">
+        <div className="sheets">
         {notice && <p className="notice">{notice}</p>}
 
         {game.status === 'waiting' && <WaitingFriend id={game.id} />}
@@ -360,8 +365,8 @@ export function Game({ id }: { id: string }) {
 
         {chatOpen && you && <ChatBox lines={chat} you={you} onSend={(text) => send({ t: 'chat', text })} enabled={me?.user.chatEnabled !== false} />}
 
-        {game.status === 'ended' && game.end && <EndPanel game={game} you={you} />}
-      </div>
+        {game.status === 'ended' && game.end && (endOpen ? <EndPanel game={game} you={you} onClose={() => setEndOpen(false)} /> : null)}
+        </div>
 
       {playing && you && (
         <div className="actions">
@@ -393,6 +398,18 @@ export function Game({ id }: { id: string }) {
           )}
         </div>
       )}
+
+        {game.status === 'ended' && game.end && !endOpen && (
+          <div className="actions">
+            <button className="btn" onClick={() => setEndOpen(true)}>
+              Ver resultado
+            </button>
+            <button className="btn primary" onClick={() => navigate(`/jogar?tc=${encodeURIComponent(game.tc)}`)}>
+              Nova partida
+            </button>
+          </div>
+        )}
+      </div>
 
       {promo && <PromotionPicker color={you ?? 'white'} onPick={choosePromotion} />}
     </div>
@@ -533,7 +550,7 @@ function ChatBox({ lines, you, onSend, enabled }: { lines: ChatLine[]; you: Colo
   );
 }
 
-function EndPanel({ game, you }: { game: GameSnapshot; you: Color | null }) {
+function EndPanel({ game, you, onClose }: { game: GameSnapshot; you: Color | null; onClose: () => void }) {
   const end = game.end!;
   const [reported, setReported] = useState(false);
   const winner: Color | null = end.result === '1-0' ? 'white' : end.result === '0-1' ? 'black' : null;
@@ -554,6 +571,11 @@ function EndPanel({ game, you }: { game: GameSnapshot; you: Color | null }) {
 
   return (
     <div className="card end-panel" role="status">
+      <button className="sheet-close" aria-label="Fechar e ver o tabuleiro" onClick={onClose}>
+        <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round">
+          <path d="M6 6l12 12M18 6L6 18" />
+        </svg>
+      </button>
       <Oru mood={mood} size={72} face="var(--surface)" />
       <div>
         <h2 className="h1">{title}</h2>

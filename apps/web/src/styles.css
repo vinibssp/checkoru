@@ -706,21 +706,90 @@ p {
 /* ---------- Partida ---------- */
 
 .game-page {
-  padding-bottom: calc(72px + var(--safe-bottom));
+  /* A tela da partida ocupa exatamente a tela do aparelho; o tabuleiro fica com todo o espaço que sobrar. */
+  height: 100vh;
+  height: 100dvh;
+  min-height: 0;
+  overflow: hidden;
+  max-width: 900px;
+  padding-bottom: var(--safe-bottom);
+}
+
+.game-page .topbar {
+  height: 48px;
+  flex: none;
 }
 
 .game-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  /* Jogadores colados no tabuleiro; a sobra de espaço fica dividida em cima e embaixo. */
+  justify-content: center;
+}
+
+.board-zone {
+  flex: none;
+  display: flex;
+  justify-content: center;
+}
+
+.game-bottom {
+  position: relative;
+  flex: none;
+}
+
+/* Avisos, chat e resultado aparecem por cima do tabuleiro, sem empurrá-lo. */
+.sheets {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: calc(100% + 8px);
+  z-index: 6;
   display: flex;
   flex-direction: column;
   gap: 8px;
-  padding: 10px 10px 0;
+  pointer-events: none;
+}
+
+.sheets > * {
+  pointer-events: auto;
+  box-shadow: 0 6px 24px rgb(0 0 0 / 0.25);
+}
+
+.sheets .notice {
+  align-self: center;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: var(--surface);
+}
+
+.sheet-close {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 40px;
+  height: 40px;
+  border: 0;
+  background: transparent;
+  color: var(--sub);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.end-panel {
+  position: relative;
 }
 
 .player-bar {
+  flex: none;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 4px;
+  min-height: 52px;
+  padding: 4px 10px;
 }
 
 .player-id {
@@ -784,14 +853,15 @@ p {
 }
 
 .movelist {
+  flex: none;
   list-style: none;
   margin: 0;
-  padding: 8px 4px;
+  padding: 6px 10px;
   display: flex;
   gap: 14px;
   overflow-x: auto;
   white-space: nowrap;
-  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
   font-family: var(--serif);
   font-size: 17px;
   scrollbar-width: none;
@@ -820,22 +890,24 @@ p {
 }
 
 .actions {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 5;
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 10px;
-  padding: 12px 12px calc(12px + var(--safe-bottom));
+  padding: 8px 10px;
   background: var(--surface);
   border-top: 1px solid var(--rule);
 }
 
 .actions .btn {
-  flex: 0 1 160px;
+  flex: 1 1 0;
+  max-width: 180px;
+  padding: 0 10px;
+}
+
+.btn.on {
+  background: var(--ink);
+  color: var(--bg);
 }
 
 .waiting .link-box {
@@ -983,12 +1055,21 @@ p {
 /* ---------- Tabuleiro (chessground) ---------- */
 
 .board-frame {
-  padding: 6px;
-  background: var(--frame);
-  border-radius: 4px;
+  /* O maior quadrado que cabe: largura toda no celular, ou a altura que sobra
+     depois do topo, da faixa de lances, dos dois jogadores e dos botões. */
+  --game-chrome: calc(252px + var(--safe-top) + var(--safe-bottom));
   width: 100%;
-  max-width: min(100%, calc(100vh - 300px));
+  width: min(100%, calc(100dvh - var(--game-chrome)));
+  padding: 0;
   margin: 0 auto;
+}
+
+@media (min-width: 600px) and (min-height: 601px) {
+  .board-frame {
+    padding: 6px;
+    background: var(--frame);
+    border-radius: 4px;
+  }
 }
 
 .board-square {
@@ -1200,4 +1281,39 @@ cg-board square.check {
 a.choice {
   text-decoration: none;
   color: inherit;
+}
+
+/* Celular deitado: tabuleiro à esquerda com a altura toda, o resto ao lado. */
+@media (orientation: landscape) and (max-height: 600px) {
+  .game-page {
+    display: grid;
+    grid-template-columns: min(100dvh, 62vw) 1fr;
+    grid-template-rows: auto 1fr auto auto auto;
+    max-width: none;
+    padding-left: env(safe-area-inset-left, 0px);
+    padding-right: env(safe-area-inset-right, 0px);
+  }
+
+  .game-page .game-body {
+    display: contents;
+  }
+
+  .game-page .board-zone {
+    grid-column: 1;
+    grid-row: 1 / -1;
+    align-items: center;
+    container-type: size;
+  }
+
+  .game-page .board-frame {
+    width: min(100cqw, 100cqh);
+  }
+
+  .game-page .movelist {
+    flex-wrap: wrap;
+    align-content: flex-start;
+    overflow-y: auto;
+    white-space: normal;
+    border-bottom: 0;
+  }
 }
