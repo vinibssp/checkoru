@@ -20,7 +20,7 @@ Site e app Android, de código aberto e sem anúncios.
 | Chat com filtro e mensagens rápidas | pronto |
 | Histórico e download do PGN | pronto |
 | Partida no mesmo aparelho (sem internet) | pronto |
-| Personalização: fundo (cores ou sua foto), tabuleiro (temas ou cores livres), peças, sons | pronto |
+| Personalização: 8 temas arcade (Fliperama, Cartucho, Fósforo, Letreiro, Disquete, Âmbar, Bala de goma, Turbo), foto de fundo, tabuleiro, 7 conjuntos de peças, 5 de sons e volume | pronto |
 | Análise com Stockfish no aparelho: avaliação, melhor lance, resumo com precisão e revisão dos erros | pronto |
 | Importar partidas: PGN/FEN, arquivo, Lichess, Chess.com e o próprio histórico | pronto |
 | Jogar contra a Oru: 6 bots (~400 a ~2800), dica, desfazer, sem internet | pronto |

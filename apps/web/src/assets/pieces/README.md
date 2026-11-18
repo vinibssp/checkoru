@@ -6,6 +6,7 @@ Todos têm licença compatível com a AGPL-3.0 do Checkoru.
 
 | Pasta | Nome no app | Original | Autor | Licença |
 | --- | --- | --- | --- | --- |
+| `pixel` | Pixel | pixel | therealqtpi | AGPL-3.0-or-later |
 | `classicas` | Clássicas | merida | Armando Hernandez Marroquin | GPL-2.0-or-later |
 | `contorno` | Contorno | mpchess | Maxime Chupin | GPL-3.0-or-later |
 | `entalhadas` | Entalhadas | rhosgfx | RhosGFX | CC0 1.0 |

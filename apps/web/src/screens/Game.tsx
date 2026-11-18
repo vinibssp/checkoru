@@ -360,7 +360,7 @@ export function Game({ id }: { id: string }) {
           </div>
         )}
 
-        {chatOpen && you && <ChatBox lines={chat} you={you} onSend={(text) => send({ t: 'chat', text })} enabled={me?.user.chatEnabled !== false} />}
+        {chatOpen && you && <ChatBox lines={chat} you={you} onSend={(text) => send({ t: 'chat', text })} enabled={me?.user.chatEnabled !== false} onClose={() => setChatOpen(false)} />}
 
         {game.status === 'ended' && game.end && (endOpen ? <EndPanel game={game} you={you} onClose={() => setEndOpen(false)} /> : null)}
         </div>
@@ -512,11 +512,16 @@ function WaitingFriend({ id }: { id: string }) {
   );
 }
 
-function ChatBox({ lines, you, onSend, enabled }: { lines: ChatLine[]; you: Color; onSend: (text: string) => void; enabled: boolean }) {
+function ChatBox({ lines, you, onSend, enabled, onClose }: { lines: ChatLine[]; you: Color; onSend: (text: string) => void; enabled: boolean; onClose: () => void }) {
   const [text, setText] = useState('');
   if (!enabled) return <p className="muted small">O chat está desligado nas suas configurações.</p>;
   return (
     <div className="chat">
+      <button className="sheet-close" aria-label="Fechar o chat" onClick={onClose}>
+        <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round">
+          <path d="M6 6l12 12M18 6L6 18" />
+        </svg>
+      </button>
       <ul className="chat-lines" aria-live="polite">
         {lines.length === 0 && <li className="muted">Nenhuma mensagem.</li>}
         {lines.map((l, i) => (

@@ -2,7 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import { api, getToken, setToken, TEST_BUILD, type Me } from './api';
 import { pieceCss } from './pieces';
 import { preload, setVolume } from './sound';
-import { cssVars, DEFAULT_PREFS, sanitizePrefs, type Prefs } from './themes';
+import { cssVars, DEFAULT_PREFS, sanitizePrefs, themeOf, type Prefs } from './themes';
 
 const PREFS_KEY = 'checkoru.prefs';
 const BG_KEY = 'checkoru.bg';
@@ -159,6 +159,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     const root = document.documentElement;
     for (const [k, v] of Object.entries(cssVars(prefs))) root.style.setProperty(k, v);
     root.style.setProperty('--bg-image', background ? `url("${background}")` : 'none');
+    root.dataset.theme = prefs.theme;
+    root.style.colorScheme = themeOf(prefs).dark ? 'dark' : 'light';
     document.querySelector('meta[name="theme-color"]')?.setAttribute('content', cssVars(prefs)['--bg']!);
     let style = document.getElementById('piece-set') as HTMLStyleElement | null;
     if (!style) {

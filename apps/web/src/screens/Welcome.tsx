@@ -47,13 +47,16 @@ export function Welcome() {
           <path d="M0 420 L0 392 L22 362 L44 392 L60 370 L82 400 L104 376 L128 406 L128 420 Z M270 420 L284 388 L304 404 L326 372 L350 400 L372 380 L390 396 L390 420 Z" fill="#2A3143" />
         </svg>
         <div className="welcome-owl">
-          <Oru mood="feliz" size={176} face="#1E2433" ink="#ECE7D8" />
+          <Oru mood="feliz" size={160} />
         </div>
       </div>
       <div className="welcome-body">
         <h1 className="wordmark">
           Check<span>oru</span>
         </h1>
+        <p className="press-start" aria-hidden="true">
+          ▶ APERTE START
+        </p>
         <p className="welcome-lead">Eu sou a Oru. Vou jogar, treinar e revisar suas partidas com você, de dia ou de madrugada.</p>
         <div className="grow" />
         {error && <p className="welcome-error">{error}</p>}

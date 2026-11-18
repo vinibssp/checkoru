@@ -6,12 +6,13 @@ O Checkoru existe graças a projetos abertos.
 | --- | --- | --- |
 | [chessground](https://github.com/lichess-org/chessground) (tabuleiro interativo) | Lichess | GPL-3.0 |
 | [chessops](https://github.com/niklasf/chessops) (regras, FEN, SAN, PGN) | Niklas Fiekas | GPL-3.0 |
+| Peças Pixel ("pixel") | therealqtpi | AGPL-3.0-or-later |
 | Peças Clássicas ("merida") | Armando Hernandez Marroquin | GPL-2.0-or-later |
 | Peças Contorno ("mpchess") | Maxime Chupin | GPL-3.0-or-later |
 | Peças Entalhadas ("rhosgfx") | RhosGFX | CC0 1.0 |
 | Peças Recorte ("papercut") | Nikolay Anzarov | CC BY 4.0 |
 | Peças Celtas e Fantasia ("celtic", "fantasy") | Maurizio Monge | MIT |
-| Fontes [Alegreya e Alegreya Sans](https://www.huertatipografica.com/en/fonts/alegreya-ht-pro) | Juan Pablo del Peral, Huerta Tipográfica | SIL Open Font License 1.1 |
+| Fontes [Bungee](https://djr.com/bungee) (David Jonathan Ross), [Pixelify Sans](https://github.com/eifetx/Pixelify-Sans) (Stefie Justprince), [Silkscreen](https://kottke.org/plus/type/silkscreen/) (Jason Kottke), [Space Grotesk](https://github.com/floriankarsten/space-grotesk) (Florian Karsten) e [VT323](https://github.com/phoikoi/VT323) (Peter Hull) | — | SIL Open Font License 1.1 |
 | [Stockfish](https://stockfishchess.org) 19, versão WebAssembly de [stockfish.js](https://github.com/nmrugg/stockfish.js) | Equipe do Stockfish, Nathan Rugg | GPL-3.0 |
 | Sons Piano, Efeitos, Retrô 8-bit e Futurista (conjuntos piano, sfx, nes e futuristic do Lichess) | Enigmahack | AGPL-3.0-or-later |
 | Sons de madeira (lance, captura, xeque) | Equipe do [PyChess](https://github.com/pychess/pychess) | GPL-3.0-or-later |
