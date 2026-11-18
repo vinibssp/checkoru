@@ -32,6 +32,7 @@ describe('aulas', () => {
   for (const lesson of LESSONS) {
     test(lesson.id, () => {
       expect(lesson.steps.length).toBeGreaterThan(0);
+      expect(lesson.ref.length, `${lesson.id}: falta o livro de referência`).toBeGreaterThan(10);
       expect(lesson.steps.some((s) => s.moves)).toBe(true);
       for (const step of lesson.steps) {
         position(step.fen);
@@ -66,6 +67,7 @@ describe('aulas', () => {
 describe('jogos famosos', () => {
   for (const g of FAMOUS) {
     test(g.id, () => {
+      expect(g.sources.length, `${g.id}: falta a fonte`).toBeGreaterThan(0);
       const game = parseGameText(famousPgn(g), 'Jogos famosos');
       const sans = g.moves.replace(/\d+\.(\.\.)?/g, ' ').trim().split(/\s+/);
       expect(game.moves.length, 'todos os lances foram lidos').toBe(sans.length);

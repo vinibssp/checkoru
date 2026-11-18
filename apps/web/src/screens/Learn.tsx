@@ -80,7 +80,11 @@ export function Learn() {
             </a>
           ))}
         </div>
-        <p className="muted small">Comentários da Oru. Assista lance a lance ou tente adivinhar os lances do vencedor.</p>
+        <p className="muted small">
+          As aulas seguem livros de referência (Capablanca, Seirawan, Dvoretsky, as Leis da FIDE e outros), citados em cada aula. Os lances dos
+          jogos vêm de coletâneas como The Mammoth Book of the World's Greatest Chess Games; os comentários são da Oru. Assista lance a lance ou
+          tente adivinhar os lances do vencedor.
+        </p>
       </div>
     </Page>
   );
@@ -149,6 +153,7 @@ export function LessonScreen() {
           <Oru mood="feliz" size={120} />
           <p className="lead">Aula concluída!</p>
           <p className="muted">{lesson.title}</p>
+          <p className="muted small lesson-ref-end">Para se aprofundar: {lesson.ref}.</p>
           {nextLesson ? (
             <a className="btn primary" href={`#/aula?id=${nextLesson.id}`}>
               Próxima: {nextLesson.title}
@@ -206,6 +211,7 @@ export function LessonScreen() {
             />
           )}
         </div>
+        <p className="lesson-ref">Fonte: {lesson.ref}</p>
       </div>
       <div className="game-bottom">
         <div className="actions">
@@ -384,6 +390,7 @@ export function FamousScreen() {
           </span>
           <span className="muted small">{g.result.replace('1/2', '½')}</span>
         </div>
+        <p className="lesson-ref">Fontes: {g.sources.join('; ')}</p>
       </div>
 
       <div className="game-bottom">

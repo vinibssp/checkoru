@@ -26,6 +26,8 @@ export interface Lesson {
   title: string;
   sub: string;
   group: string;
+  /** Livros de referência em que a aula se apoia (obrigatório: veja docs/REFERENCIAS.md). */
+  ref: string;
   steps: LessonStep[];
 }
 
@@ -40,6 +42,7 @@ export const LESSONS: Lesson[] = [
     title: 'O objetivo do jogo',
     sub: 'Xeque-mate',
     group: 'Primeiros passos',
+    ref: "Leis do Xadrez da FIDE, art. 1; Fischer, Margulies e Mosenfelder, Bobby Fischer Teaches Chess (1966), cap. 'Elements of Checkmate'",
     steps: [
       {
         fen: START,
@@ -64,6 +67,7 @@ export const LESSONS: Lesson[] = [
     title: 'A torre e o bispo',
     sub: 'Linhas retas e diagonais',
     group: 'Primeiros passos',
+    ref: "Leis do Xadrez da FIDE, art. 3; Capablanca, Chess Fundamentals (1921), cap. I",
     steps: [
       {
         fen: '7k/8/8/8/3R4/8/8/K7 w - - 0 1',
@@ -94,6 +98,7 @@ export const LESSONS: Lesson[] = [
     title: 'A dama e o rei',
     sub: 'A mais forte e a mais importante',
     group: 'Primeiros passos',
+    ref: "Leis do Xadrez da FIDE, art. 3",
     steps: [
       {
         fen: '8/7k/8/8/3Q4/8/8/4K3 w - - 0 1',
@@ -124,6 +129,7 @@ export const LESSONS: Lesson[] = [
     title: 'O cavalo',
     sub: 'O lance em L',
     group: 'Primeiros passos',
+    ref: "Leis do Xadrez da FIDE, art. 3",
     steps: [
       {
         fen: '7k/8/8/8/3N4/8/8/4K3 w - - 0 1',
@@ -143,6 +149,7 @@ export const LESSONS: Lesson[] = [
     title: 'O peão',
     sub: 'Pequeno, mas promove',
     group: 'Primeiros passos',
+    ref: "Leis do Xadrez da FIDE, art. 3.7 (promoção); Capablanca, Chess Fundamentals (1921), cap. I §2 (promoção do peão)",
     steps: [
       {
         fen: START,
@@ -168,10 +175,11 @@ export const LESSONS: Lesson[] = [
     title: 'Quanto vale cada peça',
     sub: 'Trocas boas e ruins',
     group: 'Primeiros passos',
+    ref: "Seirawan, Play Winning Chess (1990), cap. 2 'Force' (escala 1-3-3-5-9); Capablanca, Chess Fundamentals (1921), cap. I §5",
     steps: [
       {
         fen: START,
-        text: 'Para decidir trocas, conte pontos: peão 1, cavalo 3, bispo 3, torre 5, dama 9. O rei não tem preço: perdê-lo é perder o jogo.',
+        text: 'Para decidir trocas, conte pontos: peão 1, cavalo 3, bispo 3, torre 5, dama 9, a escala usada por Seirawan em Play Winning Chess. O rei não tem preço. Capablanca lembra que não existe tabela exata: o bispo costuma valer um pouco mais que o cavalo, e uma torre vale mais ou menos uma peça menor e dois peões.',
       },
       {
         fen: '6k1/5ppp/8/1r6/4p3/2N5/8/6K1 w - - 0 1',
@@ -186,6 +194,7 @@ export const LESSONS: Lesson[] = [
     title: 'Xeque e como sair dele',
     sub: 'Fugir, bloquear ou capturar',
     group: 'Primeiros passos',
+    ref: "Leis do Xadrez da FIDE, art. 3.9",
     steps: [
       {
         fen: '4k3/8/8/8/8/8/8/4R1K1 b - - 0 1',
@@ -218,6 +227,7 @@ export const LESSONS: Lesson[] = [
     title: 'Roque, en passant e empate',
     sub: 'Os lances especiais',
     group: 'Primeiros passos',
+    ref: "Leis do Xadrez da FIDE, art. 3.8.2 (roque), 3.7.4 (en passant), art. 5 e 9 (empates)",
     steps: [
       {
         fen: 'r3k2r/pppq1ppp/2npbn2/2b1p3/2B1P3/2NPBN2/PPPQ1PPP/R3K2R w KQkq - 0 1',
@@ -261,6 +271,7 @@ export const LESSONS: Lesson[] = [
     title: 'Garfo',
     sub: 'Um ataque, dois alvos',
     group: 'Táticas',
+    ref: "Seirawan, Winning Chess Tactics, cap. 2 'The Double Attack'",
     steps: [
       {
         fen: '2q3k1/5ppp/8/3N4/8/8/5PPP/6K1 w - - 0 1',
@@ -279,6 +290,7 @@ export const LESSONS: Lesson[] = [
     title: 'Cravada',
     sub: 'Preso na frente do rei',
     group: 'Táticas',
+    ref: "Seirawan, Winning Chess Tactics, cap. 3 'The Pin'",
     steps: [
       {
         fen: '4k3/pp3ppp/2n5/8/8/8/PP3PPP/4KB2 w - - 0 1',
@@ -297,6 +309,7 @@ export const LESSONS: Lesson[] = [
     title: 'Espeto',
     sub: 'A cravada ao contrário',
     group: 'Táticas',
+    ref: "Seirawan, Winning Chess Tactics, cap. 4 'The Skewer'",
     steps: [
       {
         fen: '8/8/B7/3k4/8/8/2K5/7q w - - 0 1',
@@ -316,6 +329,7 @@ export const LESSONS: Lesson[] = [
     title: 'Ataque descoberto',
     sub: 'A peça que sai revela outra',
     group: 'Táticas',
+    ref: "Seirawan, Winning Chess Tactics (xeque descoberto)",
     steps: [
       {
         fen: 'q3k3/8/8/8/4B3/8/8/4R1K1 w - - 0 1',
@@ -336,6 +350,7 @@ export const LESSONS: Lesson[] = [
     title: 'Xeque duplo',
     sub: 'Duas peças dão xeque juntas',
     group: 'Táticas',
+    ref: "Edward Lasker, Chess Strategy (1915), partida 35 (Réti x Tartakower); Seirawan, Winning Chess Tactics (xeque duplo)",
     steps: [
       {
         fen: 'rnbk1b1r/pp3ppp/2p5/4q3/4n3/8/PPPB1PPP/2KR1BNR w - - 0 10',
@@ -355,6 +370,7 @@ export const LESSONS: Lesson[] = [
     title: 'Desvio',
     sub: 'Tire o defensor do lugar',
     group: 'Táticas',
+    ref: "Seirawan, Winning Chess Tactics, cap. 6 'Deflection'; Sergeant, Morphy's Games of Chess (1957), pp. 149-150",
     steps: [
       {
         fen: '4kb1r/p2n1ppp/4q3/4p1B1/4P3/1Q6/PPP2PPP/2KR4 w k - 0 16',
@@ -377,6 +393,7 @@ export const LESSONS: Lesson[] = [
     title: 'Mate do corredor',
     sub: 'Os peões viram uma prisão',
     group: 'Mates',
+    ref: "Fischer, Margulies e Mosenfelder, Bobby Fischer Teaches Chess (1966), cap. 'The Back-Rank Mates'",
     steps: [
       {
         fen: '6k1/5ppp/8/8/8/8/5PPP/3R2K1 w - - 0 1',
@@ -397,6 +414,7 @@ export const LESSONS: Lesson[] = [
     title: 'Mate com dama e rei',
     sub: 'O rei ajuda a dama',
     group: 'Mates',
+    ref: "Capablanca, Chess Fundamentals (1921), cap. I §1 'Some Simple Mates'",
     steps: [
       {
         fen: '7k/8/6K1/8/8/8/8/1Q6 w - - 0 1',
@@ -417,6 +435,7 @@ export const LESSONS: Lesson[] = [
     title: 'Mate da escada',
     sub: 'Duas torres, um degrau por vez',
     group: 'Mates',
+    ref: "Capablanca, Chess Fundamentals (1921), cap. I §1 (o princípio de levar o rei até a borda)",
     steps: [
       {
         fen: '8/8/8/8/3k4/6R1/8/K6R w - - 0 1',
@@ -437,6 +456,7 @@ export const LESSONS: Lesson[] = [
     title: 'Mate sufocado',
     sub: 'O rei preso pelas próprias peças',
     group: 'Mates',
+    ref: "Hooper e Whyld, The Oxford Companion to Chess (2ª ed., 1992), verbete 'Philidor's legacy'",
     steps: [
       {
         fen: '6rk/6pp/8/6N1/8/8/8/6K1 w - - 0 1',
@@ -457,6 +477,7 @@ export const LESSONS: Lesson[] = [
     title: 'Mate com torre e rei',
     sub: 'O rei ajuda a torre na borda',
     group: 'Mates',
+    ref: "Capablanca, Chess Fundamentals (1921), cap. I §1 'Some Simple Mates', exemplo 1",
     steps: [
       {
         fen: '8/8/8/8/8/5K2/R7/5k2 w - - 0 1',
@@ -478,6 +499,7 @@ export const LESSONS: Lesson[] = [
     title: 'Como começar a partida',
     sub: 'Centro, desenvolvimento, roque',
     group: 'Abertura e final',
+    ref: "Capablanca, Chess Fundamentals (1921), cap. I §6 'General Strategy of the Opening' e §7 'Control of the Centre'",
     steps: [
       {
         fen: START,
@@ -499,7 +521,7 @@ export const LESSONS: Lesson[] = [
       },
       {
         fen: 'r1bqk2r/pppp1ppp/2n2n2/2b1p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 4 4',
-        text: 'Regras de ouro: ocupe o centro, tire cavalos e bispos, faça o roque cedo, não saia com a dama cedo demais e não mexa a mesma peça duas vezes sem motivo.',
+        text: 'Os conselhos de Capablanca: desenvolva as peças rápido, tire os cavalos antes dos bispos, não mexa a mesma peça duas vezes antes de terminar o desenvolvimento e dispute o centro, porque sem controlar o centro nenhum ataque forte dá certo.',
         arrows: [['e1', 'g1']],
       },
     ],
@@ -509,6 +531,7 @@ export const LESSONS: Lesson[] = [
     title: 'Abertura italiana',
     sub: 'Um plano clássico para começar',
     group: 'Abertura e final',
+    ref: "Capablanca, Chess Fundamentals (1921), cap. I §6, e parte II, partida 13 (Ruy López)",
     steps: [
       {
         fen: 'r1bqkbnr/pppp1ppp/2n5/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2 3',
@@ -530,6 +553,7 @@ export const LESSONS: Lesson[] = [
     title: 'Mate do pastor',
     sub: 'Dar e se defender',
     group: 'Abertura e final',
+    ref: "Capablanca, Chess Fundamentals (1921), cap. I §8 'Traps' (armadilhas de abertura)",
     steps: [
       {
         fen: 'r1bqkbnr/pppp1ppp/2n5/4p2Q/2B1P3/8/PPPP1PPP/RNB1K1NR b KQkq - 3 3',
@@ -552,6 +576,7 @@ export const LESSONS: Lesson[] = [
     title: 'A regra do quadrado',
     sub: 'O rei alcança o peão?',
     group: 'Abertura e final',
+    ref: "Dvoretsky, Dvoretsky's Endgame Manual (2003), cap. 1 'The Rule of the Square'",
     steps: [
       {
         fen: '8/8/8/5k2/P7/8/8/7K b - - 0 1',
@@ -574,6 +599,7 @@ export const LESSONS: Lesson[] = [
     title: 'Oposição',
     sub: 'Rei contra rei',
     group: 'Abertura e final',
+    ref: "Capablanca, Chess Fundamentals (1921), cap. II §13 'The Opposition'; Dvoretsky, Dvoretsky's Endgame Manual (2003), cap. 1",
     steps: [
       {
         fen: '8/8/4k3/8/4K3/8/4P3/8 b - - 1 1',
