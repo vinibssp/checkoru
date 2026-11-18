@@ -1,9 +1,9 @@
 import { useRef, useState } from 'react';
 import { Page, TopBar } from '../components/Shell';
 import { pieceImage } from '../pieces';
-import { play } from '../sound';
+import { play, preload, type SoundEvent } from '../sound';
 import { useStore } from '../store';
-import { BOARDS, boardColors, PALETTES, PIECE_SETS, SOUND_SETS, type PieceSetId, type Prefs, type SoundSetId } from '../themes';
+import { BOARDS, boardColors, PALETTES, PIECE_SETS, SOUND_DESCRIPTIONS, SOUND_SETS, type PieceSetId, type Prefs, type SoundSetId } from '../themes';
 
 const MAX_BG_BYTES = 1_500_000;
 
@@ -16,6 +16,19 @@ async function shrinkImage(file: File): Promise<string> {
   canvas.height = Math.round(bitmap.height * scale);
   canvas.getContext('2d')!.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
   return canvas.toDataURL('image/jpeg', 0.8);
+}
+
+/** Toca uma amostra: lance, captura, xeque e o som de vitória. */
+async function preview(id: SoundSetId) {
+  if (id === 'silencio') return;
+  await preload(id);
+  const seq: [SoundEvent, number][] = [
+    ['move', 0],
+    ['capture', 450],
+    ['check', 900],
+    ['victory', 1400],
+  ];
+  for (const [ev, at] of seq) window.setTimeout(() => play(id, ev), at);
 }
 
 export function Customize() {
@@ -106,21 +119,45 @@ export function Customize() {
         </div>
 
         <h2 className="h2">Sons</h2>
-        <div className="seg">
+        <ul className="sound-list" role="radiogroup" aria-label="Sons do jogo">
           {(Object.keys(SOUND_SETS) as SoundSetId[]).map((id) => (
-            <button
-              key={id}
-              className={prefs.sounds === id ? 'on' : ''}
-              aria-pressed={prefs.sounds === id}
-              onClick={() => {
-                setPrefs({ sounds: id });
-                play(id, 'capture');
-              }}
-            >
-              {SOUND_SETS[id]}
-            </button>
+            <li key={id}>
+              <button
+                className={`sound-pick ${prefs.sounds === id ? 'on' : ''}`}
+                role="radio"
+                aria-checked={prefs.sounds === id}
+                onClick={() => {
+                  setPrefs({ sounds: id });
+                  void preview(id);
+                }}
+              >
+                <span className="sound-name">{SOUND_SETS[id]}</span>
+                <span className="sound-desc">{SOUND_DESCRIPTIONS[id]}</span>
+              </button>
+              {id !== 'silencio' && (
+                <button className="btn small" aria-label={`Ouvir ${SOUND_SETS[id]}`} onClick={() => void preview(id)}>
+                  Ouvir
+                </button>
+              )}
+            </li>
           ))}
-        </div>
+        </ul>
+        {prefs.sounds !== 'silencio' && (
+          <label className="volume">
+            <span>Volume</span>
+            <input
+              type="range"
+              min={0}
+              max={100}
+              step={5}
+              value={Math.round(prefs.volume * 100)}
+              onChange={(e) => setPrefs({ volume: Number(e.target.value) / 100 })}
+              onPointerUp={() => play(prefs.sounds, 'move')}
+              aria-valuetext={`${Math.round(prefs.volume * 100)}%`}
+            />
+            <span className="muted small">{Math.round(prefs.volume * 100)}%</span>
+          </label>
+        )}
 
         <h2 className="h2">Jogo</h2>
         {toggle('coords', 'Mostrar coordenadas')}

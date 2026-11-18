@@ -45,9 +45,22 @@ export type PieceSetId = keyof typeof PIECE_SETS;
 
 export const SOUND_SETS = {
   madeira: 'Madeira',
-  pedra: 'Pedra',
+  piano: 'Piano',
+  efeitos: 'Efeitos',
+  retro: 'Retrô 8-bit',
+  futurista: 'Futurista',
   silencio: 'Silêncio',
 } as const;
+
+/** Uma frase para cada conjunto, na tela de temas. */
+export const SOUND_DESCRIPTIONS: Record<SoundSetId, string> = {
+  madeira: 'peças de madeira batendo no tabuleiro',
+  piano: 'notas curtas e suaves',
+  efeitos: 'estalos e sininhos discretos',
+  retro: 'como num videogame antigo',
+  futurista: 'bipes eletrônicos',
+  silencio: 'sem som nenhum',
+};
 export type SoundSetId = keyof typeof SOUND_SETS;
 
 export interface Prefs {
@@ -60,6 +73,8 @@ export interface Prefs {
   sounds: SoundSetId;
   coords: boolean;
   showDests: boolean;
+  /** Volume dos sons, de 0 a 1. */
+  volume: number;
   animation: boolean;
   confirmResign: boolean;
 }
@@ -73,6 +88,7 @@ export const DEFAULT_PREFS: Prefs = {
   sounds: 'madeira',
   coords: true,
   showDests: true,
+  volume: 0.8,
   animation: true,
   confirmResign: true,
 };
@@ -91,6 +107,7 @@ export function sanitizePrefs(raw: unknown): Prefs {
     sounds: typeof r.sounds === 'string' && r.sounds in SOUND_SETS ? (r.sounds as SoundSetId) : DEFAULT_PREFS.sounds,
     coords: bool(r.coords, DEFAULT_PREFS.coords),
     showDests: bool(r.showDests, DEFAULT_PREFS.showDests),
+    volume: typeof r.volume === 'number' && r.volume >= 0 && r.volume <= 1 ? r.volume : DEFAULT_PREFS.volume,
     animation: bool(r.animation, DEFAULT_PREFS.animation),
     confirmResign: bool(r.confirmResign, DEFAULT_PREFS.confirmResign),
   };

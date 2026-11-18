@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { api, getToken, setToken, TEST_BUILD, type Me } from './api';
 import { pieceCss } from './pieces';
+import { preload, setVolume } from './sound';
 import { cssVars, DEFAULT_PREFS, sanitizePrefs, type Prefs } from './themes';
 
 const PREFS_KEY = 'checkoru.prefs';
@@ -146,6 +147,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     void refreshMe();
   }, [refreshMe]);
+
+  // Sons: volume e conjunto escolhido já carregado.
+  useEffect(() => {
+    setVolume(prefs.volume);
+    void preload(prefs.sounds);
+  }, [prefs.volume, prefs.sounds]);
 
   // Aplica tema e peças no documento inteiro.
   useEffect(() => {

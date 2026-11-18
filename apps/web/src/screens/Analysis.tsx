@@ -29,7 +29,7 @@ import { currentAnalysis } from '../currentAnalysis';
 import { CancelledError, engine } from '../engine';
 import { sanPt } from '../notation';
 import { navigate } from '../router';
-import { play } from '../sound';
+import { moveSound, play } from '../sound';
 import { useStore } from '../store';
 import { PromotionPicker } from './Game';
 
@@ -189,7 +189,7 @@ function AnalysisBoard({ game, you, startPly }: { game: import('../analysis').An
     const san = makeSan(p, m);
     p.play(m);
     const next: AnalysisMove = { uci, san, fen: makeFen(p.toSetup()) };
-    play(prefs.sounds, san.includes('+') || san.includes('#') ? 'check' : san.includes('x') ? 'capture' : 'move');
+    play(prefs.sounds, moveSound(san));
 
     if (reviewItem && tryState === 'tentando') {
       void judgeTry(uci, next.fen);

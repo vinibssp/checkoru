@@ -22,7 +22,7 @@ import { formatClock, sanPt } from '../notation';
 import { pieceImage } from '../pieces';
 import { AnalyseCheckoruButton } from './Analyze';
 import { navigate } from '../router';
-import { play, type SoundEvent } from '../sound';
+import { endSound, moveSound, play } from '../sound';
 import { useStore } from '../store';
 
 interface ChatLine {
@@ -49,10 +49,6 @@ function position(fen: string): Chess | null {
   return pos.isOk ? pos.value : null;
 }
 
-function soundFor(san: string): SoundEvent {
-  if (san.includes('+') || san.includes('#')) return 'check';
-  return san.includes('x') ? 'capture' : 'move';
-}
 
 export function Game({ id }: { id: string }) {
   const { me, prefs } = useStore();
@@ -138,7 +134,7 @@ export function Game({ id }: { id: string }) {
               sock.current?.close(); // fora de sincronia: reconecta e recebe a foto completa
               return v;
             }
-            play(soundSet.current, soundFor(msg.move.san));
+            play(soundSet.current, moveSound(msg.move.san));
             return {
               ...v,
               clockAt: local,
@@ -148,7 +144,7 @@ export function Game({ id }: { id: string }) {
           });
           break;
         case 'end':
-          play(soundSet.current, 'end');
+          play(soundSet.current, endSound(msg.end.result, viewRef.current?.you ?? null));
           setView((v) => (v ? { ...v, clockAt: local, game: { ...v.game, status: 'ended', end: msg.end, clock: msg.clock, drawOfferBy: null } } : v));
           break;
         case 'draw-offer':
@@ -216,7 +212,7 @@ export function Game({ id }: { id: string }) {
       clock.running = clock.running || startsNow ? (v.you === 'white' ? 'black' : 'white') : null;
       const moveView: MoveView = { uci, san };
       setView({ ...v, clockAt: Date.now(), game: { ...v.game, fen: makeFen(p.toSetup()), moves: [...v.game.moves, moveView], clock, drawOfferBy: null } });
-      play(soundSet.current, soundFor(san));
+      play(soundSet.current, moveSound(san));
       send({ t: 'move', uci, ply: v.game.moves.length, lag: Math.round(lag.current) });
     },
     [send],

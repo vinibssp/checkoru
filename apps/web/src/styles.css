@@ -1627,3 +1627,62 @@ a.choice {
 .tc-grid.five {
   grid-template-columns: repeat(5, 1fr);
 }
+
+/* ---------- Sons ---------- */
+
+.sound-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.sound-list li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sound-pick {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 8px 12px;
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  background: transparent;
+  text-align: left;
+}
+
+.sound-pick.on {
+  background: var(--surface);
+  border: 2px solid var(--ink);
+  padding: 7px 11px;
+}
+
+.sound-name {
+  font-weight: 800;
+}
+
+.sound-desc {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 15px;
+  color: var(--sub);
+}
+
+.volume {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 48px;
+  font-weight: 700;
+}
+
+.volume input {
+  flex: 1;
+  accent-color: var(--ink);
+}

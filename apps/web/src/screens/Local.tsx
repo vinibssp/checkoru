@@ -5,7 +5,7 @@ import { Board, type BoardApi, type Key } from '../components/Board';
 import { Oru } from '../components/Oru';
 import { Page, TopBar } from '../components/Shell';
 import { formatClock } from '../notation';
-import { play, type SoundEvent } from '../sound';
+import { endSound, moveSound, play } from '../sound';
 import { useStore } from '../store';
 import { MoveList, PromotionPicker } from './Game';
 import { botMove, BOTS, markDefeated, type Bot } from '../bots';
@@ -22,10 +22,6 @@ interface Clock {
   since: number | null;
 }
 
-function soundFor(san: string): SoundEvent {
-  if (san.includes('+') || san.includes('#')) return 'check';
-  return san.includes('x') ? 'capture' : 'move';
-}
 
 /** Duas pessoas no mesmo aparelho. Não precisa de internet nem de conta. */
 export function Local() {
@@ -105,7 +101,7 @@ export function LocalBoard({ tc, onNew, vs }: { tc: Tc; onNew: () => void; vs?: 
       g.finish(r.result, r.reason);
       setClock((c) => ({ ...c, [turn]: 0, since: null }));
       setEnd(r);
-      play(prefs.sounds, 'end');
+      play(prefs.sounds, endSound(r.result, vs?.you ?? null));
     }
   });
 
@@ -119,7 +115,7 @@ export function LocalBoard({ tc, onNew, vs }: { tc: Tc; onNew: () => void; vs?: 
         return;
       }
       setHint(null);
-      play(prefs.sounds, r.end ? 'end' : soundFor(r.move.san));
+      play(prefs.sounds, r.end ? endSound(r.end.result, vs?.you ?? null) : moveSound(r.move.san));
       setClock((c) => {
         if (!timed) return c;
         // Como no online: o relógio começa depois do primeiro lance das pretas.
@@ -207,7 +203,7 @@ export function LocalBoard({ tc, onNew, vs }: { tc: Tc; onNew: () => void; vs?: 
     const r = { result: (turn === 'white' ? '0-1' : '1-0') as GameResult, reason: 'resign' as EndReason };
     g.finish(r.result, r.reason);
     setEnd(r);
-    play(prefs.sounds, 'end');
+    play(prefs.sounds, endSound(r.result, vs?.you ?? null));
   };
 
   const names: Record<Color, string> = vs
