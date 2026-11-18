@@ -6,6 +6,7 @@ import { Board, type Key } from '../components/Board';
 import { Oru, type Mood } from '../components/Oru';
 import { Page, TopBar } from '../components/Shell';
 import { openAnalysis } from '../currentAnalysis';
+import { libraryExample } from '../learn/library';
 import { FAMOUS, famousById, famousPgn, noteKey } from '../learn/famous';
 import { doneLessons, GROUPS, LESSONS, lessonById, markLessonDone, type LessonStep } from '../learn/lessons';
 import { sanPt } from '../notation';
@@ -65,6 +66,12 @@ export function Learn() {
             </div>
           </section>
         ))}
+
+        <h2 className="h2">Biblioteca</h2>
+        <a className="card link-card" href="#/biblioteca">
+          <span className="choice-title">Clássicos traduzidos</span>
+          <span className="choice-sub">Capablanca, Fundamentos do Xadrez (1921), com os exemplos no tabuleiro</span>
+        </a>
 
         <h2 className="h2">Jogos famosos</h2>
         <div className="lesson-list">
@@ -247,7 +254,9 @@ const CASTLE: Record<string, string> = { e1h1: 'e1g1', e1a1: 'e1c1', e8h8: 'e8g8
 export function FamousScreen() {
   const { query } = useRoute();
   const { prefs } = useStore();
-  const g = famousById(query.get('id') ?? '');
+  const g = famousById(query.get('id') ?? '') ?? libraryExample(query.get('id') ?? '');
+  // Exemplos da biblioteca voltam para o texto do livro.
+  const back = query.get('de') ? `/${query.get('de')}` : '/aprender';
   const game = useMemo(() => (g ? parseGameText(famousPgn(g), 'Jogos famosos') : null), [g]);
   const [ply, setPly] = useState(0);
   const [auto, setAuto] = useState(false);
@@ -297,7 +306,7 @@ export function FamousScreen() {
   if (!g || !game) {
     return (
       <Page>
-        <TopBar title="Jogo famoso" back="/aprender" />
+        <TopBar title="Jogo famoso" back={back} />
         <div className="center-screen">
           <Oru mood="triste" size={110} />
           <p className="lead">Não achei esse jogo.</p>
@@ -336,7 +345,7 @@ export function FamousScreen() {
 
   return (
     <div className="page game-page famous-page">
-      <TopBar title={g.title} sub={`${g.place}, ${g.year}`} back="/aprender" />
+      <TopBar title={g.title} sub={`${g.place}, ${g.year}`} back={back} />
       <div className={`puzzle-status lesson-status ${verdict && guess ? (verdict.ok ? 'resolvido' : 'errado') : ''}`} role="status" aria-live="polite">
         <Oru size={40} mood={mood} />
         <span>

@@ -5,6 +5,7 @@ import { describe, expect, test } from 'vitest';
 import { parseGameText } from '../analysis';
 import { FAMOUS, famousPgn, noteKey } from './famous';
 import { LESSONS } from './lessons';
+import { BOOKS, LIBRARY_EXAMPLES, libraryExample } from './library';
 
 const SQ = /^[a-h][1-8]$/;
 
@@ -64,8 +65,16 @@ describe('aulas', () => {
   });
 });
 
+describe('biblioteca', () => {
+  test('cada exemplo citado no texto existe', () => {
+    for (const b of BOOKS)
+      for (const c of b.chapters)
+        for (const s of c.sections) for (const blk of s.blocks) if (blk.kind === 'ex') expect(libraryExample(blk.id), blk.id).toBeDefined();
+  });
+});
+
 describe('jogos famosos', () => {
-  for (const g of FAMOUS) {
+  for (const g of [...FAMOUS, ...LIBRARY_EXAMPLES]) {
     test(g.id, () => {
       expect(g.sources.length, `${g.id}: falta a fonte`).toBeGreaterThan(0);
       const game = parseGameText(famousPgn(g), 'Jogos famosos');

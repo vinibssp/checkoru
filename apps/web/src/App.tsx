@@ -22,6 +22,7 @@ import { Otb } from './screens/Otb';
 import { getToken } from './api';
 import { VisitorGame } from './screens/Visitor';
 import { ClassScreen, Classes } from './screens/Classes';
+import { BookReader, Library } from './screens/Library';
 import { NewTournament, TournamentScreen, Tournaments } from './screens/Tournament';
 import { Local } from './screens/Local';
 import { LoginReturn } from './screens/LoginReturn';
@@ -93,6 +94,10 @@ function Routes() {
       return <Local />;
     case 'mesa':
       return <Otb key={route.query.toString()} />;
+    case 'biblioteca':
+      return <Library />;
+    case 'livro':
+      return <BookReader key={route.query.toString()} />;
     case 'turmas':
       return arg ? <ClassScreen key={arg} id={arg} /> : <Classes />;
     case 'torneio':

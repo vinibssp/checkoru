@@ -18,6 +18,7 @@ O Checkoru existe graças a projetos abertos.
 | Sons de madeira (lance, captura, xeque) | Equipe do [PyChess](https://github.com/pychess/pychess) | GPL-3.0-or-later |
 | Nomes de aberturas ([chess-openings](https://github.com/lichess-org/chess-openings)) | Lichess e colaboradores | CC0 1.0 |
 | Puzzles ([banco de puzzles](https://database.lichess.org/#puzzles), seleção de ~20 mil) | Lichess e seus jogadores | CC0 1.0 |
+| Texto de *Chess Fundamentals*, de José Raúl Capablanca (1921), traduzido pelo Checkoru | [Project Gutenberg](https://www.gutenberg.org/ebooks/33870) | Domínio público |
 | [React](https://react.dev) | Meta e colaboradores | MIT |
 | [Capacitor](https://capacitorjs.com) | Ionic | MIT |
 | [Capacitor Community Text-to-Speech](https://github.com/capacitor-community/text-to-speech) e [Speech Recognition](https://github.com/capacitor-community/speech-recognition) | Capacitor Community | MIT |

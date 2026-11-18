@@ -1582,3 +1582,24 @@ cg-board square.last-move {
 .result-select.wide {
   width: 100%;
 }
+
+/* ---------- Biblioteca ---------- */
+
+.book-card {
+  margin: 12px 0;
+}
+
+.book-chapter {
+  font-weight: 800;
+  color: var(--sub);
+  margin: 12px 0 6px;
+}
+
+.book-text p {
+  line-height: 1.6;
+  margin: 0 0 12px;
+}
+
+.book-example {
+  margin: 8px 0 14px;
+}

@@ -105,6 +105,16 @@ Os textos do app são escritos por nós, com nossas palavras; não copiamos trec
 - Fala e reconhecimento de voz: a voz do próprio aparelho (Web Speech API no navegador; no Android, os plugins
   `@capacitor-community/text-to-speech` e `@capacitor-community/speech-recognition`, licença MIT).
 
+## Biblioteca de clássicos
+
+- **José Raúl Capablanca, *Chess Fundamentals*** (Harcourt, Brace and Company, 1921; texto da edição revista de
+  1934), Project Gutenberg, e-book nº 33870, conferido no espelho oficial `github.com/GITenberg/Chess-Fundamentals_33870`
+  (arquivo `33870-8.txt`). Tradução própria do cap. I, §1 ("Some Simple Mates"), em `apps/web/src/learn/library.ts`.
+  As posições iniciais dos 4 exemplos foram copiadas dos diagramas do livro (Fig1 a Fig4 do e-book). Os lances
+  passaram da notação descritiva do livro para a algébrica e são todos conferidos em `learn.test.ts`.
+- Direitos: a obra está em domínio público nos EUA (Project Gutenberg). No Brasil, está livre desde 2013, porque o autor
+  morreu em 1942 e a Lei 9.610/98, art. 41, dá 70 anos.
+
 ## Jogo limpo (anti-trapaça)
 
 - **K. W. Regan e G. McC. Haworth, "Intrinsic Chess Ratings"**, *Proceedings of the AAAI Conference on Artificial
