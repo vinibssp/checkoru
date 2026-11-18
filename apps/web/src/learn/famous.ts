@@ -175,6 +175,83 @@ export const FAMOUS: FamousGame[] = [
       '44.': 'A dama contra a torre decide, e as pretas abandonaram.',
     },
   },
+
+  {
+    id: 'lasker-thomas',
+    title: 'A caçada ao rei',
+    white: 'Edward Lasker',
+    black: 'George Thomas',
+    place: 'Londres',
+    year: 1912,
+    result: '1-0',
+    intro: 'Um sacrifício de dama arrasta o rei preto de h8 até g1, do outro lado do tabuleiro.',
+    moves:
+      '1.d4 e6 2.Nf3 f5 3.Nc3 Nf6 4.Bg5 Be7 5.Bxf6 Bxf6 6.e4 fxe4 7.Nxe4 b6 8.Ne5 O-O 9.Bd3 Bb7 10.Qh5 Qe7 11.Qxh7+ Kxh7 12.Nxf6+ Kh6 13.Neg4+ Kg5 14.h4+ Kf4 15.g3+ Kf3 16.Be2+ Kg2 17.Rh2+ Kg1 18.Kd2#',
+    notes: {
+      '10.': 'A dama mira h7, defendida só pelo rei.',
+      '11.': 'Dxh7+!! A dama se entrega para puxar o rei para fora de casa.',
+      '12.': 'Xeque duplo, e começa a caçada.',
+      '14.': 'Cada xeque empurra o rei mais um pouco para o campo das brancas.',
+      '17...': 'O rei preto chegou a g1, a casa de partida do rei branco.',
+      '18.': 'Mate com um lance de rei! (Rocar grande também seria mate.)',
+    },
+  },
+  {
+    id: 'steinitz',
+    title: 'Steinitz contra Bardeleben',
+    white: 'Wilhelm Steinitz',
+    black: 'Curt von Bardeleben',
+    place: 'Hastings',
+    year: 1895,
+    result: '1-0',
+    intro: 'O primeiro campeão mundial oficial deixa a torre ser capturada por quatro lances seguidos, e ninguém consegue pegá-la.',
+    moves:
+      '1.e4 e5 2.Nf3 Nc6 3.Bc4 Bc5 4.c3 Nf6 5.d4 exd4 6.cxd4 Bb4+ 7.Nc3 d5 8.exd5 Nxd5 9.O-O Be6 10.Bg5 Be7 11.Bxd5 Bxd5 12.Nxd5 Qxd5 13.Bxe7 Nxe7 14.Re1 f6 15.Qe2 Qd7 16.Rac1 c6 17.d5 cxd5 18.Nd4 Kf7 19.Ne6 Rhc8 20.Qg4 g6 21.Ng5+ Ke8 22.Rxe7+ Kf8 23.Rf7+ Kg8 24.Rg7+ Kh8 25.Rxh7+',
+    notes: {
+      '17.': 'Um peão entregue para abrir caminho ao cavalo.',
+      '22.': 'Txe7+! A torre entra e não pode ser capturada: se Dxe7, Txc8+ ganha uma torre; se Rxe7, Te1+ e o ataque continua.',
+      '23.': 'A torre fica dando xeque. Se as pretas a pegarem, a dama de g4 entra na jogada.',
+      '25.': 'Aqui Bardeleben saiu do salão sem abandonar. Steinitz mostrou depois um mate em dez lances.',
+    },
+  },
+  {
+    id: 'deep-blue',
+    title: 'A máquina vence o campeão',
+    white: 'Deep Blue',
+    black: 'Garry Kasparov',
+    place: 'Nova York',
+    year: 1997,
+    result: '1-0',
+    intro: 'Última partida do match: pela primeira vez um computador venceu o campeão mundial num match com ritmo de torneio.',
+    moves:
+      '1.e4 c6 2.d4 d5 3.Nc3 dxe4 4.Nxe4 Nd7 5.Ng5 Ngf6 6.Bd3 e6 7.N1f3 h6 8.Nxe6 Qe7 9.O-O fxe6 10.Bg6+ Kd8 11.Bf4 b5 12.a4 Bb7 13.Re1 Nd5 14.Bg3 Kc8 15.axb5 cxb5 16.Qd3 Bc6 17.Bf5 exf5 18.Rxe7 Bxe7 19.c4',
+    notes: {
+      '7...': 'h6? Um lance conhecido por ser perigoso nesta abertura.',
+      '8.': 'Cxe6! O cavalo se entrega e o rei preto fica preso no centro.',
+      '10...': 'O rei não pode mais rocar e foge para o lado da dama.',
+      '19.': 'Kasparov abandonou: as peças brancas entram por todos os lados.',
+    },
+  },
+  {
+    id: 'fischer-spassky',
+    title: 'A sexta do match do século',
+    white: 'Bobby Fischer',
+    black: 'Boris Spassky',
+    place: 'Reykjavík',
+    year: 1972,
+    result: '1-0',
+    intro: 'Fischer, que quase sempre abria com e4, joga c4 e vence de um jeito tão bonito que o próprio Spassky aplaudiu.',
+    moves:
+      '1.c4 e6 2.Nf3 d5 3.d4 Nf6 4.Nc3 Be7 5.Bg5 O-O 6.e3 h6 7.Bh4 b6 8.cxd5 Nxd5 9.Bxe7 Qxe7 10.Nxd5 exd5 11.Rc1 Be6 12.Qa4 c5 13.Qa3 Rc8 14.Bb5 a6 15.dxc5 bxc5 16.O-O Ra7 17.Be2 Nd7 18.Nd4 Qf8 19.Nxe6 fxe6 20.e4 d4 21.f4 Qe7 22.e5 Rb8 23.Bc4 Kh8 24.Qh3 Nf8 25.b3 a5 26.f5 exf5 27.Rxf5 Nh7 28.Rcf1 Qd8 29.Qg3 Re7 30.h4 Rbb7 31.e6 Rbc7 32.Qe5 Qe8 33.a4 Qd8 34.R1f2 Qe8 35.R2f3 Qd8 36.Bd3 Qe8 37.Qe4 Nf6 38.Rxf6 gxf6 39.Rxf6 Kg8 40.Bc4 Kh8 41.Qf4',
+    notes: {
+      '1.': 'c4! Uma surpresa: Fischer quase nunca abria assim.',
+      '20.': 'Os peões brancos do centro começam a andar.',
+      '26.': 'f5! A coluna f se abre para as torres.',
+      '31.': 'O peão de e6 corta o tabuleiro das pretas ao meio.',
+      '38.': 'Txf6! A torre se entrega para abrir o rei preto.',
+      '41.': 'Spassky abandonou e aplaudiu junto com o público.',
+    },
+  },
 ];
 
 export function famousById(id: string): FamousGame | undefined {

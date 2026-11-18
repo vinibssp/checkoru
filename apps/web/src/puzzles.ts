@@ -257,12 +257,13 @@ export function loadProfile(): PuzzleProfile {
   return { rating: 1200, solved: 0, failed: 0, seen: [], bestRush: 0 };
 }
 
-export function saveProfile(p: PuzzleProfile): void {
+export function saveProfile(p: PuzzleProfile, sync = true): void {
   try {
     localStorage.setItem(PROFILE_KEY, JSON.stringify({ ...p, seen: p.seen.slice(-2000) }));
   } catch {
     /* ignora */
   }
+  if (sync) void import('./training').then((t) => t.pushTraining());
 }
 
 /** Elo simples: K alto nos primeiros puzzles para achar o nível rápido. */

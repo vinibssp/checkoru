@@ -331,6 +331,46 @@ export const LESSONS: Lesson[] = [
     ],
   },
 
+  {
+    id: 'xeque-duplo',
+    title: 'Xeque duplo',
+    sub: 'Duas peças dão xeque juntas',
+    group: 'Táticas',
+    steps: [
+      {
+        fen: 'rnbk1b1r/pp3ppp/2p5/4q3/4n3/8/PPPB1PPP/2KR1BNR w - - 0 10',
+        text: 'No xeque duplo, duas peças atacam o rei ao mesmo tempo. Não dá para bloquear nem capturar as duas: o rei é obrigado a andar.',
+        arrows: [['d1', 'd8', 'red']],
+      },
+      {
+        fen: 'rnbk1b1r/pp3ppp/2p5/4q3/4n3/8/PPPB1PPP/2KR1BNR w - - 0 10',
+        text: 'Esta é a posição de Réti contra Tartakower (1910). Mova o bispo, dando xeque com ele e com a torre ao mesmo tempo. Depois, dê o mate.',
+        moves: ['d2g5', 'd8c7', 'g5d8'],
+        done: 'Xeque duplo e depois mate com o bispo. Réti tinha acabado de entregar a dama.',
+      },
+    ],
+  },
+  {
+    id: 'desvio',
+    title: 'Desvio',
+    sub: 'Tire o defensor do lugar',
+    group: 'Táticas',
+    steps: [
+      {
+        fen: '4kb1r/p2n1ppp/4q3/4p1B1/4P3/1Q6/PPP2PPP/2KR4 w k - 0 16',
+        text: 'Às vezes uma peça só está defendendo uma casa importante. Se você forçar essa peça a sair, a casa fica livre. Aqui o cavalo de d7 é a única defesa de d8.',
+        arrows: [['d1', 'd8', 'yellow']],
+        circles: ['d7'],
+      },
+      {
+        fen: '4kb1r/p2n1ppp/4q3/4p1B1/4P3/1Q6/PPP2PPP/2KR4 w k - 0 16',
+        text: 'A partida da ópera, de Morphy (1858). Entregue a dama para desviar o cavalo e dê mate.',
+        moves: ['b3b8', 'd7b8', 'd1d8'],
+        done: 'O cavalo saiu de d7 para pegar a dama, e a torre deu mate. Uma das combinações mais famosas da história.',
+      },
+    ],
+  },
+
   // ---------------- Mates ----------------
   {
     id: 'corredor',
@@ -392,6 +432,46 @@ export const LESSONS: Lesson[] = [
     ],
   },
 
+  {
+    id: 'mate-sufocado',
+    title: 'Mate sufocado',
+    sub: 'O rei preso pelas próprias peças',
+    group: 'Mates',
+    steps: [
+      {
+        fen: '6rk/6pp/8/6N1/8/8/8/6K1 w - - 0 1',
+        text: 'Quando o rei está cercado pelas próprias peças, um cavalo sozinho pode dar mate. Dê o mate!',
+        moves: ['g5f7'],
+        done: 'Mate sufocado: o rei não tem casa nenhuma, e ninguém alcança o cavalo.',
+      },
+      {
+        fen: '5r1k/6pp/8/3Q2N1/8/8/8/6K1 w - - 0 1',
+        text: 'Agora o famoso mate de Philidor: xeque com o cavalo, xeque duplo, sacrifício da dama em g8 e o cavalo volta para o mate. Comece com xeque.',
+        moves: ['g5f7', 'h8g8', 'f7h6', 'g8h8', 'd5g8', 'f8g8', 'h6f7'],
+        done: 'Perfeito! A dama obrigou a torre a tampar g8, e o cavalo deu o mate.',
+      },
+    ],
+  },
+  {
+    id: 'mate-torre',
+    title: 'Mate com torre e rei',
+    sub: 'O rei ajuda a torre na borda',
+    group: 'Mates',
+    steps: [
+      {
+        fen: '8/8/8/8/8/5K2/R7/5k2 w - - 0 1',
+        text: 'Com uma torre só também dá mate, mas o rei tem que ajudar: ele fica de frente para o rei adversário, e a torre ataca a fileira da borda. Dê o mate.',
+        moves: ['a2a1'],
+        done: 'Mate! Seu rei tirou as casas da frente, e a torre fechou a borda.',
+      },
+      {
+        fen: '8/8/8/8/8/5K2/R7/5k2 w - - 0 1',
+        text: 'Para chegar até aqui, use a torre como uma cerca: ela corta o rei adversário numa parte do tabuleiro, e o seu rei vai empurrando, sempre de frente para ele, até a borda.',
+        arrows: [['f3', 'f2', 'green']],
+      },
+    ],
+  },
+
   // ---------------- Abertura e final ----------------
   {
     id: 'abertura',
@@ -421,6 +501,27 @@ export const LESSONS: Lesson[] = [
         fen: 'r1bqk2r/pppp1ppp/2n2n2/2b1p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 4 4',
         text: 'Regras de ouro: ocupe o centro, tire cavalos e bispos, faça o roque cedo, não saia com a dama cedo demais e não mexa a mesma peça duas vezes sem motivo.',
         arrows: [['e1', 'g1']],
+      },
+    ],
+  },
+  {
+    id: 'bispo-italiana',
+    title: 'Abertura italiana',
+    sub: 'Um plano clássico para começar',
+    group: 'Abertura e final',
+    steps: [
+      {
+        fen: 'r1bqkbnr/pppp1ppp/2n5/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2 3',
+        text: 'Depois de 1.e4 e5 2.Cf3 Cc6, o bispo de f1 tem duas casas boas: c4 (abertura italiana), mirando f7, ou b5 (abertura espanhola), pressionando o cavalo que defende e5.',
+        arrows: [['f1', 'c4'], ['f1', 'b5']],
+      },
+      {
+        fen: 'r1bqkbnr/pppp1ppp/2n5/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2 3',
+        text: 'Leve o bispo para c4, mirando a casa mais fraca das pretas.',
+        moves: ['f1c4'],
+        alt: ['f1b5'],
+        done: 'Bispo ativo! O próximo passo é o roque, e depois c3 e d4 para disputar o centro.',
+        arrows: [['c4', 'f7', 'yellow']],
       },
     ],
   },
@@ -467,6 +568,26 @@ export const LESSONS: Lesson[] = [
       },
     ],
   },
+
+  {
+    id: 'oposicao',
+    title: 'Oposição',
+    sub: 'Rei contra rei',
+    group: 'Abertura e final',
+    steps: [
+      {
+        fen: '8/8/4k3/8/4K3/8/4P3/8 b - - 1 1',
+        text: 'Reis frente a frente, com uma casa entre eles: isso é a oposição. Quem tem que jogar precisa ceder caminho. Aqui as pretas têm a vez e vão ter que deixar o rei branco passar.',
+        circles: ['e5'],
+      },
+      {
+        fen: '8/8/4k3/8/8/4K3/4P3/8 w - - 0 1',
+        text: 'Com rei e peão contra rei, o rei vai na frente do peão. Tome a oposição: coloque seu rei de frente para o rei preto, com uma casa entre eles.',
+        moves: ['e3e4'],
+        done: 'Oposição! As pretas têm que sair da frente, o rei branco avança e abre caminho para o peão.',
+      },
+    ],
+  },
 ];
 
 export function lessonById(id: string): Lesson | undefined {
@@ -485,12 +606,15 @@ export function doneLessons(): Set<string> {
   }
 }
 
-export function markLessonDone(id: string): void {
+export function saveDoneLessons(ids: string[], sync = true): void {
   try {
-    const s = doneLessons();
-    s.add(id);
-    localStorage.setItem(KEY, JSON.stringify([...s]));
+    localStorage.setItem(KEY, JSON.stringify(ids.filter((id) => LESSONS.some((l) => l.id === id))));
   } catch {
     /* ignora */
   }
+  if (sync) void import('../training').then((t) => t.pushTraining());
+}
+
+export function markLessonDone(id: string): void {
+  saveDoneLessons([...doneLessons(), id]);
 }

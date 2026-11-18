@@ -166,6 +166,28 @@ async function route(request: Request, env: Env): Promise<Response> {
     }
   }
 
+  if (path === '/api/me/treino') {
+    if (method === 'GET') {
+      const row = await env.DB.prepare('SELECT json FROM training WHERE user_id = ?').bind(user.id).first<{ json: string }>();
+      return json({ training: row ? JSON.parse(row.json) : null });
+    }
+    if (method === 'PUT') {
+      const text = await request.text();
+      if (text.length > 4_000) return json({ error: 'Progresso grande demais' }, 413);
+      try {
+        JSON.parse(text);
+      } catch {
+        return json({ error: 'JSON inválido' }, 400);
+      }
+      await env.DB.prepare(
+        'INSERT INTO training (user_id, json, updated_at) VALUES (?1, ?2, ?3) ON CONFLICT(user_id) DO UPDATE SET json = ?2, updated_at = ?3',
+      )
+        .bind(user.id, text, Date.now())
+        .run();
+      return json({ ok: true });
+    }
+  }
+
   if (path === '/api/me/games' && method === 'GET') return json({ games: await listGames(env.DB, user.id) });
 
   if (path === '/api/ws-ticket' && method === 'POST') {

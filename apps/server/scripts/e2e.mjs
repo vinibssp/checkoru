@@ -118,6 +118,13 @@ await friend.opened;
 const fsnap = await friend.next((m) => m.t === 'snapshot');
 assert(fsnap.you === 'black' && fsnap.game.status === 'playing' && !fsnap.game.rated, 'desafio por link: amigo entra de pretas, sem rating');
 
+// ---------- Progresso de treino ----------
+const t0 = await call('/api/me/treino', { token: players[0].token });
+assert(t0.training === null, 'conta nova sem progresso de treino');
+await call('/api/me/treino', { token: players[0].token, method: 'PUT', body: { puzzles: { rating: 1340, solved: 3, failed: 1, bestRush: 9 }, lessons: ['objetivo'] } });
+const t1 = await call('/api/me/treino', { token: players[0].token });
+assert(t1.training.puzzles.rating === 1340 && t1.training.lessons[0] === 'objetivo', 'progresso de treino salvo na conta');
+
 // ---------- Revanche ----------
 seats.white.s.send({ t: 'rematch' });
 const offer = await seats.black.s.next((m) => m.t === 'rematch-offer');

@@ -66,6 +66,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     if (!getToken()) return setMe(guestSaved() ? GUEST : null);
     try {
       setMe(await api<Me>('/api/me'));
+      void import('./training').then((t) => t.syncTraining());
     } catch (err) {
       if ((err as { status?: number }).status === 401) {
         setToken(null);

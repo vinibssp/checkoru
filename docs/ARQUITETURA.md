@@ -77,7 +77,7 @@ O banco aberto do Lichess (CC0, milhões de puzzles) é baixado pelo workflow `p
 `scripts/puzzles/build.py`: fica só com os bem avaliados e jogados (popularidade ≥ 80, ≥ 300 partidas), até 800 por
 faixa de 100 pontos, de 400 a 2999. O resultado (~20 mil puzzles, 2,8 MB) vai em `apps/web/public/puzzles/`, um
 arquivo por faixa, e é carregado sob demanda: funciona sem internet. Um teste confere que todos têm solução válida.
-O rating de puzzles é um Elo simples guardado no aparelho. O puzzle do dia é escolhido pela data, igual para todos.
+O rating de puzzles é um Elo simples guardado no aparelho e, com login, também na conta (tabela `training`, junto com as aulas concluídas; ao entrar, vale o rating de quem jogou mais puzzles e as aulas somam). O puzzle do dia é escolhido pela data, igual para todos.
 
 ## Aulas e jogos famosos
 
@@ -103,5 +103,4 @@ O plano gratuito da Cloudflare dá 100 mil requisições por dia (mensagens de W
 
 1. Mais aulas (finais de torre, aberturas) e mais jogos famosos.
 2. Importar partida a partir de uma foto do tabuleiro.
-3. Rating de puzzles salvo na conta (hoje fica no aparelho).
-4. Anti-trapaça: análise das partidas suspeitas em lote, pelo GitHub Actions.
+3. Anti-trapaça: análise das partidas suspeitas em lote, pelo GitHub Actions.
