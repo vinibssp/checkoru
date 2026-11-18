@@ -418,7 +418,7 @@ export function LocalBoard({ tc, onNew, vs }: { tc: Tc; onNew: () => void; vs?: 
   );
 }
 
-function isPawnAt(fen: string, square: string): boolean {
+export function isPawnAt(fen: string, square: string): boolean {
   const rows = fen.split(' ')[0]!.split('/');
   const file = square.charCodeAt(0) - 97;
   const rank = Number(square[1]);

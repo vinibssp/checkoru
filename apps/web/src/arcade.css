@@ -1212,3 +1212,250 @@ cg-board square.last-move {
 .switch input {
   flex: none;
 }
+
+/* ---------- Tabuleiro de verdade (relógio e súmula) ---------- */
+
+.otb-names {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.otb .game-body {
+  gap: 8px;
+  padding: 8px;
+  justify-content: space-between;
+}
+
+.otb-clock {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  width: 100%;
+  min-height: 84px;
+  border: var(--card-border);
+  border-radius: var(--card-radius);
+  box-shadow: var(--card-shadow);
+  background: var(--surface);
+  color: var(--sub);
+  font: inherit;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.otb-only .otb-clock {
+  flex: 1;
+}
+
+/* Quem senta do outro lado lê o próprio relógio de frente. */
+.otb-clock.top {
+  transform: rotate(180deg);
+}
+
+.otb-clock.active {
+  background: var(--clock-on);
+  color: var(--clock-on-ink);
+  border-color: transparent;
+}
+
+.otb-clock.low,
+.otb-clock.flag {
+  background: var(--danger);
+  color: #fff;
+}
+
+.otb-who {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 800;
+}
+
+.otb-time {
+  font-family: var(--font-digits);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  font-size: calc(44px * var(--digits-scale));
+}
+
+.otb-only .otb-time {
+  font-size: calc(min(22vw, 120px) * var(--digits-scale));
+}
+
+.otb-hint {
+  font-size: 14px;
+  opacity: 0.85;
+}
+
+.otb-record .otb-clock {
+  flex-direction: row;
+  justify-content: space-between;
+  padding: 0 16px;
+  min-height: 64px;
+}
+
+.otb-record .otb-clock.top {
+  /* Na súmula, os dois relógios ficam legíveis por quem segura o celular. */
+  transform: none;
+}
+
+/* ---------- Torneio do clube ---------- */
+
+.textarea {
+  min-height: 160px;
+  padding: 10px 14px;
+  border: 1.5px solid var(--ink);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-size: 17px;
+  resize: vertical;
+}
+
+.round-nav {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin: 12px 0 0;
+}
+
+.round-nav .chip {
+  min-width: 44px;
+  min-height: 36px;
+  border: 1px solid var(--rule);
+  border-radius: 18px;
+  background: var(--surface);
+  color: var(--ink);
+  font-weight: 800;
+}
+
+.round-nav .chip.on {
+  background: var(--clock-on);
+  color: var(--clock-on-ink);
+  border-color: transparent;
+}
+
+.pairings {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.pairing {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--rule);
+}
+
+.pairing-board {
+  width: 26px;
+  font-weight: 800;
+  color: var(--sub);
+  text-align: center;
+}
+
+.pairing-names {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.pairing-names .dot {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  vertical-align: -1px;
+}
+
+.result-select {
+  height: 44px;
+  min-width: 78px;
+  padding: 0 6px;
+  border: 1.5px solid var(--ink);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 800;
+}
+
+.small-btn {
+  min-width: 44px;
+  padding: 0 10px;
+}
+
+.warn {
+  color: var(--danger);
+  font-weight: 700;
+}
+
+.standings-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 14px 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.standings-table th,
+.standings-table td {
+  padding: 8px 4px;
+  border-bottom: 1px solid var(--rule);
+  text-align: center;
+}
+
+.standings-table .left {
+  text-align: left;
+}
+
+.standings-table th {
+  color: var(--sub);
+  font-size: 13px;
+}
+
+.standings {
+  margin: 0;
+  padding: 0 0 0 22px;
+}
+
+.standings li {
+  padding: 6px 0;
+  border-bottom: 1px solid var(--rule);
+}
+
+.standings li {
+  display: list-item;
+}
+
+.standings li span:first-child {
+  display: inline-block;
+  min-width: 60%;
+}
+
+.rating-small {
+  font-family: var(--font-digits);
+  font-variant-numeric: tabular-nums;
+  font-weight: 800;
+}
+
+.row-form {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  margin: 12px 0 0;
+}
+
+.row-form .field {
+  flex: 1;
+}
+
+.row-form .btn {
+  height: 52px;
+}

@@ -18,6 +18,8 @@ import { Review } from './screens/Review';
 import { Coordinates, Memory, Visual } from './screens/Visual';
 import { PuzzleScreen, Rush, Train } from './screens/Puzzles';
 import { Analyze } from './screens/Analyze';
+import { Otb } from './screens/Otb';
+import { NewTournament, TournamentScreen, Tournaments } from './screens/Tournament';
 import { Local } from './screens/Local';
 import { LoginReturn } from './screens/LoginReturn';
 import { Play } from './screens/Play';
@@ -84,6 +86,10 @@ function Routes() {
       return <Analysis key={route.query.toString()} />;
     case 'local':
       return <Local />;
+    case 'mesa':
+      return <Otb key={route.query.toString()} />;
+    case 'torneio':
+      return arg === 'novo' ? <NewTournament /> : arg ? <TournamentScreen key={arg} id={arg} /> : <Tournaments />;
     case 'partida':
       return arg ? <Game key={arg} id={arg} /> : <Home />;
     case 'treinar':

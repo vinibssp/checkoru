@@ -57,6 +57,14 @@ export function Play() {
             <span className="choice-title">No mesmo aparelho</span>
             <span className="choice-sub">duas pessoas, um celular · sem internet</span>
           </a>
+          <a className="choice" href="#/mesa">
+            <span className="choice-title">Tabuleiro de verdade</span>
+            <span className="choice-sub">relógio e súmula no celular · sem internet</span>
+          </a>
+          <a className="choice" href="#/torneio">
+            <span className="choice-title">Torneio do clube</span>
+            <span className="choice-sub">suíço, tabela e rating do clube · sem internet</span>
+          </a>
           <a className="choice" href="#/bots">
             <span className="choice-title">A Oru e os bichos da mata</span>
             <span className="choice-sub">computador, 6 níveis · sem internet</span>

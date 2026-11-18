@@ -70,6 +70,30 @@ Os textos do app são escritos por nós, com nossas palavras; não copiamos trec
   (domínio público / CC0), com a classificação ECO (*Encyclopaedia of Chess Openings*, Šahovski Informator).
   Gerado por `scripts/openings/build.py`.
 
+## Regras de torneio e rating
+
+- **FIDE Handbook, C.04.1, *Basic rules for Swiss Systems*** (handbook.fide.com, versão em vigor desde
+  1º/2/2026): número de rodadas fixo; ninguém enfrenta o mesmo adversário duas vezes; a folga (*pairing-allocated
+  bye*) vale os pontos de uma vitória, salvo regra do torneio, e não vai para quem já teve folga ou vitória por W.O.;
+  ninguém recebe a mesma cor três vezes seguidas, salvo exceção do sistema; em geral cada um recebe a cor com que
+  jogou menos.
+- **FIDE Handbook, C.04.3, *FIDE (Dutch) System***: dentro do grupo de pontos, a metade de cima enfrenta a de baixo.
+  O Checkoru usa uma versão **simplificada** (busca com retrocesso que segue essa ideia e as regras acima), boa
+  para clube e escola, mas que não aplica todos os critérios do sistema holandês: não serve para torneio homologado.
+  Quando o grupo é pequeno demais para as rodadas, o app avisa antes de repetir cor ou confronto.
+- **FIDE Handbook, C.07, *Tie-Break Regulations*** (em vigor desde 1º/3/2026): definições de Buchholz,
+  Sonneborn-Berger e número de vitórias (WIN). Simplificação do Checkoru: folga e W.O. não entram no Buchholz nem no
+  Sonneborn-Berger (o regulamento atual trata rodadas não jogadas de outro jeito).
+- **Arpad E. Elo, *The Rating of Chessplayers, Past and Present*** (Arco, 1978): a fórmula do rating do clube,
+  pontuação esperada E = 1 / (1 + 10^(diferença/400)) e novo rating = antigo + K × (resultado − E).
+- **FIDE Handbook, B.02, *FIDE Rating Regulations***: fatores K (40 nas primeiras 30 partidas, 20 abaixo de 2400,
+  10 depois de chegar a 2400) e diferença de rating limitada a 400. O rating do clube é só do aparelho; não tem
+  relação com o rating oficial.
+- **Leis do Xadrez da FIDE (FIDE Handbook, E.01), art. 6**: uso do relógio (o jogador aperta o próprio relógio depois
+  do lance; incremento por lance) e queda de bandeira: perde quem ficou sem tempo, a não ser que o adversário não
+  possa dar mate com nenhuma sequência de lances legais, quando é empate (art. 6.9). Na súmula, o app
+  aproxima isso pela falta de material para mate.
+
 ## Puzzles
 
 Os puzzles vêm do banco aberto do Lichess (CC0), de partidas reais, com solução conferida por motor. Não há livro
