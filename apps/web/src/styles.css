@@ -1547,3 +1547,83 @@ a.choice {
   font-style: italic;
   color: var(--sub);
 }
+
+/* ---------- Bots ---------- */
+
+.bot-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.bot {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 10px;
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  background: transparent;
+  text-align: left;
+}
+
+.bot.on {
+  background: var(--surface);
+  border: 2px solid var(--ink);
+  padding: 7px 9px;
+}
+
+.bot:disabled {
+  opacity: 0.45;
+}
+
+.bot-avatar {
+  width: 40px;
+  height: 40px;
+  flex: none;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--serif);
+  font-size: 20px;
+  font-weight: 800;
+  color: #fbf7ea;
+}
+
+.bot-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.bot-name {
+  font-weight: 800;
+  font-size: 17px;
+}
+
+.bot-style {
+  font-family: var(--serif);
+  font-style: italic;
+  color: var(--sub);
+  font-size: 15px;
+}
+
+.bot-state {
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--sub);
+}
+
+.bot-state.vencido {
+  color: var(--green);
+}
+
+.tc-grid.five {
+  grid-template-columns: repeat(5, 1fr);
+}

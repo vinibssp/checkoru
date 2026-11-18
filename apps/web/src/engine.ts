@@ -6,6 +6,8 @@ import { terminalScore, turnAt } from './analysis';
 export interface SearchOptions {
   depth?: number;
   movetime?: number;
+  /** Força do Stockfish de 0 a 20 (padrão 20, a máxima). Usado pelos bots. */
+  skill?: number;
   /** Chamado a cada atualização (para mostrar a avaliação subindo de profundidade). */
   onInfo?: (ev: PositionEval) => void;
 }
@@ -100,6 +102,7 @@ class Engine {
     this.last = { score: { cp: 0 }, pv: [], depth: 0 };
     // Profundidade e tempo juntos: para no que vier primeiro (protege celulares lentos).
     const go = `go depth ${job.opts.depth ?? 14}${job.opts.movetime ? ` movetime ${job.opts.movetime}` : ''}`;
+    this.worker.postMessage(`setoption name Skill Level value ${Math.max(0, Math.min(20, job.opts.skill ?? 20))}`);
     this.worker.postMessage(`position fen ${job.fen}`);
     this.worker.postMessage(go);
   }

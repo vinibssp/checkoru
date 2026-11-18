@@ -51,10 +51,10 @@ export function Play() {
             <span className="choice-title">No mesmo aparelho</span>
             <span className="choice-sub">duas pessoas, um celular · sem internet</span>
           </a>
-          <div className="choice disabled" aria-disabled="true">
-            <span className="choice-title">A Oru (computador)</span>
-            <span className="choice-sub">chegando na próxima versão</span>
-          </div>
+          <a className="choice" href="#/bots">
+            <span className="choice-title">A Oru e os bichos da mata</span>
+            <span className="choice-sub">computador, 6 níveis · sem internet</span>
+          </a>
         </div>
 
         <h2 className="h2">Ritmo</h2>

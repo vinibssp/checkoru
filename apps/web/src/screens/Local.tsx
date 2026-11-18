@@ -8,6 +8,8 @@ import { formatClock } from '../notation';
 import { play, type SoundEvent } from '../sound';
 import { useStore } from '../store';
 import { MoveList, PromotionPicker } from './Game';
+import { botMove, BOTS, markDefeated, type Bot } from '../bots';
+import { engine } from '../engine';
 import { gameFromUcis } from '../analysis';
 import { openAnalysis } from '../currentAnalysis';
 
@@ -60,8 +62,17 @@ function LocalSetup({ onStart }: { onStart: (tc: Tc) => void }) {
   );
 }
 
-function LocalBoard({ tc, onNew }: { tc: Tc; onNew: () => void }) {
+export interface Versus {
+  bot: Bot;
+  /** Cor de quem joga contra o bot. */
+  you: Color;
+}
+
+/** Partida sem servidor: duas pessoas no mesmo aparelho, ou você contra um bot. */
+export function LocalBoard({ tc, onNew, vs }: { tc: Tc; onNew: () => void; vs?: Versus }) {
   const { prefs } = useStore();
+  const [thinking, setThinking] = useState(false);
+  const [hint, setHint] = useState<string | null>(null);
   const timed = tc !== 'livre';
   const initial = timed ? TIME_CONTROLS[tc].initialMs : 0;
   const inc = timed ? TIME_CONTROLS[tc].incrementMs : 0;
@@ -107,6 +118,7 @@ function LocalBoard({ tc, onNew }: { tc: Tc; onNew: () => void }) {
         board.current?.set({ fen: g.fen });
         return;
       }
+      setHint(null);
       play(prefs.sounds, r.end ? 'end' : soundFor(r.move.san));
       setClock((c) => {
         if (!timed) return c;
@@ -116,11 +128,47 @@ function LocalBoard({ tc, onNew }: { tc: Tc; onNew: () => void }) {
         next.since = r.end ? null : g.ply >= 2 ? at : null;
         return next;
       });
-      if (r.end) setEnd(r.end);
+      if (r.end) {
+        setEnd(r.end);
+        if (vs && r.end.result === (vs.you === 'white' ? '1-0' : '0-1')) markDefeated(vs.bot.id);
+      }
       rerender();
     },
-    [g, inc, prefs.sounds, timed],
+    [g, inc, prefs.sounds, timed, vs],
   );
+
+  // Vez do bot.
+  const plyNow = g.ply;
+  useEffect(() => {
+    if (!vs || end || g.turn === vs.you) return;
+    let alive = true;
+    const at = plyNow;
+    setThinking(true);
+    botMove(g.fen, vs.bot)
+      .then((uci) => {
+        if (!alive || game.current.ply !== at || !uci) return;
+        playMove(uci);
+        window.setTimeout(() => board.current?.playPremove(), 50);
+      })
+      .catch(() => undefined)
+      .finally(() => alive && setThinking(false));
+    return () => {
+      alive = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [plyNow, end, vs]);
+
+  useEffect(() => () => engine.cancelAll(), []);
+
+  const askHint = async () => {
+    if (!vs || end || g.turn !== vs.you) return;
+    try {
+      const ev = await engine.analyse(g.fen, { depth: 12, movetime: 1500 });
+      if (ev.best && game.current.fen === g.fen) setHint(ev.best);
+    } catch {
+      /* sem dica */
+    }
+  };
 
   const onUserMove = useCallback(
     (orig: Key, dest: Key) => {
@@ -141,7 +189,15 @@ function LocalBoard({ tc, onNew }: { tc: Tc; onNew: () => void }) {
 
   const undo = () => {
     if (!g.ply || end) return;
-    const ucis = g.moves.slice(0, -1).map((m) => m.uci);
+    let ucis = g.moves.slice(0, -1).map((m) => m.uci);
+    if (vs) {
+      // Contra o bot, volta até ser a sua vez de novo (desfaz o seu lance e a resposta).
+      engine.cancelAll();
+      ucis = g.moves.map((m) => m.uci);
+      do ucis.pop();
+      while (ucis.length && (ucis.length % 2 === 0 ? 'white' : 'black') !== vs.you);
+      if ((ucis.length % 2 === 0 ? 'white' : 'black') !== vs.you) return;
+    }
     game.current = ChessGame.fromUciMoves(ucis);
     setClock((c) => ({ ...c, since: c.since === null ? null : Date.now() }));
     rerender();
@@ -154,14 +210,18 @@ function LocalBoard({ tc, onNew }: { tc: Tc; onNew: () => void }) {
     play(prefs.sounds, 'end');
   };
 
+  const names: Record<Color, string> = vs
+    ? { white: vs.you === 'white' ? 'Você' : vs.bot.name, black: vs.you === 'black' ? 'Você' : vs.bot.name }
+    : { white: 'Brancas', black: 'Pretas' };
+
   const pgn = () =>
     toPgn(
       {
-        event: 'Partida no mesmo aparelho',
+        event: vs ? `Contra ${vs.bot.art} ${vs.bot.name}` : 'Partida no mesmo aparelho',
         site: 'Checkoru',
         date: new Date(),
-        white: 'Brancas',
-        black: 'Pretas',
+        white: names.white,
+        black: names.black,
         result: end?.result ?? '*',
         timeControl: timed ? `${initial / 1000}+${inc / 1000}` : '-',
       },
@@ -177,17 +237,31 @@ function LocalBoard({ tc, onNew }: { tc: Tc; onNew: () => void }) {
     URL.revokeObjectURL(url);
   };
 
-  const orientation: Color = flip ? turn : 'white';
+  const orientation: Color = vs ? vs.you : flip ? turn : 'white';
   const top = opposite(orientation);
   const last = g.moves[g.moves.length - 1];
-  const winner = end?.result === '1-0' ? 'Brancas vencem' : end?.result === '0-1' ? 'Pretas vencem' : 'Empate';
+  const youWon = vs && end?.result === (vs.you === 'white' ? '1-0' : '0-1');
+  const draw = end?.result === '1/2-1/2';
+  const winner = vs
+    ? youWon
+      ? 'Vitória!'
+      : draw
+        ? 'Empate'
+        : 'Derrota'
+    : end?.result === '1-0'
+      ? 'Brancas vencem'
+      : end?.result === '0-1'
+        ? 'Pretas vencem'
+        : 'Empate';
+  const nextBot = vs && youWon ? BOTS[BOTS.findIndex((b) => b.id === vs.bot.id) + 1] : undefined;
+  const sideName = (c: Color) => (vs ? (c === vs.you ? 'Você' : `${vs.bot.name} · ~${vs.bot.elo}`) : undefined);
 
   return (
     <div className="page game-page">
-      <TopBar title="No mesmo aparelho" sub={timed ? TIME_CONTROLS[tc].label : 'sem relógio'} back={onNew} />
+      <TopBar title={vs ? `Contra ${vs.bot.art} ${vs.bot.name}` : 'No mesmo aparelho'} sub={timed ? TIME_CONTROLS[tc].label : 'sem relógio'} back={onNew} />
       <MoveList moves={g.moves} />
       <div className="game-body">
-        <SideBar color={top} ms={left(top)} timed={timed} active={!end && turn === top} />
+        <SideBar color={top} ms={left(top)} timed={timed} active={!end && turn === top} name={sideName(top)} status={thinking && top !== vs?.you ? 'pensando…' : undefined} />
         <div className="board-zone">
         <Board
           onReady={(api) => (board.current = api)}
@@ -198,11 +272,18 @@ function LocalBoard({ tc, onNew }: { tc: Tc; onNew: () => void }) {
             lastMove: last ? ([last.uci.slice(0, 2), last.uci.slice(2, 4)] as Key[]) : undefined,
             check: last?.san.includes('+') || last?.san.includes('#') ? turn : false,
             viewOnly: !!end,
-            movable: { free: false, color: end ? undefined : turn, dests: g.legalDests() as Map<Key, Key[]>, events: { after: onUserMove } },
+            movable: {
+              free: false,
+              color: end ? undefined : vs ? vs.you : turn,
+              dests: !vs || turn === vs.you ? (g.legalDests() as Map<Key, Key[]>) : new Map(),
+              events: { after: onUserMove },
+            },
+            premovable: { enabled: !!vs },
+            drawable: { autoShapes: hint ? [{ orig: hint.slice(0, 2) as Key, dest: hint.slice(2, 4) as Key, brush: 'green' }] : [] },
           }}
         />
         </div>
-        <SideBar color={orientation} ms={left(orientation)} timed={timed} active={!end && turn === orientation} />
+        <SideBar color={orientation} ms={left(orientation)} timed={timed} active={!end && turn === orientation} name={sideName(orientation)} />
       </div>
 
       <div className="game-bottom">
@@ -214,10 +295,11 @@ function LocalBoard({ tc, onNew }: { tc: Tc; onNew: () => void }) {
                 <path d="M6 6l12 12M18 6L6 18" />
               </svg>
             </button>
-            <Oru mood="feliz" size={64} face="var(--surface)" />
+            <Oru mood={vs && !youWon && !draw ? 'triste' : 'feliz'} size={64} face="var(--surface)" />
             <div>
               <h2 className="h1">{winner}</h2>
               <p className="muted">{END_REASON_LABEL[end.reason]}</p>
+              {youWon && <p className="ok">{nextBot ? `Agora dá para jogar contra: ${nextBot.name}.` : 'Você venceu o maior bicho da mata!'}</p>}
             </div>
             <div className="end-actions">
               <button className="btn primary" onClick={onNew}>
@@ -229,9 +311,9 @@ function LocalBoard({ tc, onNew }: { tc: Tc; onNew: () => void }) {
                   openAnalysis({
                     game: gameFromUcis(
                       g.moves.map((m) => m.uci),
-                      { source: 'No mesmo aparelho', result: end.result },
+                      { source: vs ? `Contra ${vs.bot.art} ${vs.bot.name}` : 'No mesmo aparelho', result: end.result, white: names.white, black: names.black },
                     ),
-                    you: null,
+                    you: vs ? vs.you : null,
                   })
                 }
               >
@@ -246,12 +328,20 @@ function LocalBoard({ tc, onNew }: { tc: Tc; onNew: () => void }) {
         </div>
 
         <div className="actions">
-          <button className={`btn icon-text ${flip ? 'on' : ''}`} onClick={() => setFlip((f) => !f)} aria-pressed={flip} title="Virar o tabuleiro a cada lance">
-            <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M7 4v13M7 17l-3-3M7 17l3-3M17 20V7M17 7l-3 3M17 7l3 3" />
-            </svg>
-            Virar
-          </button>
+          {vs ? (
+            !end && (
+              <button className="btn" onClick={() => void askHint()} disabled={thinking || turn !== vs.you}>
+                Dica
+              </button>
+            )
+          ) : (
+            <button className={`btn icon-text ${flip ? 'on' : ''}`} onClick={() => setFlip((f) => !f)} aria-pressed={flip} title="Virar o tabuleiro a cada lance">
+              <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M7 4v13M7 17l-3-3M7 17l3-3M17 20V7M17 7l-3 3M17 7l3 3" />
+              </svg>
+              Virar
+            </button>
+          )}
           {end ? (
             <>
               {!endOpen && (
@@ -265,7 +355,7 @@ function LocalBoard({ tc, onNew }: { tc: Tc; onNew: () => void }) {
             </>
           ) : (
             <>
-              <button className="btn" onClick={undo} disabled={!g.ply}>
+              <button className="btn" onClick={undo} disabled={!g.ply || (!!vs && g.ply < (vs.you === 'white' ? 1 : 2))}>
                 Desfazer
               </button>
               <button className="btn" onClick={resign}>
@@ -297,14 +387,14 @@ function isPawnAt(fen: string, square: string): boolean {
   return false;
 }
 
-function SideBar({ color, ms, timed, active }: { color: Color; ms: number; timed: boolean; active: boolean }) {
+function SideBar({ color, ms, timed, active, name, status }: { color: Color; ms: number; timed: boolean; active: boolean; name?: string; status?: string }) {
   const low = timed && active && ms < 10_000;
   return (
     <div className="player-bar">
       <div className="player-id">
         <span className={`dot ${color}`} style={{ width: 22, height: 22 }} />
-        <p className="player-name">{color === 'white' ? 'Brancas' : 'Pretas'}</p>
-        {active && <span className="player-status">joga agora</span>}
+        <p className="player-name">{name ?? (color === 'white' ? 'Brancas' : 'Pretas')}</p>
+        {(status || active) && <span className="player-status">{status ?? 'joga agora'}</span>}
       </div>
       {timed && <span className={`clock ${active ? 'active' : ''} ${low ? 'low' : ''}`}>{formatClock(ms)}</span>}
     </div>

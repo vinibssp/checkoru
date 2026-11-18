@@ -43,9 +43,13 @@ export function Home() {
             <p className="banner">
               <span>Modo de teste: sem conta e sem servidor. Dá para jogar no mesmo aparelho e mexer em temas e peças.</span>
             </p>
-            <a className="card play-card" href="#/local">
-              <span className="play-card-title">Jogar no mesmo aparelho</span>
-              <span className="play-card-sub">duas pessoas · sem internet</span>
+            <a className="card play-card" href="#/bots">
+              <span className="play-card-title">Jogar contra a Oru</span>
+              <span className="play-card-sub">6 níveis · sem internet</span>
+            </a>
+            <a className="card link-card" href="#/local">
+              <span className="choice-title">Jogar no mesmo aparelho</span>
+              <span className="choice-sub">duas pessoas, um celular</span>
             </a>
           </>
         ) : (

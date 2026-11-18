@@ -23,7 +23,8 @@ Site e app Android, de código aberto e sem anúncios.
 | Personalização: fundo (cores ou sua foto), tabuleiro (temas ou cores livres), peças, sons | pronto |
 | Análise com Stockfish no aparelho: avaliação, melhor lance, resumo com precisão e revisão dos erros | pronto |
 | Importar partidas: PGN/FEN, arquivo, Lichess, Chess.com e o próprio histórico | pronto |
-| Puzzles, aulas, jogos famosos, jogar contra a Oru | depois |
+| Jogar contra a Oru: 6 bots (~400 a ~2800), dica, desfazer, sem internet | pronto |
+| Puzzles, aulas, jogos famosos | depois |
 
 ## Como rodar na sua máquina
 

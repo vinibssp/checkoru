@@ -64,15 +64,21 @@ Mudança no banco = novo arquivo `000N_descricao.sql` na pasta `migrations`. Nun
   nativo; no site, o Chess.com passa por `/api/chesscom/...` (repasse só-leitura com cache), porque nem sempre
   libera acesso direto do navegador.
 
+## Bots
+
+`src/bots.ts`: seis bichos da mata, do Tatu (~400) ao Jacurutu (~2800). Todos usam o mesmo Stockfish do aparelho
+com força reduzida (`Skill Level`, profundidade e tempo). Os mais fracos às vezes jogam um lance qualquer, e o
+Sagui prefere capturas, para errar como gente. Vencer um libera o próximo (guardado no aparelho; no APK de teste,
+todos vêm liberados). A força em Elo é aproximada.
+
 ## Custos e limites
 
 O plano gratuito da Cloudflare dá 100 mil requisições por dia (mensagens de WebSocket contam 1 a cada 20) e 5 GB no D1. As salas hibernam entre lances, então partidas paradas não gastam CPU. A análise com motor vai rodar no aparelho (Stockfish em WebAssembly), sem custo de servidor.
 
 ## Próximos passos
 
-1. Jogar contra a Oru (motor com níveis, usando o mesmo Stockfish).
-2. Importar partida a partir de uma foto do tabuleiro.
-3. Puzzles (banco aberto do Lichess, CC0) e corrida de puzzles.
-4. Aulas e jogos famosos comentados.
-5. Revanche, amigos e bloqueio pelo app.
-6. Anti-trapaça: análise das partidas suspeitas em lote, pelo GitHub Actions.
+1. Puzzles (banco aberto do Lichess, CC0) e corrida de puzzles.
+2. Aulas e jogos famosos comentados.
+3. Importar partida a partir de uma foto do tabuleiro.
+4. Revanche, amigos e bloqueio pelo app.
+5. Anti-trapaça: análise das partidas suspeitas em lote, pelo GitHub Actions.

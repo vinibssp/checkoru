@@ -7,6 +7,7 @@ import { Game } from './screens/Game';
 import { Home } from './screens/Home';
 import { Legal } from './screens/Legal';
 import { Analysis } from './screens/Analysis';
+import { Bots } from './screens/Bots';
 import { Analyze } from './screens/Analyze';
 import { Local } from './screens/Local';
 import { LoginReturn } from './screens/LoginReturn';
@@ -54,6 +55,8 @@ export function App() {
       return <Home />;
     case 'jogar':
       return <Play key={route.query.toString()} />;
+    case 'bots':
+      return <Bots />;
     case 'analisar':
       return <Analyze />;
     case 'analise':
