@@ -108,6 +108,26 @@ export const THEMES: Record<string, AppTheme> = {
       '--board-frame': '0 3px 14px rgba(0,0,0,0.45)',
     },
   },
+  contraste: {
+    name: 'Alto contraste',
+    desc: 'preto, branco e amarelo, para enxergar melhor',
+    style: 'tradicional',
+    dark: true,
+    pieces: 'classicas',
+    sounds: 'madeira',
+    board: { name: 'Alto contraste', light: '#FFFFFF', dark: '#3D6FB6', frame: '#FFFFFF', hlLight: '#FFE14D', hlDark: '#FFC400' },
+    vars: {
+      ...CLASSIC_TEXT,
+      '--bg': '#000000', '--surface': '#111111', '--ink': '#FFFFFF', '--sub': '#E6E6E6', '--rule': '#FFFFFF',
+      '--accent': '#FFE14D', '--on-accent': '#000000', '--accent2': '#7CC4FF', '--accent3': '#FFFFFF', '--score': '#FFE14D',
+      '--clock-on': '#FFE14D', '--clock-on-ink': '#000000', '--nav': '#000000', '--danger': '#FF8A80',
+      '--owl-body': '#FFFFFF', '--owl-face': '#000000',
+      '--font-display': INTER, '--font-ui': INTER, '--font-digits': INTER,
+      '--btn-border': '2px solid #FFFFFF', '--btn-radius': '8px', '--btn-shadow': 'none',
+      '--card-border': '2px solid #FFFFFF', '--card-radius': '10px', '--card-shadow': 'none',
+      '--board-frame': '0 0 0 3px #FFFFFF',
+    },
+  },
   fliperama: {
     name: 'Fliperama',
     desc: 'neon de noite',
@@ -278,6 +298,14 @@ export const THEMES: Record<string, AppTheme> = {
  * Só troca cores; fontes e formatos continuam os do tema.
  */
 export const THEME_ALT: Record<string, Record<string, string>> = {
+  contraste: {
+    '--bg': '#FFFFFF', '--surface': '#FFFFFF', '--ink': '#000000', '--sub': '#1F1F1F', '--rule': '#000000',
+    '--accent': '#0033CC', '--on-accent': '#FFFFFF', '--accent2': '#00661F', '--accent3': '#000000', '--score': '#0033CC',
+    '--clock-on': '#000000', '--clock-on-ink': '#FFFFFF', '--nav': '#FFFFFF', '--danger': '#B00020',
+    '--owl-body': '#000000', '--owl-face': '#FFFFFF',
+    '--btn-border': '2px solid #000000', '--card-border': '2px solid #000000',
+    '--board-frame': '0 0 0 3px #000000',
+  },
   classico: {
     '--bg': '#211B16', '--surface': '#2E2620', '--ink': '#F1E8DA', '--sub': '#BFAF9B', '--rule': '#43382E',
     '--accent': '#C8955E', '--on-accent': '#211B16', '--accent2': '#6FB28A', '--accent3': '#D9A845', '--score': '#D9A845',
@@ -430,6 +458,8 @@ export interface Prefs {
   confirmResign: boolean;
   /** Claro ou escuro: o do tema, um fixo, ou seguir o celular. */
   mode: ModeId;
+  /** Modo leve, para celular simples: sem efeitos de tela e análise mais curta. */
+  lite: boolean;
 }
 
 export const DEFAULT_PREFS: Prefs = {
@@ -445,6 +475,7 @@ export const DEFAULT_PREFS: Prefs = {
   animation: true,
   confirmResign: true,
   mode: 'tema',
+  lite: false,
 };
 
 /** Aceita qualquer coisa vinda do servidor ou do armazenamento e devolve preferências válidas. */
@@ -465,6 +496,7 @@ export function sanitizePrefs(raw: unknown): Prefs {
     animation: bool(r.animation, DEFAULT_PREFS.animation),
     confirmResign: bool(r.confirmResign, DEFAULT_PREFS.confirmResign),
     mode: typeof r.mode === 'string' && r.mode in MODES ? (r.mode as ModeId) : DEFAULT_PREFS.mode,
+    lite: bool(r.lite, DEFAULT_PREFS.lite),
   };
 }
 
@@ -497,6 +529,7 @@ export function cssVars(prefs: Prefs, systemDark = false): Record<string, string
   const b = boardColors(prefs);
   return {
     ...themeVars(prefs.theme, isDark(prefs, systemDark)),
+    ...(prefs.lite ? { '--overlay': 'none', '--glow': 'none' } : {}),
     '--sq-light': b.light,
     '--sq-dark': b.dark,
     '--sq-hl-light': b.hlLight,

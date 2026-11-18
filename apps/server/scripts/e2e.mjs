@@ -169,6 +169,11 @@ await joiner.opened;
 const jsnap = await joiner.next((m) => m.t === 'snapshot');
 assert(jsnap.game.status === 'playing' && jsnap.you !== null, 'convidada entra na partida');
 
+// Partida tranquila (sem relógio).
+const calm = await call('/api/challenges', { token: ana.token, method: 'POST', body: { tc: '3+2', untimed: true } });
+const calmSnap = await call(`/api/games/${calm.gameId}`);
+assert(calmSnap.untimed === true, 'partida tranquila marcada como sem relógio');
+
 // ---------- Bloqueio ----------
 await call(`/api/blocks/${ana.id}`, { token: bia.token, method: 'PUT' });
 const blockedRes = await fetch(`${API}/api/challenges`, {

@@ -197,7 +197,7 @@ async function route(request: Request, env: Env): Promise<Response> {
 
   if (path === '/api/challenges' && method === 'POST') {
     if (!user.username) return json({ error: 'Escolha um nome de usuário primeiro' }, 403);
-    const body = await readJson<{ tc?: string; color?: string; to?: string }>(request);
+    const body = await readJson<{ tc?: string; color?: string; to?: string; untimed?: boolean }>(request);
     if (!isTimeControlId(body?.tc)) return json({ error: 'Ritmo inválido' }, 400);
     const color: Color = body?.color === 'white' || body?.color === 'black' ? body.color : Math.random() < 0.5 ? 'white' : 'black';
     // Desafio direto: só a pessoa convidada entra, e ela vê o convite no app.
@@ -213,8 +213,9 @@ async function route(request: Request, env: Env): Promise<Response> {
       color,
       creator: { id: user.id, username: user.username, avatar: user.avatar, rating: ratings[TIME_CONTROLS[body.tc].category] },
       invited,
+      untimed: body.untimed === true,
     });
-    if (invited) await createDirectChallenge(env.DB, gameId, user.id, invited.id, body.tc);
+    if (invited) await createDirectChallenge(env.DB, gameId, user.id, invited.id, body.untimed === true ? 'livre' : body.tc);
     return json({ gameId, url: `${env.WEB_ORIGIN}/#/partida/${gameId}` });
   }
 

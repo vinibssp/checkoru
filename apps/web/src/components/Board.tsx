@@ -20,7 +20,7 @@ export function Board({ config, onReady }: { config: Config; onReady?: (api: Api
     // (só sobrescreve se precisar: o chessground copia até chaves undefined por cima do estado)
     ...(locked ? { premovable: { enabled: false } } : {}),
     coordinates: prefs.coords,
-    animation: { enabled: prefs.animation, duration: 180 },
+    animation: { enabled: prefs.animation && !prefs.lite, duration: 180 },
     movable: locked ? { ...config.movable, color: undefined, dests: new Map(), showDests: prefs.showDests } : { ...config.movable, showDests: prefs.showDests },
     highlight: { lastMove: true, check: true },
     draggable: { showGhost: true },

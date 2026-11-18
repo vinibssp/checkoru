@@ -160,4 +160,16 @@ describe('RoomCore', () => {
     expect(room.state.end?.reason).toBe('aborted');
     expect(fx.finished).toBe(false);
   });
+
+  it('partida tranquila: o relógio não anda e ninguém perde por tempo', () => {
+    const room = RoomCore.createChallenge('g5', '3+2', p('ana'), 'white', 0, null, true);
+    room.join(p('bia'), 0);
+    room.handle('white', { t: 'move', uci: 'e2e4', ply: 0 }, 1_000);
+    room.handle('black', { t: 'move', uci: 'e7e5', ply: 1 }, 2_000);
+    room.handle('white', { t: 'move', uci: 'g1f3', ply: 2 }, 10 * 60_000);
+    room.tick(60 * 60_000);
+    expect(room.state.status).toBe('playing');
+    expect(room.snapshot(60 * 60_000).untimed).toBe(true);
+    expect(room.nextDeadline()).toBeNull();
+  });
 });

@@ -7,6 +7,7 @@ import type { DrawShape } from '@lichess-org/chessground/draw';
 import { Board, type BoardApi, type Key } from '../components/Board';
 import { dailyNumber, dailyState, marksText, recordDaily, share, shareText } from '../daily';
 import { addCards, reviewStats, type Card } from '../srs';
+import { count } from '../wellbeing';
 import { Oru, type Mood } from '../components/Oru';
 import { Page, TopBar } from '../components/Shell';
 import { openAnalysis } from '../currentAnalysis';
@@ -381,6 +382,7 @@ export function PuzzleScreen() {
   const p = usePuzzle(puzzle, {
     onFirstResult: (won) => {
       if (!puzzle) return;
+      count('puzzles');
       const r = updateRating(profile, puzzle.rating, won);
       const next = { ...r.profile, seen: [...r.profile.seen, puzzle.id] };
       saveProfile(next);

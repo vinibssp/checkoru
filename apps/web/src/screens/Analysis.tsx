@@ -86,7 +86,7 @@ function AnalysisBoard({ game, you, startPly }: { game: import('../analysis').An
       const out: (PositionEval | undefined)[] = [];
       for (let i = 0; i <= total && !stop; i++) {
         try {
-          out[i] = await engine.analyse(fenAt(game, i), { depth: REVIEW_DEPTH, movetime: REVIEW_MS });
+          out[i] = await engine.analyse(fenAt(game, i), prefs.lite ? { depth: 8, movetime: 600 } : { depth: REVIEW_DEPTH, movetime: REVIEW_MS });
           setEvals([...out]);
         } catch (e) {
           if (e instanceof CancelledError) return;
@@ -149,7 +149,7 @@ function AnalysisBoard({ game, you, startPly }: { game: import('../analysis').An
     let alive = true;
     engine.cancelAll();
     engine
-      .analyse(fen, { depth: LIVE_DEPTH, movetime: 8000, onInfo: (ev) => alive && ev.depth >= 8 && setLive(ev) })
+      .analyse(fen, { depth: prefs.lite ? 12 : LIVE_DEPTH, movetime: prefs.lite ? 3000 : 8000, onInfo: (ev) => alive && ev.depth >= 8 && setLive(ev) })
       .then((ev) => alive && setLive(ev))
       .catch(() => undefined);
     return () => {

@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { api, wsTicket, WS_URL } from '../api';
 import { Oru } from '../components/Oru';
 import { Page, TopBar } from '../components/Shell';
+import { useFamily } from '../components/Wellbeing';
 import { navigate, useRoute } from '../router';
 import { useStore } from '../store';
 
@@ -13,8 +14,11 @@ export function Play() {
   const { me, guest } = useStore();
   const initialTc = query.get('tc');
   const [tc, setTc] = useState<TimeControlId>(isTimeControlId(initialTc) ? initialTc : '10+0');
-  const [mode, setMode] = useState<Mode>('online');
+  const family = useFamily();
+  const strangersOff = family.on && family.friendsOnly;
+  const [mode, setMode] = useState<Mode>(strangersOff ? 'amigo' : 'online');
   const [color, setColor] = useState<'random' | 'white' | 'black'>('random');
+  const [calm, setCalm] = useState(false);
   const [seeking, setSeeking] = useState(query.get('auto') === '1' && !guest);
   const [error, setError] = useState<string | null>(null);
 
@@ -23,7 +27,7 @@ export function Play() {
     if (guest) return setError('Para jogar online, entre com sua conta Google. No modo de teste, use "No mesmo aparelho".');
     if (mode === 'online') return setSeeking(true);
     try {
-      const { gameId } = await api<{ gameId: string }>('/api/challenges', { method: 'POST', body: { tc, color } });
+      const { gameId } = await api<{ gameId: string }>('/api/challenges', { method: 'POST', body: { tc, color, untimed: calm } });
       navigate(`/partida/${gameId}`);
     } catch (e) {
       setError((e as Error).message);
@@ -39,10 +43,12 @@ export function Play() {
       <div className="pad">
         <h2 className="h2">Contra quem</h2>
         <div className="choice-list">
-          <button className={`choice ${mode === 'online' ? 'on' : ''}`} onClick={() => setMode('online')} aria-pressed={mode === 'online'}>
-            <span className="choice-title">Alguém online</span>
-            <span className="choice-sub">do seu nível · valendo rating</span>
-          </button>
+          {!strangersOff && (
+            <button className={`choice ${mode === 'online' ? 'on' : ''}`} onClick={() => setMode('online')} aria-pressed={mode === 'online'}>
+              <span className="choice-title">Alguém online</span>
+              <span className="choice-sub">do seu nível · valendo rating</span>
+            </button>
+          )}
           <button className={`choice ${mode === 'amigo' ? 'on' : ''}`} onClick={() => setMode('amigo')} aria-pressed={mode === 'amigo'}>
             <span className="choice-title">Um amigo</span>
             <span className="choice-sub">por link · sem rating</span>
@@ -77,6 +83,13 @@ export function Play() {
                 </button>
               ))}
             </div>
+            <label className="switch">
+              <span>
+                Partida tranquila
+                <span className="muted small"> · sem relógio, cada um no seu tempo</span>
+              </span>
+              <input type="checkbox" checked={calm} onChange={(e) => setCalm(e.target.checked)} />
+            </label>
           </>
         )}
 

@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Oru } from './components/Oru';
 import { themeChosen, ThemeIntro } from './components/ThemePicker';
+import { FamilyGate, useUsageTracker } from './components/Wellbeing';
+import { FamilyScreen } from './screens/Family';
 import { navigate, useRoute } from './router';
 import { CreateAccount } from './screens/CreateAccount';
 import { Customize } from './screens/Customize';
@@ -26,6 +28,15 @@ import { useStore } from './store';
 const AFTER_LOGIN_KEY = 'checkoru.depoisDoLogin';
 
 export function App() {
+  useUsageTracker();
+  return (
+    <FamilyGate>
+      <Routes />
+    </FamilyGate>
+  );
+}
+
+function Routes() {
   const route = useRoute();
   const { me } = useStore();
   const [section, arg] = route.parts;
@@ -101,6 +112,8 @@ export function App() {
       return <Memory />;
     case 'amigos':
       return <Friends />;
+    case 'familia':
+      return <FamilyScreen />;
     case 'bloqueados':
       return <Blocked />;
     case 'jogador':

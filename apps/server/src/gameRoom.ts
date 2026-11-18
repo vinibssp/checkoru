@@ -40,9 +40,10 @@ export class GameRoom extends DurableObject<Env> {
     creator: SeatPlayer;
     color: Color;
     invited?: { id: string; username: string } | null;
+    untimed?: boolean;
   }): Promise<void> {
     if (this.core) return;
-    this.core = RoomCore.createChallenge(params.id, params.tc, params.creator, params.color, Date.now(), params.invited ?? null);
+    this.core = RoomCore.createChallenge(params.id, params.tc, params.creator, params.color, Date.now(), params.invited ?? null, !!params.untimed);
     await this.persist();
   }
 

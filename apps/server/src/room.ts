@@ -60,6 +60,8 @@ export interface RoomState {
   disconnectedSince: { white: number | null; black: number | null };
   end: EndView | null;
   ratingsAfter: { white: Rating; black: Rating } | null;
+  /** Partida tranquila: o relógio nunca anda. */
+  untimed?: boolean;
   /** Desafio direto: só esta pessoa pode entrar. */
   invitedId?: string | null;
   invitedName?: string | null;
@@ -109,12 +111,14 @@ export class RoomCore {
     color: Color,
     now: number,
     invited: { id: string; username: string } | null = null,
+    untimed = false,
   ): RoomCore {
     const core = new RoomCore(RoomCore.blank(id, tc, false, now));
     core.state[color] = creator;
     core.state.creatorId = creator.id;
     core.state.invitedId = invited?.id ?? null;
     core.state.invitedName = invited?.username ?? null;
+    core.state.untimed = untimed;
     return core;
   }
 
@@ -294,6 +298,7 @@ export class RoomCore {
       rematchBy: s.rematchBy ?? null,
       rematchId: s.rematchId ?? null,
       invited: s.invitedName ?? null,
+      untimed: !!s.untimed,
     };
   }
 
@@ -310,7 +315,9 @@ export class RoomCore {
 
     const tc = TIME_CONTROLS[s.tc];
     const newPly = this.game.ply;
-    if (newPly === 2) s.clock = startClock(s.clock, 'white', now);
+    if (s.untimed) {
+      /* partida tranquila: sem relógio */
+    } else if (newPly === 2) s.clock = startClock(s.clock, 'white', now);
     else if (newPly > 2) s.clock = pressClock(s.clock, color, now, tc.incrementMs, lagMs);
     s.moves.push(attempt.move.uci);
     s.moveClocks.push(s.clock[color]);

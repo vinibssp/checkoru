@@ -9,6 +9,8 @@ import { endSound, moveSound, play } from '../sound';
 import { useStore } from '../store';
 import { MoveList, PromotionPicker } from './Game';
 import { botMove, BOTS, markDefeated, type Bot } from '../bots';
+import { BreakSuggestion } from '../components/Wellbeing';
+import { count, recordGame } from '../wellbeing';
 import { engine } from '../engine';
 import { gameFromUcis } from '../analysis';
 import { openAnalysis } from '../currentAnalysis';
@@ -257,7 +259,17 @@ export function LocalBoard({ tc, onNew, vs }: { tc: Tc; onNew: () => void; vs?: 
   const orientation: Color = vs ? vs.you : flip ? turn : 'white';
   const top = opposite(orientation);
   const last = g.moves[g.moves.length - 1];
+  // Fim de partida: conta para o relatório e para a sugestão de pausa.
+  const counted = useRef(false);
+  useEffect(() => {
+    if (!end || counted.current) return;
+    counted.current = true;
+    if (!vs) return count('partidas');
+    const won = end.result === (vs.you === 'white' ? '1-0' : '0-1');
+    recordGame(won ? 'vitoria' : end.result === '1/2-1/2' || end.result === '*' ? 'empate' : 'derrota');
+  }, [end, vs]);
   const youWon = vs && end?.result === (vs.you === 'white' ? '1-0' : '0-1');
+  const youLost = vs && end && end.result === (vs.you === 'white' ? '0-1' : '1-0');
   const draw = end?.result === '1/2-1/2';
   const winner = vs
     ? youWon
@@ -327,6 +339,7 @@ export function LocalBoard({ tc, onNew, vs }: { tc: Tc; onNew: () => void; vs?: 
               <h2 className="h1">{winner}</h2>
               <p className="muted">{END_REASON_LABEL[end.reason]}</p>
               {youWon && <p className="ok">{nextBot ? `Agora dá para jogar contra: ${nextBot.name}.` : 'Você venceu o maior bicho da mata!'}</p>}
+              {youLost && <BreakSuggestion />}
             </div>
             <div className="end-actions">
               <button className="btn primary" onClick={onNew}>

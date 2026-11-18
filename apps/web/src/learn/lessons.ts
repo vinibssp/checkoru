@@ -642,5 +642,6 @@ export function saveDoneLessons(ids: string[], sync = true): void {
 }
 
 export function markLessonDone(id: string): void {
+  if (!doneLessons().has(id)) void import('../wellbeing').then((w) => w.count('aulas'));
   saveDoneLessons([...doneLessons(), id]);
 }

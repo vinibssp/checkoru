@@ -176,6 +176,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     root.dataset.theme = prefs.theme;
     root.dataset.estilo = themeOf(prefs).style;
     root.dataset.modo = isDark(prefs, systemDark) ? 'escuro' : 'claro';
+    if (prefs.lite) root.dataset.leve = '1';
+    else delete root.dataset.leve;
     root.style.colorScheme = isDark(prefs, systemDark) ? 'dark' : 'light';
     document.querySelector('meta[name="theme-color"]')?.setAttribute('content', vars['--bg']!);
     let style = document.getElementById('piece-set') as HTMLStyleElement | null;

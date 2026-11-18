@@ -1146,3 +1146,69 @@ cg-board square.last-move {
   display: flex;
   align-items: center;
 }
+
+/* Modo leve: sem animações nem transições. */
+[data-leve] *,
+[data-leve] *::before,
+[data-leve] *::after {
+  animation: none !important;
+  transition: none !important;
+}
+
+/* ---------- Jogo saudável e modo família ---------- */
+
+.break-banner {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+}
+
+.break-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.pin-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 10px 0;
+}
+
+.pin-field input {
+  min-height: 48px;
+  max-width: 220px;
+  padding: 0 14px;
+  font: inherit;
+  font-size: 22px;
+  letter-spacing: 0.3em;
+  color: var(--ink);
+  background: var(--surface);
+  border: var(--card-border);
+  border-radius: var(--card-radius);
+}
+
+.family-gate .pin-field input {
+  margin: 0 auto;
+  text-align: center;
+}
+
+.family-list {
+  padding-left: 20px;
+  line-height: 1.5;
+}
+
+.family-limits {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.family-table td,
+.family-table th {
+  text-align: center;
+}
+
+.switch input {
+  flex: none;
+}

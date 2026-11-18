@@ -3,6 +3,7 @@ import { api, type GameListItem } from '../api';
 import { Oru } from '../components/Oru';
 import { Page } from '../components/Shell';
 import { ThemeButton } from '../components/ThemePicker';
+import { useFamily } from '../components/Wellbeing';
 import { useStore } from '../store';
 import { GameRow } from './Toca';
 import { IncomingChallenges } from './Friends';
@@ -21,6 +22,7 @@ export function Home() {
   const { me, guest } = useStore();
   const [games, setGames] = useState<GameListItem[] | null>(null);
   const daily = useMemo(() => dailyState(), []);
+  const family = useFamily();
   const review = useMemo(() => reviewStats(), []);
 
   useEffect(() => {
@@ -64,7 +66,7 @@ export function Home() {
             </a>
           </>
         ) : (
-          <a className="card play-card" href="#/jogar?tc=10%2B0&auto=1">
+          <a className="card play-card" href={family.on && family.friendsOnly ? '#/jogar' : '#/jogar?tc=10%2B0&auto=1'}>
             <span className="play-card-title">Jogar 10 min</span>
             <span className="play-card-sub">online · valendo rating</span>
           </a>

@@ -167,6 +167,7 @@ export function Customize() {
         {toggle('showDests', 'Mostrar lances possíveis')}
         {toggle('animation', 'Animar as peças')}
         {toggle('confirmResign', 'Confirmar antes de desistir')}
+        {toggle('lite', 'Modo leve (celular simples): sem efeitos de tela e análise mais rápida')}
       </div>
     </Page>
   );

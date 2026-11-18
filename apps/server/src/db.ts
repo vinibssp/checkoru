@@ -126,14 +126,14 @@ export async function saveFinishedGame(db: D1Database, state: RoomState, site: s
   const sans = ChessGame.fromUciMoves(state.moves).moves.map((m) => m.san);
   const pgn = toPgn(
     {
-      event: state.rated ? `Partida ${tc.label} valendo rating` : `Partida ${tc.label}`,
+      event: state.untimed ? 'Partida tranquila, sem relógio' : state.rated ? `Partida ${tc.label} valendo rating` : `Partida ${tc.label}`,
       site: `${site}/#/partida/${state.id}`,
       date: new Date(state.startedAt),
       white: state.white.username,
       black: state.black.username,
       whiteElo: state.white.rating.rating,
       blackElo: state.black.rating.rating,
-      timeControl: `${tc.initialMs / 1000}+${tc.incrementMs / 1000}`,
+      timeControl: state.untimed ? '-' : `${tc.initialMs / 1000}+${tc.incrementMs / 1000}`,
       result: state.end.result,
       termination: state.end.reason,
     },

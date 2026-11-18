@@ -51,6 +51,8 @@ export interface GameSnapshot {
   rematchId?: string | null;
   /** Desafio direto: nome de quem foi convidado. */
   invited?: string | null;
+  /** Partida tranquila, sem relógio (só em desafios entre amigos). */
+  untimed?: boolean;
 }
 
 // ---------- Fila (lobby) ----------

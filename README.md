@@ -32,6 +32,9 @@ Site e app Android, de código aberto e sem anúncios.
 | Revisão espaçada (SM-2) dos seus erros de partidas, puzzles e repertório | pronto |
 | Repertório de aberturas com nomes ECO e treino por repetição | pronto |
 | Visualização: coordenadas, memória de posição e jogo às cegas contra os bots | pronto |
+| Jogo saudável: partida tranquila sem relógio entre amigos e a Oru sugerindo pausa depois de derrotas seguidas | pronto |
+| Modo leve para celular simples e tema de alto contraste (claro e escuro) | pronto |
+| Modo família: PIN do responsável, limite de tempo por dia, sem chat, só amigos e relatório da semana | pronto |
 
 ## Como rodar na sua máquina
 

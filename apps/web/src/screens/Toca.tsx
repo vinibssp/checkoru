@@ -62,6 +62,10 @@ export function Toca() {
           </div>
         </div>
 
+        <a className="card link-card" href="#/familia">
+          <span className="choice-title">Modo família</span>
+          <span className="choice-sub">PIN, limite de tempo, sem chat e relatório</span>
+        </a>
         <a className="card link-card" href="#/amigos">
           <span className="choice-title">Amigos</span>
           <span className="choice-sub">seguir, desafiar e bloquear</span>

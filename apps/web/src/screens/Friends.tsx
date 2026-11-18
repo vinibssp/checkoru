@@ -78,7 +78,7 @@ export function IncomingChallenges() {
           <span className="challenge-text">
             <b>{c.from.username}</b> te desafiou
             <span className="muted small">
-              {c.tc} · {TIME_CONTROLS[c.tc as TimeControlId]?.category === 'blitz' ? 'blitz' : 'rápida'} · sem rating
+              {c.tc === 'livre' ? 'partida tranquila, sem relógio' : `${c.tc} · ${TIME_CONTROLS[c.tc as TimeControlId]?.category === 'blitz' ? 'blitz' : 'rápida'}`} · sem rating
             </span>
           </span>
           <span className="challenge-actions">
@@ -179,7 +179,7 @@ export function PlayerProfile({ username }: { username: string }) {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [challenge, setChallenge] = useState(query.get('desafiar') === '1');
-  const [tc, setTc] = useState<TimeControlId>('10+0');
+  const [tc, setTc] = useState<TimeControlId | 'livre'>('10+0');
   const [color, setColor] = useState<'random' | 'white' | 'black'>('random');
   const [confirmBlock, setConfirmBlock] = useState(false);
 
@@ -274,7 +274,11 @@ export function PlayerProfile({ username }: { username: string }) {
         {challenge && !self && !p.blocked && (
           <div className="card challenge-box">
             <h2 className="h2">Ritmo</h2>
-            <div className="tc-grid">
+            <div className="tc-grid five">
+              <button className={`tc ${tc === 'livre' ? 'on' : ''}`} onClick={() => setTc('livre')} aria-pressed={tc === 'livre'}>
+                <span className="tc-time">∞</span>
+                <span className="tc-name">Tranquila</span>
+              </button>
               {TIME_CONTROL_IDS.map((id) => (
                 <button key={id} className={`tc ${tc === id ? 'on' : ''}`} onClick={() => setTc(id)} aria-pressed={tc === id}>
                   <span className="tc-time">{id}</span>

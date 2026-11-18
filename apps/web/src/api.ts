@@ -122,7 +122,10 @@ export const social = {
   setFollow: (id: string, on: boolean) => api(`/api/follows/${id}`, { method: on ? 'PUT' : 'DELETE' }),
   setBlock: (id: string, on: boolean) => api(`/api/blocks/${id}`, { method: on ? 'PUT' : 'DELETE' }),
   challenge: (to: string, tc: string, color: string) =>
-    api<{ gameId: string }>('/api/challenges', { method: 'POST', body: { tc, to, color: color === 'random' ? undefined : color } }),
+    api<{ gameId: string }>('/api/challenges', {
+      method: 'POST',
+      body: { tc: tc === 'livre' ? '10+0' : tc, to, color: color === 'random' ? undefined : color, untimed: tc === 'livre' },
+    }),
   incoming: () => api<{ challenges: IncomingChallenge[] }>('/api/me/challenges').then((r) => r.challenges),
   answer: (id: string, accept: boolean) => api(`/api/challenges/${id}/${accept ? 'aceitar' : 'recusar'}`, { method: 'POST' }),
 };

@@ -5,6 +5,7 @@ import type { Puzzle } from '../puzzles';
 import { useRoute } from '../router';
 import { dueCards, gradeCard, qualityOf, removeCards, reviewStats, today, type Card, type CardKind } from '../srs';
 import { usePuzzle } from './Puzzles';
+import { count } from '../wellbeing';
 
 const KIND_LABEL: Record<CardKind, string> = { erro: 'erro de partida', puzzle: 'puzzle errado', abertura: 'repertório' };
 
@@ -53,6 +54,7 @@ export function Review() {
     if (!card || !p.state?.done || result) return;
     const q = qualityOf(track.current);
     const next = gradeCard(card.id, q);
+    count('revisoes');
     if (next) setResult({ q, next });
     setDone((d) => d + 1);
     // eslint-disable-next-line react-hooks/exhaustive-deps

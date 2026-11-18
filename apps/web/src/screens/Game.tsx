@@ -15,6 +15,8 @@ import { makeSan } from 'chessops/san';
 import { parseSquare, parseUci, type Color, type Role } from 'chessops';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { api, API_URL, getToken, wsTicket, WS_URL } from '../api';
+import { BreakSuggestion, useFamily } from '../components/Wellbeing';
+import { recordGame } from '../wellbeing';
 import { Board, type BoardApi, type Key } from '../components/Board';
 import { Avatar, Oru } from '../components/Oru';
 import { TopBar } from '../components/Shell';
@@ -55,6 +57,7 @@ export function Game({ id }: { id: string }) {
   const [view, setView] = useState<View | null>(null);
   const [chat, setChat] = useState<ChatLine[]>([]);
   const [chatOpen, setChatOpen] = useState(false);
+  const family = useFamily();
   const [notice, setNotice] = useState<string | null>(null);
   const [promo, setPromo] = useState<{ from: string; to: string } | null>(null);
   const [confirmResign, setConfirmResign] = useState(false);
@@ -143,10 +146,17 @@ export function Game({ id }: { id: string }) {
             };
           });
           break;
-        case 'end':
+        case 'end': {
+          // Conta para o relatório e para a sugestão de pausa.
+          const mine = viewRef.current?.you;
+          if (mine && msg.end.reason !== 'aborted') {
+            const won = msg.end.result === (mine === 'white' ? '1-0' : '0-1');
+            recordGame(won ? 'vitoria' : msg.end.result === '1/2-1/2' ? 'empate' : 'derrota');
+          }
           play(soundSet.current, endSound(msg.end.result, viewRef.current?.you ?? null));
           setView((v) => (v ? { ...v, clockAt: local, game: { ...v.game, status: 'ended', end: msg.end, clock: msg.clock, drawOfferBy: null } } : v));
           break;
+        }
         case 'draw-offer':
           setView((v) => (v ? { ...v, game: { ...v.game, drawOfferBy: msg.by } } : v));
           break;
@@ -292,7 +302,7 @@ export function Game({ id }: { id: string }) {
         back="/"
         right={
           you && playing ? (
-            <button className="icon-btn" aria-label="Chat" onClick={() => setChatOpen((o) => !o)}>
+            <button className="icon-btn" aria-label="Chat" hidden={family.on && family.noChat} onClick={() => setChatOpen((o) => !o)}>
               <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinejoin="round">
                 <path d="M4 5h16v11H9l-5 4z" />
               </svg>
@@ -310,6 +320,7 @@ export function Game({ id }: { id: string }) {
           active={game.clock.running === opp && playing}
           status={you && game[opp] ? (view.opponent.connected ? 'conectado' : 'desconectado') : undefined}
           diff={game.end?.ratingDiff?.[opp]}
+          untimed={game.untimed}
         />
 
         <div className="board-zone">
@@ -341,6 +352,7 @@ export function Game({ id }: { id: string }) {
           status={myTurn ? 'sua vez' : undefined}
           diff={game.end?.ratingDiff?.[orientation]}
           lowSound={you === orientation ? prefs.sounds : undefined}
+          untimed={game.untimed}
         />
       </div>
 
@@ -371,7 +383,7 @@ export function Game({ id }: { id: string }) {
           </div>
         )}
 
-        {chatOpen && you && <ChatBox lines={chat} you={you} onSend={(text) => send({ t: 'chat', text })} enabled={me?.user.chatEnabled !== false} onClose={() => setChatOpen(false)} />}
+        {chatOpen && you && !(family.on && family.noChat) && <ChatBox lines={chat} you={you} onSend={(text) => send({ t: 'chat', text })} enabled={me?.user.chatEnabled !== false} onClose={() => setChatOpen(false)} />}
 
         {game.status === 'ended' && game.end && (endOpen ? <EndPanel game={game} you={you} send={send} onClose={() => setEndOpen(false)} /> : null)}
         </div>
@@ -432,6 +444,7 @@ function PlayerBar({
   status,
   diff,
   lowSound,
+  untimed,
 }: {
   player: GameSnapshot['white'];
   color: Color;
@@ -440,9 +453,10 @@ function PlayerBar({
   status?: string;
   diff?: number;
   lowSound?: import('../themes').SoundSetId;
+  untimed?: boolean;
 }) {
   const warned = useRef(false);
-  const low = active && ms < 10_000;
+  const low = !untimed && active && ms < 10_000;
   useEffect(() => {
     if (low && !warned.current && lowSound) {
       warned.current = true;
@@ -471,9 +485,15 @@ function PlayerBar({
           </p>
         </div>
       </div>
-      <span className={`clock ${active ? 'active' : ''} ${low ? 'low' : ''}`} aria-label={`Relógio das ${color === 'white' ? 'brancas' : 'pretas'}`}>
-        {formatClock(ms)}
-      </span>
+      {untimed ? (
+        <span className="clock" aria-label="Sem relógio">
+          ∞
+        </span>
+      ) : (
+        <span className={`clock ${active ? 'active' : ''} ${low ? 'low' : ''}`} aria-label={`Relógio das ${color === 'white' ? 'brancas' : 'pretas'}`}>
+          {formatClock(ms)}
+        </span>
+      )}
     </div>
   );
 }
@@ -621,6 +641,7 @@ function EndPanel({ game, you, send, onClose }: { game: GameSnapshot; you: Color
           </button>
         </div>
       )}
+      {you && end.result === (you === 'white' ? '0-1' : '1-0') && <BreakSuggestion />}
       <div className="end-actions">
         {you && opp && !declined && game.rematchBy !== (you === 'white' ? 'black' : 'white') && (
           <button className="btn primary" disabled={game.rematchBy === you} onClick={() => send({ t: 'rematch' })}>
