@@ -16,6 +16,7 @@ O Checkoru existe graças a projetos abertos.
 | [Stockfish](https://stockfishchess.org) 19, versão WebAssembly de [stockfish.js](https://github.com/nmrugg/stockfish.js) | Equipe do Stockfish, Nathan Rugg | GPL-3.0 |
 | Sons Piano, Efeitos, Retrô 8-bit e Futurista (conjuntos piano, sfx, nes e futuristic do Lichess) | Enigmahack | AGPL-3.0-or-later |
 | Sons de madeira (lance, captura, xeque) | Equipe do [PyChess](https://github.com/pychess/pychess) | GPL-3.0-or-later |
+| Nomes de aberturas ([chess-openings](https://github.com/lichess-org/chess-openings)) | Lichess e colaboradores | CC0 1.0 |
 | Puzzles ([banco de puzzles](https://database.lichess.org/#puzzles), seleção de ~20 mil) | Lichess e seus jogadores | CC0 1.0 |
 | [React](https://react.dev) | Meta e colaboradores | MIT |
 | [Capacitor](https://capacitorjs.com) | Ionic | MIT |

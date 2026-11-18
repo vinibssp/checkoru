@@ -28,6 +28,10 @@ Site e app Android, de código aberto e sem anúncios.
 | Puzzles sem internet: 20 mil do banco do Lichess, puzzle do dia, por tema, corrida de 3 min e rating de puzzles | pronto |
 | Aprender: 24 aulas interativas (do zero a xeque duplo, mate sufocado e oposição) e 12 jogos famosos comentados, com modo adivinhar | pronto |
 | Rating de puzzles e aulas concluídas salvos na conta | pronto |
+| Desafio do dia com sequência de dias e resultado para compartilhar no WhatsApp | pronto |
+| Revisão espaçada (SM-2) dos seus erros de partidas, puzzles e repertório | pronto |
+| Repertório de aberturas com nomes ECO e treino por repetição | pronto |
+| Visualização: coordenadas, memória de posição e jogo às cegas contra os bots | pronto |
 
 ## Como rodar na sua máquina
 

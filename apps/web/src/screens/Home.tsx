@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { api, type GameListItem } from '../api';
 import { Oru } from '../components/Oru';
 import { Page } from '../components/Shell';
@@ -6,6 +6,8 @@ import { ThemeButton } from '../components/ThemePicker';
 import { useStore } from '../store';
 import { GameRow } from './Toca';
 import { IncomingChallenges } from './Friends';
+import { dailyState } from '../daily';
+import { reviewStats } from '../srs';
 
 function greeting(): string {
   const h = new Date().getHours();
@@ -18,6 +20,8 @@ function greeting(): string {
 export function Home() {
   const { me, guest } = useStore();
   const [games, setGames] = useState<GameListItem[] | null>(null);
+  const daily = useMemo(() => dailyState(), []);
+  const review = useMemo(() => reviewStats(), []);
 
   useEffect(() => {
     if (guest) return setGames([]);
@@ -65,6 +69,17 @@ export function Home() {
             <span className="play-card-sub">online · valendo rating</span>
           </a>
         )}
+
+        <div className="mode-grid">
+          <a className="card mode-tile tile-a" href="#/puzzle?dia=1">
+            <span className="choice-title">Desafio do dia</span>
+            <span className="choice-sub">{daily.done ? `feito hoje · 🔥 ${daily.streak}` : daily.streak ? `🔥 ${daily.streak} dias · não perca` : 'compartilhe no WhatsApp'}</span>
+          </a>
+          <a className="card mode-tile tile-b" href="#/revisao">
+            <span className="choice-title">Revisão</span>
+            <span className="choice-sub">{review.due ? `${review.due} para hoje` : review.total ? 'em dia ✓' : 'seus erros voltam aqui'}</span>
+          </a>
+        </div>
 
         <a className="card link-card analyse-card" href="#/analisar">
           <span className="choice-title">Analisar uma partida</span>

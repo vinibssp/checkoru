@@ -11,6 +11,9 @@ import { Analysis } from './screens/Analysis';
 import { Bots } from './screens/Bots';
 import { FamousScreen, Learn, LessonScreen } from './screens/Learn';
 import { Blocked, Friends, PlayerProfile } from './screens/Friends';
+import { Openings } from './screens/Openings';
+import { Review } from './screens/Review';
+import { Coordinates, Memory, Visual } from './screens/Visual';
 import { PuzzleScreen, Rush, Train } from './screens/Puzzles';
 import { Analyze } from './screens/Analyze';
 import { Local } from './screens/Local';
@@ -86,6 +89,16 @@ export function App() {
       return <FamousScreen key={route.query.toString()} />;
     case 'toca':
       return <Toca />;
+    case 'revisao':
+      return <Review key={route.query.toString()} />;
+    case 'aberturas':
+      return <Openings />;
+    case 'visualizacao':
+      return <Visual />;
+    case 'coordenadas':
+      return <Coordinates />;
+    case 'memoria':
+      return <Memory />;
     case 'amigos':
       return <Friends />;
     case 'bloqueados':

@@ -1,3 +1,4 @@
+import { addCards } from '../srs';
 import { Chess } from 'chessops/chess';
 import { chessgroundDests } from 'chessops/compat';
 import { makeFen, parseFen } from 'chessops/fen';
@@ -106,6 +107,25 @@ function AnalysisBoard({ game, you, startPly }: { game: import('../analysis').An
     () => reviews.filter((r) => (r.judgement === 'erro' || r.judgement === 'capivarada' || r.judgement === 'imprecisao') && (!you || r.color === you)),
     [reviews, you],
   );
+
+  // Seus erros e capivaradas vão para a revisão espaçada (só em partidas suas, não em puzzles).
+  const [sentToReview, setSentToReview] = useState(0);
+  useEffect(() => {
+    if (!reviewDone || !you || game.source === 'Puzzle') return;
+    const cards = reviews
+      .filter((r) => r.color === you && (r.judgement === 'erro' || r.judgement === 'capivarada'))
+      .map((r) => ({ r, before: fenAt(game, r.ply - 1), best: evals[r.ply - 1]?.best }))
+      .filter((x): x is { r: MoveReview; before: string; best: string } => !!x.best)
+      .map(({ r, before, best }) => ({
+        id: `erro:${before.split(' ').slice(0, 4).join(' ')}`,
+        kind: 'erro' as const,
+        fen: before,
+        moves: [best],
+        title: `${game.white} × ${game.black}, lance ${Math.ceil(r.ply / 2)} (você jogou ${sanPt(r.san)})`,
+      }));
+    setSentToReview(addCards(cards));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [reviewDone]);
 
   // Mostra o resumo assim que a análise termina.
   useEffect(() => {
@@ -419,6 +439,12 @@ function AnalysisBoard({ game, you, startPly }: { game: import('../analysis').An
                 </button>
               ) : (
                 <p className="ok">Nada para revisar. Bela partida!</p>
+              )}
+              {sentToReview > 0 && (
+                <p className="muted small">
+                  {sentToReview} {sentToReview === 1 ? 'erro foi' : 'erros foram'} para a sua <a href="#/revisao">revisão espaçada</a>: eles voltam nos próximos dias até você
+                  acertar.
+                </p>
               )}
             </div>
           )}

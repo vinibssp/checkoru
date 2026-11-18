@@ -58,8 +58,21 @@ function LocalSetup({ onStart }: { onStart: (tc: Tc) => void }) {
   );
 }
 
+/** Treino às cegas contra o bot: esconder as peças dele, todas, ou todas depois do 10º lance. */
+export type Blind = 'nao' | 'dele' | 'todas' | 'aos-poucos';
+export const BLIND_IDS: Blind[] = ['nao', 'dele', 'aos-poucos', 'todas'];
+export const BLIND_LABEL: Record<Blind, string> = { nao: 'Não', dele: 'Peças dele', 'aos-poucos': 'Aos poucos', todas: 'Tudo' };
+export const BLIND_HELP: Record<Blind, string> = {
+  nao: '',
+  dele: 'As peças do bot ficam invisíveis. Acompanhe pela lista de lances.',
+  'aos-poucos': 'Depois do 10º lance, todas as peças somem.',
+  todas: 'Nenhuma peça aparece: só a lista de lances. Dá para espiar 3 vezes.',
+};
+
 export interface Versus {
   bot: Bot;
+  /** Treino às cegas (opcional). */
+  blind?: Exclude<Blind, 'nao'>;
   /** Cor de quem joga contra o bot. */
   you: Color;
 }
@@ -69,6 +82,14 @@ export function LocalBoard({ tc, onNew, vs }: { tc: Tc; onNew: () => void; vs?: 
   const { prefs } = useStore();
   const [thinking, setThinking] = useState(false);
   const [hint, setHint] = useState<string | null>(null);
+  const [peek, setPeek] = useState(false);
+  const [peeksLeft, setPeeksLeft] = useState(3);
+  const doPeek = () => {
+    if (peeksLeft === 0) return;
+    setPeeksLeft((n) => n - 1);
+    setPeek(true);
+    window.setTimeout(() => setPeek(false), 2000);
+  };
   const timed = tc !== 'livre';
   const initial = timed ? TIME_CONTROLS[tc].initialMs : 0;
   const inc = timed ? TIME_CONTROLS[tc].incrementMs : 0;
@@ -249,11 +270,21 @@ export function LocalBoard({ tc, onNew, vs }: { tc: Tc; onNew: () => void; vs?: 
       : end?.result === '0-1'
         ? 'Pretas vencem'
         : 'Empate';
+  // Às cegas: some com as peças (todas, só as do bot, ou depois do 10º lance). Espiar mostra por 2 s.
+  const hidden =
+    !end && !peek && vs?.blind
+      ? vs.blind === 'dele'
+        ? `blind-${vs.you === 'white' ? 'black' : 'white'}`
+        : vs.blind === 'todas' || g.moves.length >= 20
+          ? 'blind-all'
+          : ''
+      : '';
+  const blindClass = hidden;
   const nextBot = vs && youWon ? BOTS[BOTS.findIndex((b) => b.id === vs.bot.id) + 1] : undefined;
   const sideName = (c: Color) => (vs ? (c === vs.you ? 'Você' : `${vs.bot.name} · ~${vs.bot.elo}`) : undefined);
 
   return (
-    <div className="page game-page">
+    <div className={`page game-page ${blindClass}`}>
       <TopBar title={vs ? `Contra ${vs.bot.art} ${vs.bot.name}` : 'No mesmo aparelho'} sub={timed ? TIME_CONTROLS[tc].label : 'sem relógio'} back={onNew} />
       <MoveList moves={g.moves} />
       <div className="game-body">
@@ -326,9 +357,16 @@ export function LocalBoard({ tc, onNew, vs }: { tc: Tc; onNew: () => void; vs?: 
         <div className="actions">
           {vs ? (
             !end && (
-              <button className="btn" onClick={() => void askHint()} disabled={thinking || turn !== vs.you}>
-                Dica
-              </button>
+              <>
+                {vs.blind && (
+                  <button className="btn" disabled={peeksLeft === 0 || peek} onClick={doPeek}>
+                    Espiar ({peeksLeft})
+                  </button>
+                )}
+                <button className="btn" onClick={() => void askHint()} disabled={thinking || turn !== vs.you}>
+                  Dica
+                </button>
+              </>
             )
           ) : (
             <button className={`btn icon-text ${flip ? 'on' : ''}`} onClick={() => setFlip((f) => !f)} aria-pressed={flip} title="Virar o tabuleiro a cada lance">

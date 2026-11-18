@@ -1062,3 +1062,87 @@ cg-board square.last-move {
   max-width: 34ch;
   text-align: center;
 }
+
+/* ---------- Treino às cegas ---------- */
+
+.blind-all cg-board piece,
+.blind-white cg-board piece.white,
+.blind-black cg-board piece.black {
+  opacity: 0;
+}
+
+.blind-seg {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+}
+
+/* ---------- Coordenadas e memória ---------- */
+
+.coord-head {
+  flex: none;
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 14px;
+  min-height: 56px;
+  padding: 6px 12px;
+}
+
+.coord-target {
+  font-family: var(--font-digits);
+  font-size: calc(44px * var(--digits-scale));
+  color: var(--accent);
+}
+
+.coord-board {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  grid-template-rows: repeat(8, 1fr);
+}
+
+.coord-sq {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  border-radius: 0;
+  min-height: 0;
+  box-shadow: none;
+  clip-path: none;
+}
+
+.coord-sq.clara {
+  background: var(--sq-light);
+}
+
+.coord-sq.escura {
+  background: var(--sq-dark);
+}
+
+.coord-sq.ok {
+  background: var(--accent2);
+}
+
+.coord-sq.bad {
+  background: var(--danger);
+}
+
+.memory-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  padding: 8px 12px;
+}
+
+.rep-list {
+  padding: 4px 12px 8px;
+}
+
+.rep-list summary {
+  cursor: pointer;
+  color: var(--sub);
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+}

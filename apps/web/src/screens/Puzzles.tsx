@@ -5,6 +5,8 @@ import { parseFen } from 'chessops/fen';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { DrawShape } from '@lichess-org/chessground/draw';
 import { Board, type BoardApi, type Key } from '../components/Board';
+import { dailyNumber, dailyState, marksText, recordDaily, share, shareText } from '../daily';
+import { addCards, reviewStats, type Card } from '../srs';
 import { Oru, type Mood } from '../components/Oru';
 import { Page, TopBar } from '../components/Shell';
 import { openAnalysis } from '../currentAnalysis';
@@ -37,6 +39,8 @@ import { PromotionPicker } from './Game';
 export function Train() {
   const [index, setIndex] = useState<PuzzleIndex | null | undefined>(undefined);
   const profile = useMemo(loadProfile, []);
+  const review = useMemo(() => reviewStats(), []);
+  const daily = useMemo(() => dailyState(), []);
   useEffect(() => {
     void loadIndex().then(setIndex);
   }, []);
@@ -63,14 +67,32 @@ export function Train() {
           <span className="play-card-sub">{index ? `${index.total.toLocaleString('pt-BR')} puzzles · sem internet` : 'carregando…'}</span>
         </a>
 
+        <a className="card play-card review-card" href="#/revisao">
+          <span className="play-card-title">Revisão {review.due > 0 ? `· ${review.due} para hoje` : ''}</span>
+          <span className="play-card-sub">
+            {review.total ? `${review.total} cartões com os seus erros, no dia certo` : 'seus erros de partidas e puzzles voltam no dia certo'}
+          </span>
+        </a>
+
         <div className="mode-grid">
           <a className="card mode-tile tile-a" href="#/puzzle?dia=1">
-            <span className="choice-title">Puzzle do dia</span>
-            <span className="choice-sub">o mesmo para todo mundo</span>
+            <span className="choice-title">Desafio do dia</span>
+            <span className="choice-sub">{daily.done ? `feito · 🔥 ${daily.streak}` : `o mesmo para todo mundo${daily.streak ? ` · 🔥 ${daily.streak}` : ''}`}</span>
           </a>
           <a className="card mode-tile tile-b" href="#/corrida">
             <span className="choice-title">Corrida</span>
             <span className="choice-sub">3 min · recorde {profile.bestRush}</span>
+          </a>
+        </div>
+
+        <div className="mode-grid">
+          <a className="card mode-tile" href="#/aberturas">
+            <span className="choice-title">Repertório</span>
+            <span className="choice-sub">suas aberturas, com revisão</span>
+          </a>
+          <a className="card mode-tile" href="#/visualizacao">
+            <span className="choice-title">Visualização</span>
+            <span className="choice-sub">coordenadas, memória, às cegas</span>
           </a>
         </div>
 
@@ -125,7 +147,14 @@ function isPawn(fen: string, sq: string): boolean {
 /** Controla um puzzle: lance de abertura, conferência, resposta, dica e solução. */
 export function usePuzzle(
   puzzle: Puzzle | null,
-  opts: { onFirstResult: (won: boolean) => void; onSolved: () => void; onMistake?: () => void; shapes?: DrawShape[] },
+  opts: {
+    onFirstResult: (won: boolean) => void;
+    onSolved: () => void;
+    onMistake?: (step: number) => void;
+    onHint?: (step: number) => void;
+    onGiveUp?: (step: number) => void;
+    shapes?: DrawShape[];
+  },
 ) {
   const { prefs } = useStore();
   const [state, setState] = useState<PuzzleState | null>(null);
@@ -188,7 +217,7 @@ export function usePuzzle(
         play(prefs.sounds, 'defeat');
         setFeedback({ kind: 'errado', text: 'Não é isso. Tente de novo.' });
         report(false);
-        optsRef.current.onMistake?.();
+        optsRef.current.onMistake?.(state.step);
         board.current?.set({ fen: state.fen });
         return;
       }
@@ -241,6 +270,7 @@ export function usePuzzle(
   const showHint = () => {
     if (!puzzle || !state || state.done) return;
     report(false);
+    optsRef.current.onHint?.(state.step);
     setHint(puzzle.moves[state.step]!.slice(0, 2) as Key);
     setFeedback({ kind: 'vez', text: 'Dica: mexa a peça marcada.' });
   };
@@ -249,6 +279,7 @@ export function usePuzzle(
   const showSolution = () => {
     if (!puzzle || !state || state.done) return;
     report(false);
+    optsRef.current.onGiveUp?.(state.step);
     setLocked(true);
     setHint(null);
     let f = state.fen;
@@ -339,6 +370,14 @@ export function PuzzleScreen() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [counter, theme, daily]);
 
+  // O que aconteceu neste puzzle: para a nota da revisão e o resultado do desafio do dia.
+  const track = useRef({ mistakes: new Set<number>(), hintAt: new Set<number>(), hints: 0, gaveUp: false, gaveUpAt: 0 });
+  useEffect(() => {
+    track.current = { mistakes: new Set(), hintAt: new Set(), hints: 0, gaveUp: false, gaveUpAt: 0 };
+  }, [puzzle]);
+  const isDaily = daily && counter === 0;
+  const [dailyDone, setDailyDone] = useState(() => (daily ? dailyState() : null));
+
   const p = usePuzzle(puzzle, {
     onFirstResult: (won) => {
       if (!puzzle) return;
@@ -347,11 +386,36 @@ export function PuzzleScreen() {
       saveProfile(next);
       setProfile(next);
       setDiff(r.diff);
+      // Errou: o puzzle vai para a revisão espaçada.
+      if (!won) addCards([puzzleCard(puzzle)]);
     },
     onSolved: () => undefined,
+    onMistake: (step) => track.current.mistakes.add(step),
+    onHint: (step) => {
+      track.current.hints++;
+      track.current.hintAt.add(step);
+    },
+    onGiveUp: (step) => {
+      track.current.gaveUp = true;
+      track.current.gaveUpAt = step;
+    },
   });
 
-  const title = daily && counter === 0 ? 'Puzzle do dia' : theme ? THEME_NAMES[theme] ?? 'Puzzle' : 'Puzzle';
+  // Fim do desafio do dia: guarda o resultado (só o primeiro conta) e prepara o compartilhar.
+  useEffect(() => {
+    if (!isDaily || !puzzle || !p.state?.done) return;
+    const steps: number[] = [];
+    for (let i = 1; i < puzzle.moves.length; i += 2) steps.push(i);
+    const t = track.current;
+    const marks = steps.map((st) =>
+      (t.gaveUp && st >= t.gaveUpAt) || t.mistakes.has(st) ? ('erro' as const) : t.hintAt.has(st) ? ('dica' as const) : ('ok' as const),
+    );
+    recordDaily({ marks, hints: t.hints, solved: !t.gaveUp, rating: puzzle.rating });
+    setDailyDone(dailyState());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [p.state?.done]);
+
+  const title = daily && counter === 0 ? 'Desafio do dia' : theme ? THEME_NAMES[theme] ?? 'Puzzle' : 'Puzzle';
   const done = p.state?.done;
 
   const analyse = () => {
@@ -398,7 +462,12 @@ export function PuzzleScreen() {
       </div>
       <div className="game-body">
         <div className="board-zone">{p.boardEl}</div>
-        {puzzle && (
+        {isDaily && dailyDone && (
+          <p className="puzzle-themes muted small">
+            Desafio #{dailyNumber()} · 🔥 {dailyDone.streak} {dailyDone.streak === 1 ? 'dia' : 'dias'} seguidos · recorde {dailyDone.best}
+          </p>
+        )}
+        {puzzle && !isDaily && (
           <p className="puzzle-themes muted small">
             {puzzle.themes
               .filter((t) => THEME_NAMES[t] && !['short', 'long', 'veryLong', 'oneMove', 'crushing', 'advantage'].includes(t))
@@ -412,10 +481,15 @@ export function PuzzleScreen() {
         <div className="actions">
           {done ? (
             <>
+              {isDaily && dailyDone?.done && (
+                <button className="btn primary" onClick={() => void share(shareText(dailyDone.done!, dailyDone.streak))}>
+                  Compartilhar {marksText(dailyDone.done.marks)}
+                </button>
+              )}
               <button className="btn" onClick={analyse}>
                 Analisar
               </button>
-              <button className="btn primary" onClick={() => setCounter((c) => c + 1)}>
+              <button className={`btn ${isDaily ? '' : 'primary'}`} onClick={() => setCounter((c) => c + 1)}>
                 Próximo ▶
               </button>
             </>
@@ -565,4 +639,9 @@ export function Rush() {
       {p.promoEl}
     </div>
   );
+}
+
+/** Cartão de revisão para um puzzle: começa na posição depois do lance do adversário. */
+export function puzzleCard(p: Puzzle): Omit<Card, 'n' | 'ef' | 'interval' | 'due' | 'created'> {
+  return { id: `puzzle:${p.id}`, kind: 'puzzle', fen: applyUci(p.fen, p.moves[0]!), moves: p.moves.slice(1), title: `Puzzle ~${p.rating}` };
 }

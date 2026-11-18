@@ -57,6 +57,19 @@ Os textos do app são escritos por nós, com nossas palavras; não copiamos trec
 - **Feng-hsiung Hsu, *Behind Deep Blue*** (2002) e **Garry Kasparov e Mig Greengard, *Deep Thinking*** (2017):
   Deep Blue x Kasparov, 6ª partida de 1997.
 
+## Métodos de treino
+
+- **Revisão espaçada:** algoritmo SM-2, de Piotr Woźniak (SuperMemo, 1987), descrito em P. A. Woźniak,
+  *Optimization of learning*, dissertação de mestrado, Universidade de Tecnologia de Poznań, 1990
+  (republicado em supermemo.com como "Application of a computer to improve the results obtained in working with the
+  SuperMemo method"). Implementação em `apps/web/src/srs.ts`, seguindo o texto: intervalos 1, 6 e depois × EF;
+  EF começa em 2,5, nunca abaixo de 1,3; resposta com nota abaixo de 3 recomeça sem mudar o EF.
+- **Memória de posição:** inspirada nos experimentos de reconstrução de posições de **Adriaan de Groot,
+  *Thought and Choice in Chess*** (1965). O app não afirma resultados do livro; só usa a ideia do exercício.
+- **Nomes de aberturas:** banco [lichess-org/chess-openings](https://github.com/lichess-org/chess-openings)
+  (domínio público / CC0), com a classificação ECO (*Encyclopaedia of Chess Openings*, Šahovski Informator).
+  Gerado por `scripts/openings/build.py`.
+
 ## Puzzles
 
 Os puzzles vêm do banco aberto do Lichess (CC0), de partidas reais, com solução conferida por motor. Não há livro

@@ -4,7 +4,8 @@ import { useState } from 'react';
 import { BOTS, botById, defeatedBots, isUnlocked } from '../bots';
 import { Oru } from '../components/Oru';
 import { Page, TopBar } from '../components/Shell';
-import { LocalBoard, type Versus } from './Local';
+import { BLIND_HELP, BLIND_IDS, BLIND_LABEL, LocalBoard, type Blind, type Versus } from './Local';
+import { useRoute } from '../router';
 
 type Tc = TimeControlId | 'livre';
 
@@ -21,6 +22,8 @@ export function Bots() {
   });
   const [color, setColor] = useState<'random' | Color>('random');
   const [tc, setTc] = useState<Tc>('livre');
+  const { query } = useRoute();
+  const [blind, setBlind] = useState<Blind>(() => (BLIND_IDS.includes(query.get('cegas') as Blind) ? (query.get('cegas') as Blind) : 'nao'));
   const [game, setGame] = useState<{ vs: Versus; tc: Tc; key: number } | null>(null);
 
   if (game) return <LocalBoard key={game.key} tc={game.tc} vs={game.vs} onNew={() => setGame(null)} />;
@@ -33,7 +36,7 @@ export function Bots() {
       /* ignora */
     }
     const you: Color = color === 'random' ? (Math.random() < 0.5 ? 'white' : 'black') : color;
-    setGame({ vs: { bot, you }, tc, key: Date.now() });
+    setGame({ vs: { bot, you, blind: blind === 'nao' ? undefined : blind }, tc, key: Date.now() });
   };
 
   return (
@@ -100,6 +103,16 @@ export function Bots() {
             </button>
           ))}
         </div>
+
+        <h2 className="h2">Treino às cegas</h2>
+        <div className="seg blind-seg" role="radiogroup" aria-label="Treino às cegas">
+          {BLIND_IDS.map((b) => (
+            <button key={b} role="radio" aria-checked={blind === b} className={blind === b ? 'on' : ''} onClick={() => setBlind(b)}>
+              {BLIND_LABEL[b]}
+            </button>
+          ))}
+        </div>
+        {blind !== 'nao' && <p className="muted small">{BLIND_HELP[blind]}</p>}
 
         <button className="btn primary big" onClick={start}>
           Jogar com {bot.name}
