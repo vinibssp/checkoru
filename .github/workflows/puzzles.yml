@@ -1,0 +1,40 @@
+# Baixa o banco aberto de puzzles do Lichess (CC0), escolhe os melhores por faixa de rating
+# e grava em apps/web/public/puzzles (os puzzles vão dentro do app e funcionam sem internet).
+# Roda quando o script muda, uma vez por mês, ou manualmente (Actions > Puzzles > Run workflow).
+name: Puzzles
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - scripts/puzzles/**
+      - .github/workflows/puzzles.yml
+  schedule:
+    - cron: '17 6 3 * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency: puzzles
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Baixar o banco do Lichess
+        run: curl -sSfL -o puzzles.csv.zst https://database.lichess.org/lichess_db_puzzle.csv.zst
+      - name: Escolher os puzzles
+        run: |
+          rm -rf apps/web/public/puzzles
+          zstdcat puzzles.csv.zst | python3 scripts/puzzles/build.py apps/web/public/puzzles
+          du -sh apps/web/public/puzzles
+      - name: Gravar no repositório
+        run: |
+          git config user.name "checkoru-bot"
+          git config user.email "checkoru-bot@users.noreply.github.com"
+          git add apps/web/public/puzzles
+          if git diff --cached --quiet; then echo "Nada mudou."; exit 0; fi
+          git commit -m "Puzzles: banco atualizado do Lichess (CC0)"
+          git push
