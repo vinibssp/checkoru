@@ -105,6 +105,17 @@ Os textos do app são escritos por nós, com nossas palavras; não copiamos trec
 - Fala e reconhecimento de voz: a voz do próprio aparelho (Web Speech API no navegador; no Android, os plugins
   `@capacitor-community/text-to-speech` e `@capacitor-community/speech-recognition`, licença MIT).
 
+## Jogo limpo (anti-trapaça)
+
+- **K. W. Regan e G. McC. Haworth, "Intrinsic Chess Ratings"**, *Proceedings of the AAAI Conference on Artificial
+  Intelligence* 25 (2011), pp. 834-839, doi:10.1609/aaai.v25i1.7951: a ideia de medir a coincidência dos lances com
+  um motor forte.
+- **FIDE, regulamento de jogo limpo** (*Anti-Cheating / Fair Play Regulations*, FIDE Handbook): escores z, limiar de
+  4,25 para xadrez online e 2,5 só como apoio a outras provas.
+- **K. W. Regan, "Statistics and Analytics in Chess"** (palestra no 84º Congresso da FIDE, 2013): o z isolado só
+  vale como indicação sozinha com valores muito altos.
+- O método do Checkoru é **simplificado e não é o de Regan**. Está descrito por inteiro em `docs/JOGO-LIMPO.md`.
+
 ## Puzzles
 
 Os puzzles vêm do banco aberto do Lichess (CC0), de partidas reais, com solução conferida por motor. Não há livro

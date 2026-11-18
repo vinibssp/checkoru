@@ -55,6 +55,15 @@ Público é importante: o GitHub Actions é ilimitado e grátis para repositóri
    npx wrangler secret put SESSION_SECRET
    ```
 
+   Opcional, para a análise semanal de jogo limpo (`docs/JOGO-LIMPO.md`): gere outro texto aleatório e grave como
+   `ADMIN_TOKEN`. Depois, no GitHub (Settings > Secrets and variables > Actions), crie `CHECKORU_ADMIN_TOKEN` com o
+   mesmo valor e `CHECKORU_API` com o endereço do servidor (passo 6).
+
+   ```bash
+   openssl rand -base64 48
+   npx wrangler secret put ADMIN_TOKEN
+   ```
+
 6. Primeiro deploy do servidor:
 
    ```bash

@@ -17,6 +17,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { api, API_URL, getToken, wsTicket, WS_URL } from '../api';
 import { BreakSuggestion, useFamily } from '../components/Wellbeing';
 import { recordGame } from '../wellbeing';
+import { loadVisitor, visitorTicket } from '../visitor';
 import { Board, type BoardApi, type Key } from '../components/Board';
 import { Avatar, Oru } from '../components/Oru';
 import { TopBar } from '../components/Shell';
@@ -85,12 +86,12 @@ export function Game({ id }: { id: string }) {
 
     const connect = async () => {
       let url = `${WS_URL}/api/games/${id}`;
-      if (getToken()) {
-        try {
-          url += `?ticket=${encodeURIComponent(await wsTicket())}`;
-        } catch {
-          /* entra como espectador */
-        }
+      try {
+        // Com conta, o bilhete da conta; sem conta, o de visitante (se a pessoa escolheu um apelido).
+        const ticket = getToken() ? await wsTicket() : loadVisitor()?.id || loadVisitor()?.name ? await visitorTicket() : null;
+        if (ticket) url += `?ticket=${encodeURIComponent(ticket)}`;
+      } catch {
+        /* entra como espectador */
       }
       if (stopped) return;
       const ws = new WebSocket(url);
@@ -302,8 +303,8 @@ export function Game({ id }: { id: string }) {
         sub={`${you ? 'online' : 'assistindo'} · ${game.rated ? 'valendo rating' : 'sem rating'}`}
         back="/"
         right={
-          you && playing ? (
-            <button className="icon-btn" aria-label="Chat" hidden={family.on && family.noChat} onClick={() => setChatOpen((o) => !o)}>
+          you && playing && !(family.on && family.noChat) && !game.white?.guest && !game.black?.guest ? (
+            <button className="icon-btn" aria-label="Chat" onClick={() => setChatOpen((o) => !o)}>
               <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinejoin="round">
                 <path d="M4 5h16v11H9l-5 4z" />
               </svg>
@@ -474,7 +475,7 @@ function PlayerBar({
         <div>
           <p className="player-name">
             {player?.username ?? 'Esperando…'}{' '}
-            {player && (
+            {player && !player.guest && (
               <span className="muted">
                 · {player.rating}
                 {player.provisional ? '?' : ''}

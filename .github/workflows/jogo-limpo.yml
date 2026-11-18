@@ -1,0 +1,46 @@
+# Jogo limpo: análise em lote das partidas valendo rating da última semana (grátis, no GitHub Actions).
+#
+# Método publicado em docs/JOGO-LIMPO.md. O resultado é só um sinal para revisão humana:
+# nada é punido automaticamente.
+#
+# Precisa de dois segredos do repositório (Settings > Secrets and variables > Actions):
+#   CHECKORU_API          endereço do servidor (ex.: https://checkoru-api.SEU-USUARIO.workers.dev)
+#   CHECKORU_ADMIN_TOKEN  o mesmo valor do segredo ADMIN_TOKEN do servidor (wrangler secret put ADMIN_TOKEN)
+# Sem eles, o trabalho só avisa que o servidor não está configurado.
+name: Jogo limpo
+
+on:
+  schedule:
+    - cron: '17 6 * * 1' # segundas, 03:17 em Brasília
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  analise:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Analisar as partidas da semana
+        working-directory: apps/server
+        env:
+          CHECKORU_API: ${{ secrets.CHECKORU_API }}
+          CHECKORU_ADMIN_TOKEN: ${{ secrets.CHECKORU_ADMIN_TOKEN }}
+          PROFUNDIDADE: '12'
+          MAX_PARTIDAS: '400'
+        run: npx vite-node scripts/fairplay.ts
+      - name: Guardar o relatório (fica 30 dias)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: relatorio-jogo-limpo
+          path: apps/server/relatorio-jogo-limpo.*
+          if-no-files-found: ignore
+          retention-days: 30

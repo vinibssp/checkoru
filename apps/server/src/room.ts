@@ -36,6 +36,8 @@ export interface SeatPlayer {
   username: string;
   avatar: string | null;
   rating: Rating;
+  /** Visitante sem conta (entrou por link): sem chat e a partida não vai para o banco. */
+  guest?: boolean;
 }
 
 export interface RoomState {
@@ -161,6 +163,8 @@ export class RoomCore {
     const s = this.state;
     if (s.status !== 'waiting' || player.id === s.creatorId) return none();
     if (s.invitedId && player.id !== s.invitedId) return none();
+    // Visitante só entra em convite por link; desafio direto é para quem tem conta.
+    if (player.guest && s.invitedId) return none();
     const seat: Color = s.white ? 'black' : 'white';
     s[seat] = player;
     s.status = 'playing';
@@ -207,6 +211,8 @@ export class RoomCore {
         return this.finish(winnerResult(color), 'abandon', now);
       }
       case 'chat': {
+        // Com visitante sem conta na mesa, não há chat (proteção para crianças e contra abuso anônimo).
+        if (this.state.white?.guest || this.state.black?.guest) return none();
         const text = filterChat(msg.text);
         if (!text) return none();
         return { out: [{ to: 'all', msg: { t: 'chat', from: color, text } }], finished: false };
@@ -280,6 +286,7 @@ export class RoomCore {
         avatar: p.avatar,
         rating: Math.round(p.rating.rating),
         provisional: isProvisional(p.rating),
+        ...(p.guest ? { guest: true } : {}),
       };
     return {
       id: s.id,

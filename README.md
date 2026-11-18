@@ -37,6 +37,9 @@ Site e app Android, de código aberto e sem anúncios.
 | Modo família: PIN do responsável, limite de tempo por dia, sem chat, só amigos e relatório da semana | pronto |
 | Tabuleiro de verdade: relógio de xadrez com incremento e pausa, súmula no celular e análise depois (sem internet) | pronto |
 | Acessibilidade por voz: lances falados em voz alta, jogar digitando ou falando o lance (“cavalo f três”, “roque pequeno”), ouvir onde estão as peças e anúncio para leitor de tela | pronto |
+| Jogar por link sem conta: quem recebe o convite escolhe um apelido e joga (sem rating e sem chat) | pronto |
+| Turmas: o professor cria a turma, os alunos entram com um código, e ele passa aulas e puzzles e acompanha o progresso | pronto |
+| Jogo limpo: análise semanal em lote no GitHub Actions, com método público (docs/JOGO-LIMPO.md) e revisão humana | pronto |
 | Torneio do clube: sistema suíço simplificado, folga, W.O., desempates (Buchholz, Sonneborn-Berger, vitórias), tabela para compartilhar e rating do clube (Elo) | pronto |
 
 ## Como rodar na sua máquina

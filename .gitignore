@@ -13,3 +13,6 @@ coverage/
 *.keystore
 !apps/web/android/teste.keystore
 *.jks
+
+# Saída da análise de jogo limpo
+relatorio-jogo-limpo.*

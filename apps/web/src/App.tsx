@@ -19,6 +19,9 @@ import { Coordinates, Memory, Visual } from './screens/Visual';
 import { PuzzleScreen, Rush, Train } from './screens/Puzzles';
 import { Analyze } from './screens/Analyze';
 import { Otb } from './screens/Otb';
+import { getToken } from './api';
+import { VisitorGame } from './screens/Visitor';
+import { ClassScreen, Classes } from './screens/Classes';
 import { NewTournament, TournamentScreen, Tournaments } from './screens/Tournament';
 import { Local } from './screens/Local';
 import { LoginReturn } from './screens/LoginReturn';
@@ -70,6 +73,8 @@ function Routes() {
       </div>
     );
   }
+  // Convite aberto sem conta: dá para jogar como visitante.
+  if (section === 'partida' && arg && !getToken()) return <VisitorGame key={arg} id={arg} />;
   if (me === null) return <Welcome />;
   if (!me.user.username) return <CreateAccount />;
 
@@ -88,6 +93,8 @@ function Routes() {
       return <Local />;
     case 'mesa':
       return <Otb key={route.query.toString()} />;
+    case 'turmas':
+      return arg ? <ClassScreen key={arg} id={arg} /> : <Classes />;
     case 'torneio':
       return arg === 'novo' ? <NewTournament /> : arg ? <TournamentScreen key={arg} id={arg} /> : <Tournaments />;
     case 'partida':

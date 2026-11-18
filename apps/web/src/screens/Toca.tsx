@@ -62,6 +62,10 @@ export function Toca() {
           </div>
         </div>
 
+        <a className="card link-card" href="#/turmas">
+          <span className="choice-title">Turmas</span>
+          <span className="choice-sub">professor passa tarefas · aluno entra com código</span>
+        </a>
         <a className="card link-card" href="#/familia">
           <span className="choice-title">Modo família</span>
           <span className="choice-sub">PIN, limite de tempo, sem chat e relatório</span>

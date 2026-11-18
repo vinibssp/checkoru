@@ -121,6 +121,8 @@ export async function getRatings(db: D1Database, userId: string): Promise<Rating
 /** Grava a partida terminada e os novos ratings numa única transação. */
 export async function saveFinishedGame(db: D1Database, state: RoomState, site: string): Promise<void> {
   if (!state.white || !state.black || !state.end || state.startedAt === null || state.endedAt === null) return;
+  // Partida com visitante sem conta não entra no histórico (não há conta para guardar).
+  if (state.white.guest || state.black.guest) return;
   const tc = TIME_CONTROLS[state.tc];
   // Reconstrói o SAN a partir dos lances UCI (o estado guarda só UCI).
   const sans = ChessGame.fromUciMoves(state.moves).moves.map((m) => m.san);

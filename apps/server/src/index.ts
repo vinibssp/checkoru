@@ -7,6 +7,8 @@ import {
 } from '@checkoru/shared';
 import type { Color } from 'chessops';
 import { finishGoogleLogin, startGoogleLogin } from './auth';
+import { guestName } from './guest';
+import { addAssignment, classDetail, createClass, deleteClass, joinClass, listClasses, removeAssignment, removeMember, validAssignment } from './classes';
 import { signPayload, verifyPayload } from './crypto';
 import {
   consumeLoginTicket,
@@ -109,12 +111,24 @@ async function route(request: Request, env: Env): Promise<Response> {
     const stub = env.GAME.get(env.GAME.idFromName(gameId));
     const headers = new Headers(request.headers);
     headers.delete('X-Player');
-    const ticket = await verifyPayload<{ uid: string }>(env.SESSION_SECRET, url.searchParams.get('ticket'));
-    if (ticket) {
+    const ticket = await verifyPayload<{ uid: string; guest?: string }>(env.SESSION_SECRET, url.searchParams.get('ticket'));
+    if (ticket?.guest !== undefined) {
+      // Visitante sem conta: entra só pelo link, sem rating e sem chat.
+      headers.set('X-Player', JSON.stringify({ id: ticket.uid, username: ticket.guest, avatar: null, ratings: await getRatings(env.DB, ticket.uid), guest: true }));
+    } else if (ticket) {
       const player = await playerInfo(env, ticket.uid);
       if (player) headers.set('X-Player', JSON.stringify(player));
     }
     return stub.fetch(new Request(request.url, { method: request.method, headers }));
+  }
+
+  if (path === '/api/visitante' && method === 'POST') {
+    // Quem recebeu um link de convite pode jogar sem criar conta. Recebe um bilhete curto, como o de quem tem login.
+    const body = await readJson<{ name?: string; id?: string }>(request);
+    const name = guestName(body?.name ?? '');
+    if (!name) return json({ error: 'Use um apelido de 2 a 16 letras ou números.' }, 400);
+    const id = typeof body?.id === 'string' && /^v-[a-z0-9]{16}$/.test(body.id) ? body.id : `v-${Array.from(crypto.getRandomValues(new Uint8Array(8)), (b) => b.toString(16).padStart(2, '0')).join('')}`;
+    return json({ id, name, ticket: await signPayload(env.SESSION_SECRET, { uid: id, guest: name }, WS_TICKET_TTL_MS) });
   }
 
   if (path === '/api/lobby') {
@@ -126,6 +140,43 @@ async function route(request: Request, env: Env): Promise<Response> {
     headers.set('X-Player', JSON.stringify({ player: { id: player.id, username: player.username, avatar: player.avatar }, ratings: player.ratings, blocked }));
     const stub = env.LOBBY.get(env.LOBBY.idFromName('global'));
     return stub.fetch(new Request(request.url, { method: request.method, headers }));
+  }
+
+  // ---------- Jogo limpo (análise em lote, só com o segredo de admin) ----------
+  if (path.startsWith('/api/admin/')) {
+    if (!env.ADMIN_TOKEN || !(await sameSecret(bearer(request) ?? '', env.ADMIN_TOKEN))) return json({ error: 'Não encontrado' }, 404);
+    if (path === '/api/admin/jogos' && method === 'GET') {
+      const since = Number(url.searchParams.get('desde')) || Date.now() - 7 * 86_400_000;
+      const rows = await env.DB.prepare(
+        `SELECT g.id, g.white_id, g.black_id, w.username AS white_name, b.username AS black_name, g.white_rating, g.black_rating, g.moves, g.tc, g.ended_at
+         FROM games g JOIN users w ON w.id = g.white_id JOIN users b ON b.id = g.black_id
+         WHERE g.rated = 1 AND g.ended_at >= ? ORDER BY g.ended_at LIMIT 2000`,
+      )
+        .bind(since)
+        .all();
+      return json({ games: rows.results });
+    }
+    if (path === '/api/admin/sinais' && method === 'POST') {
+      const body = await readJson<{ period?: string; flags?: { userId: string; z: number; moves: number; games: number; details?: string }[] }>(request);
+      const flags = (body?.flags ?? []).filter((f) => typeof f.userId === 'string' && Number.isFinite(f.z)).slice(0, 200);
+      if (flags.length)
+        await env.DB.batch(
+          flags.map((f) =>
+            env.DB.prepare('INSERT INTO fair_play_flags (id, user_id, z, moves, games, period, details, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)').bind(
+              crypto.randomUUID(),
+              f.userId,
+              f.z,
+              Math.round(f.moves),
+              Math.round(f.games),
+              String(body?.period ?? '').slice(0, 40),
+              f.details?.slice(0, 500) ?? null,
+              Date.now(),
+            ),
+          ),
+        );
+      return json({ ok: true, saved: flags.length });
+    }
+    return json({ error: 'Não encontrado' }, 404);
   }
 
   // Daqui para baixo, só com login.
@@ -230,6 +281,45 @@ async function route(request: Request, env: Env): Promise<Response> {
     return json({ ok: true, gameId });
   }
 
+  // ---------- Turmas ----------
+
+  if (path === '/api/turmas' && method === 'GET') return json(await listClasses(env.DB, user.id));
+  if (path === '/api/turmas' && method === 'POST') {
+    if (!user.username) return json({ error: 'Escolha um nome de usuário primeiro' }, 403);
+    const body = await readJson<{ name?: string }>(request);
+    const name = (body?.name ?? '').replace(/\s+/g, ' ').trim().slice(0, 60);
+    if (name.length < 2) return json({ error: 'Dê um nome para a turma.' }, 400);
+    const r = await createClass(env.DB, user.id, name);
+    return 'error' in r ? json({ error: r.error }, 409) : json(r);
+  }
+  if (path === '/api/turmas/entrar' && method === 'POST') {
+    if (!user.username) return json({ error: 'Escolha um nome de usuário primeiro' }, 403);
+    const body = await readJson<{ code?: string }>(request);
+    const r = await joinClass(env.DB, user.id, body?.code ?? '');
+    return 'error' in r ? json({ error: r.error }, 404) : json(r);
+  }
+  const turma = path.match(/^\/api\/turmas\/([a-f0-9]{16})(?:\/(tarefas|membros)(?:\/([0-9a-f-]{16,36}))?)?$/);
+  if (turma) {
+    const [, classId, sub, itemId] = turma;
+    if (!sub && method === 'GET') {
+      const d = await classDetail(env.DB, user.id, classId!);
+      return d ? json(d) : json({ error: 'Turma não encontrada' }, 404);
+    }
+    if (!sub && method === 'DELETE') return (await deleteClass(env.DB, user.id, classId!)) ? json({ ok: true }) : json({ error: 'Turma não encontrada' }, 404);
+    if (sub === 'tarefas' && !itemId && method === 'POST') {
+      const a = validAssignment(await readJson(request));
+      if (!a) return json({ error: 'Tarefa inválida' }, 400);
+      const r = await addAssignment(env.DB, user.id, classId!, a);
+      return 'error' in r ? json({ error: r.error }, 409) : json(r);
+    }
+    if (sub === 'tarefas' && itemId && method === 'DELETE') {
+      return (await removeAssignment(env.DB, user.id, classId!, itemId)) ? json({ ok: true }) : json({ error: 'Turma não encontrada' }, 404);
+    }
+    if (sub === 'membros' && itemId && method === 'DELETE') {
+      return (await removeMember(env.DB, user.id, classId!, itemId)) ? json({ ok: true }) : json({ error: 'Sem permissão' }, 403);
+    }
+  }
+
   // ---------- Amigos e bloqueios ----------
 
   if (path === '/api/users' && method === 'GET') return json({ users: await searchUsers(env.DB, user.id, url.searchParams.get('q') ?? '') });
@@ -266,6 +356,16 @@ async function route(request: Request, env: Env): Promise<Response> {
   }
 
   return json({ error: 'Não encontrado' }, 404);
+}
+
+/** Compara segredos sem vazar pelo tempo de resposta. */
+async function sameSecret(a: string, b: string): Promise<boolean> {
+  const [ha, hb] = await Promise.all([a, b].map((x) => crypto.subtle.digest('SHA-256', new TextEncoder().encode(x))));
+  const va = new Uint8Array(ha!);
+  const vb = new Uint8Array(hb!);
+  let diff = 0;
+  for (let i = 0; i < va.length; i++) diff |= va[i]! ^ vb[i]!;
+  return diff === 0;
 }
 
 async function playerInfo(env: Env, userId: string): Promise<{ id: string; username: string; avatar: string | null; ratings: Ratings } | null> {

@@ -208,6 +208,67 @@ assert(!paired, 'fila não junta quem se bloqueou');
 await call(`/api/blocks/${ana.id}`, { token: bia.token, method: 'DELETE' });
 assert((await call('/api/me/blocks', { token: bia.token })).users.length === 0, 'desbloquear');
 
-for (const s of [...lobbies, ...lob2, ...Object.values(seats).map((x) => x.s), friend, waiting, joiner]) s.ws.close();
+// ---------- Visitante por link (sem conta) ----------
+console.log('\nVisitante por link');
+const inv = await call('/api/challenges', { token: ana.token, method: 'POST', body: { tc: '10+0', color: 'white' } });
+const { ticket: anaT } = await call('/api/ws-ticket', { token: ana.token, method: 'POST' });
+const host = socket(`${WS}/api/games/${inv.gameId}?ticket=${encodeURIComponent(anaT)}`);
+await host.opened;
+await host.next((m) => m.t === 'snapshot');
+const vis = await call('/api/visitante', { method: 'POST', body: { name: 'Zé' } });
+assert(vis.name === 'Zé (convidado)' && /^v-[0-9a-f]{16}$/.test(vis.id), 'visitante recebe apelido e bilhete');
+const guest = socket(`${WS}/api/games/${inv.gameId}?ticket=${encodeURIComponent(vis.ticket)}`);
+await guest.opened;
+const gs = await guest.next((m) => m.t === 'snapshot' && m.game.status === 'playing');
+assert(gs.you === 'black' && gs.game.black.guest === true, 'visitante senta com as pretas, marcado como convidado');
+host.send({ t: 'chat', text: 'oi' });
+let chatGot = false;
+try {
+  await guest.next((m) => m.t === 'chat', 1500);
+  chatGot = true;
+} catch {
+  /* esperado */
+}
+assert(!chatGot, 'sem chat com visitante');
+const lobbyRes = await fetch(`${API}/api/lobby?ticket=${encodeURIComponent(vis.ticket)}`);
+assert(lobbyRes.status === 401, 'visitante não entra na fila');
+const badName = await fetch(`${API}/api/visitante`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: '<b>' }) });
+assert(badName.status === 400, 'apelido inválido é recusado');
+host.send({ t: 'resign' });
+await guest.next((m) => m.t === 'end');
+
+// ---------- Turmas ----------
+console.log('\nTurmas');
+await call('/api/me/treino', { token: bia.token, method: 'PUT', body: { puzzles: { rating: 1500, solved: 10, failed: 2, bestRush: 0 }, lessons: [] } });
+const turma = await call('/api/turmas', { token: ana.token, method: 'POST', body: { name: '5º ano B' } });
+assert(/^[A-Z2-9]{6}$/.test(turma.code), `turma criada com código ${turma.code}`);
+await call('/api/turmas/entrar', { token: bia.token, method: 'POST', body: { code: turma.code.toLowerCase() } });
+await call(`/api/turmas/${turma.id}/tarefas`, { token: ana.token, method: 'POST', body: { kind: 'aula', ref: 'garfo' } });
+await call(`/api/turmas/${turma.id}/tarefas`, { token: ana.token, method: 'POST', body: { kind: 'puzzles', count: 5 } });
+const intruso = await fetch(`${API}/api/turmas/${turma.id}/tarefas`, {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${bia.token}` },
+  body: JSON.stringify({ kind: 'puzzles', count: 1 }),
+});
+assert(intruso.status === 409, 'aluno não passa tarefa');
+await call('/api/me/treino', { token: bia.token, method: 'PUT', body: { puzzles: { rating: 1520, solved: 13, failed: 2, bestRush: 0 }, lessons: ['garfo'] } });
+const minha = await call('/api/turmas', { token: bia.token });
+const tarefas = minha.learning[0].assignments;
+assert(tarefas.find((t) => t.kind === 'aula').progress.done, 'aula feita aparece como feita');
+const pz = tarefas.find((t) => t.kind === 'puzzles').progress;
+assert(pz.value === 3 && pz.target === 5 && !pz.done, 'puzzles contam só desde que a tarefa foi dada (3 de 5)');
+const det = await call(`/api/turmas/${turma.id}`, { token: ana.token });
+assert(det.members.length === 1 && det.members[0].username === bia.name && !('email' in det.members[0]), 'professor vê o aluno, sem e-mail');
+const espiar = await fetch(`${API}/api/turmas/${turma.id}`, { headers: { Authorization: `Bearer ${bia.token}` } });
+assert(espiar.status === 404, 'aluno não vê o painel do professor');
+await call(`/api/turmas/${turma.id}/membros/${bia.id}`, { token: bia.token, method: 'DELETE' });
+assert((await call('/api/turmas', { token: bia.token })).learning.length === 0, 'aluno sai da turma');
+await call(`/api/turmas/${turma.id}`, { token: ana.token, method: 'DELETE' });
+
+// ---------- Jogo limpo (rotas de admin) ----------
+const adm = await fetch(`${API}/api/admin/jogos`);
+assert(adm.status === 404, 'rotas de admin fechadas sem o segredo');
+
+for (const s of [...lobbies, ...lob2, ...Object.values(seats).map((x) => x.s), friend, waiting, joiner, host, guest]) s.ws.close();
 console.log('\nTudo certo.');
 process.exit(0);

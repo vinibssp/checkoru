@@ -9,6 +9,8 @@ export interface PublicPlayer {
   rating: number;
   provisional: boolean;
   avatar: string | null;
+  /** Visitante sem conta, que entrou por um link de convite. */
+  guest?: boolean;
 }
 
 export interface ClockView {

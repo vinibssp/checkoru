@@ -12,4 +12,6 @@ export interface Env {
   GOOGLE_CLIENT_SECRET: string;
   SESSION_SECRET: string;
   DEV_LOGIN: string;
+  /** Segredo da análise de jogo limpo em lote (GitHub Actions). Sem ele, as rotas de admin ficam desligadas. */
+  ADMIN_TOKEN?: string;
 }

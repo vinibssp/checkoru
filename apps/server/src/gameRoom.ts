@@ -59,19 +59,28 @@ export class GameRoom extends DurableObject<Env> {
       return Response.json(this.core.snapshot(Date.now()));
     }
     const header = request.headers.get('X-Player');
-    const info = header ? (JSON.parse(header) as Omit<SeatPlayer, 'rating'> & { ratings: Ratings }) : null;
+    const info = header ? (JSON.parse(header) as Omit<SeatPlayer, 'rating'> & { ratings: Ratings; guest?: boolean }) : null;
     const category = TIME_CONTROLS[this.core.state.tc].category;
     const player: SeatPlayer | null = info
-      ? { id: info.id, username: info.username, avatar: info.avatar, rating: info.ratings[category] }
+      ? { id: info.id, username: info.username, avatar: info.avatar, rating: info.ratings[category], ...(info.guest ? { guest: true } : {}) }
       : null;
     const now = Date.now();
 
+    // Visitante só pode sentar numa partida que ainda espera alguém (e só como convidado do link).
+    if (player?.guest && this.core.colorOf(player.id) === null && this.core.state.status !== 'waiting') {
+      return this.watch(null);
+    }
     if (player && this.core.state.status === 'waiting' && this.core.colorOf(player.id) === null) {
       this.dispatch(this.core.join(player, now));
       await this.persist();
     }
-    const color = player ? this.core.colorOf(player.id) : null;
+    return this.watch(player);
+  }
 
+  private async watch(player: SeatPlayer | null): Promise<Response> {
+    if (!this.core) return new Response('Partida não encontrada', { status: 404 });
+    const now = Date.now();
+    const color = player ? this.core.colorOf(player.id) : null;
     const pair = new WebSocketPair();
     const [client, server] = Object.values(pair) as [WebSocket, WebSocket];
     this.ctx.acceptWebSocket(server);

@@ -1521,3 +1521,64 @@ cg-board square.last-move {
 .move-input-status:empty {
   display: none;
 }
+
+/* ---------- Turmas ---------- */
+
+.class-card {
+  margin: 12px 0;
+}
+
+.class-code {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  text-align: center;
+}
+
+.class-code-value {
+  font-family: var(--font-digits);
+  font-size: calc(40px * var(--digits-scale));
+  letter-spacing: 0.12em;
+  color: var(--ink);
+}
+
+.task-check {
+  flex: none;
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border: 2px solid var(--rule);
+  border-radius: 50%;
+  font-weight: 800;
+}
+
+.task-check.done {
+  background: var(--clock-on);
+  color: var(--clock-on-ink);
+  border-color: transparent;
+}
+
+.task-dots {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
+.task-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid var(--rule);
+}
+
+.task-dot.done {
+  background: var(--clock-on);
+  border-color: var(--clock-on);
+}
+
+.result-select.wide {
+  width: 100%;
+}
