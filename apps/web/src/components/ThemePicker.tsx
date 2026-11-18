@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { navigate } from '../router';
 import { useStore } from '../store';
-import { THEME_GROUPS, THEMES, themePatch, type AppTheme } from '../themes';
+import { MODES, THEME_GROUPS, THEMES, themePatch, themeVars, type AppTheme, type ModeId } from '../themes';
 import { Oru } from './Oru';
 
 const CHOSEN_KEY = 'checkoru.temaEscolhido';
@@ -24,8 +24,7 @@ function markChosen(): void {
 }
 
 /** Amostra do tema: fundo, tabuleiro e o nome escrito com a fonte do próprio tema. */
-function Sample({ t }: { t: AppTheme }) {
-  const v = t.vars;
+function Sample({ t, v }: { t: AppTheme; v: Record<string, string> }) {
   return (
     <span className="theme-sample2" style={{ background: v['--bg'], color: v['--ink'] }} aria-hidden="true">
       <span className="theme-mini-board">
@@ -49,11 +48,28 @@ function Sample({ t }: { t: AppTheme }) {
   );
 }
 
-/** Todos os temas, agrupados. Tocar aplica na hora. */
-export function ThemeGrid({ fresh = false, compact = false }: { fresh?: boolean; compact?: boolean }) {
+/** Claro, escuro, o do tema ou o do celular. */
+export function ModeSwitch() {
   const { prefs, setPrefs } = useStore();
   return (
+    <div className="seg mode-seg" role="radiogroup" aria-label="Claro ou escuro">
+      {(Object.keys(MODES) as ModeId[]).map((m) => (
+        <button key={m} role="radio" aria-checked={prefs.mode === m} className={prefs.mode === m ? 'on' : ''} onClick={() => setPrefs({ mode: m })}>
+          {m === 'sistema' ? 'Sistema' : MODES[m]}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+/** Todos os temas, agrupados. Tocar aplica na hora. */
+export function ThemeGrid({ fresh = false, compact = false }: { fresh?: boolean; compact?: boolean }) {
+  const { prefs, setPrefs, systemDark } = useStore();
+  const darkFor = (t: AppTheme) => (prefs.mode === 'claro' ? false : prefs.mode === 'escuro' ? true : prefs.mode === 'sistema' ? systemDark : t.dark);
+  return (
     <>
+      <h3 className="h2 theme-group">Claro ou escuro</h3>
+      <ModeSwitch />
       {THEME_GROUPS.map((g) => (
         <section key={g.title}>
           <h3 className="h2 theme-group">{g.title}</h3>
@@ -63,7 +79,7 @@ export function ThemeGrid({ fresh = false, compact = false }: { fresh?: boolean;
               const on = prefs.theme === id;
               return (
                 <button key={id} role="radio" aria-checked={on} aria-label={t.name} className={`theme-pick ${on ? 'on' : ''}`} onClick={() => setPrefs(themePatch(prefs, id, fresh))}>
-                  <Sample t={t} />
+                  <Sample t={t} v={themeVars(id, darkFor(t))} />
                   <span className="theme-name">{t.name}</span>
                   {!compact && <span className="theme-desc">{t.desc}</span>}
                 </button>

@@ -643,7 +643,7 @@ cg-board square.last-move {
 
 .tile-b {
   background: var(--accent3);
-  color: var(--on-accent);
+  color: var(--on-accent3, var(--on-accent));
 }
 
 .tile-a .choice-sub,
@@ -932,4 +932,15 @@ cg-board square.last-move {
 .theme-intro-go .btn {
   width: 100%;
   max-width: 420px;
+}
+
+.mode-seg {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.mode-seg button {
+  min-height: 40px;
+  padding: 0 4px;
+  font-size: 13px;
 }

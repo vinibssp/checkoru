@@ -2,7 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import { api, getToken, setToken, TEST_BUILD, type Me } from './api';
 import { pieceCss } from './pieces';
 import { preload, setVolume } from './sound';
-import { cssVars, DEFAULT_PREFS, sanitizePrefs, themeOf, type Prefs } from './themes';
+import { cssVars, DEFAULT_PREFS, isDark, sanitizePrefs, themeOf, type Prefs } from './themes';
 
 const PREFS_KEY = 'checkoru.prefs';
 const BG_KEY = 'checkoru.bg';
@@ -33,6 +33,8 @@ interface Store {
   enterGuest: () => void;
   prefs: Prefs;
   setPrefs: (patch: Partial<Prefs>) => void;
+  /** O celular está no modo escuro? */
+  systemDark: boolean;
   /** Foto de fundo: fica só neste aparelho. */
   background: string | null;
   setBackground: (dataUrl: string | null) => void;
@@ -154,15 +156,27 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     void preload(prefs.sounds);
   }, [prefs.volume, prefs.sounds]);
 
+  // Claro/escuro do celular, para o modo "Do sistema".
+  const [systemDark, setSystemDark] = useState(() => window.matchMedia?.('(prefers-color-scheme: dark)').matches ?? false);
+  useEffect(() => {
+    const mq = window.matchMedia?.('(prefers-color-scheme: dark)');
+    if (!mq) return;
+    const on = () => setSystemDark(mq.matches);
+    mq.addEventListener('change', on);
+    return () => mq.removeEventListener('change', on);
+  }, []);
+
   // Aplica tema e peças no documento inteiro.
   useEffect(() => {
     const root = document.documentElement;
-    for (const [k, v] of Object.entries(cssVars(prefs))) root.style.setProperty(k, v);
+    const vars = cssVars(prefs, systemDark);
+    for (const [k, v] of Object.entries(vars)) root.style.setProperty(k, v);
     root.style.setProperty('--bg-image', background ? `url("${background}")` : 'none');
     root.dataset.theme = prefs.theme;
     root.dataset.estilo = themeOf(prefs).style;
-    root.style.colorScheme = themeOf(prefs).dark ? 'dark' : 'light';
-    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', cssVars(prefs)['--bg']!);
+    root.dataset.modo = isDark(prefs, systemDark) ? 'escuro' : 'claro';
+    root.style.colorScheme = isDark(prefs, systemDark) ? 'dark' : 'light';
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', vars['--bg']!);
     let style = document.getElementById('piece-set') as HTMLStyleElement | null;
     if (!style) {
       style = document.createElement('style');
@@ -170,11 +184,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       document.head.appendChild(style);
     }
     style.textContent = pieceCss(prefs.pieces);
-  }, [prefs, background]);
+  }, [prefs, background, systemDark]);
 
   const value = useMemo(
-    () => ({ me, refreshMe, login, logout, guest: me?.user.id === 'local', enterGuest, prefs, setPrefs, background, setBackground }),
-    [me, refreshMe, login, logout, enterGuest, prefs, setPrefs, background, setBackground],
+    () => ({ me, refreshMe, login, logout, guest: me?.user.id === 'local', enterGuest, prefs, setPrefs, background, setBackground, systemDark }),
+    [me, refreshMe, login, logout, enterGuest, prefs, setPrefs, background, setBackground, systemDark],
   );
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

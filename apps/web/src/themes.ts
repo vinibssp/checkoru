@@ -44,6 +44,7 @@ const ARCADE_TEXT: Record<string, string> = {
   '--btn-weight': '400',
   '--btn-spacing': '0.04em',
   '--digits-scale': '1',
+  '--on-accent3': 'var(--on-accent)',
 };
 
 const CLASSIC_TEXT: Record<string, string> = {
@@ -196,7 +197,7 @@ export const THEMES: Record<string, AppTheme> = {
     dark: false,
     board: { name: 'Disquete', light: '#DFDFDF', dark: '#3A6EA5', frame: '#404040', hlLight: '#FFFF80', hlDark: '#C8C850' },
     vars: {
-      '--bg': '#008080', '--surface': '#C0C0C0', '--ink': '#000000', '--sub': '#1F1F1F', '--rule': '#808080',
+      '--bg': '#008A8A', '--surface': '#C0C0C0', '--ink': '#000000', '--sub': '#1F1F1F', '--rule': '#808080',
       '--accent': '#000080', '--on-accent': '#FFFFFF', '--accent2': '#800080', '--accent3': '#808000', '--score': '#000080',
       '--clock-on': '#000080', '--clock-on-ink': '#FFFFFF', '--nav': '#C0C0C0', '--danger': '#A00000',
       '--owl-body': '#000000', '--owl-face': '#C0C0C0',
@@ -259,6 +260,7 @@ export const THEMES: Record<string, AppTheme> = {
     vars: {
       '--bg': '#0B0D14', '--surface': '#1A1F2E', '--ink': '#EEF2FA', '--sub': '#9AA6BF', '--rule': '#252B3D',
       '--accent': '#FF2E4D', '--on-accent': '#FFFFFF', '--accent2': '#1E6BFF', '--accent3': '#FFD23F', '--score': '#FFD23F',
+      '--on-accent3': '#0B0D14',
       '--clock-on': '#FFD23F', '--clock-on-ink': '#0B0D14', '--nav': '#11141D', '--danger': '#FF5C74',
       '--owl-body': '#EEF2FA', '--owl-face': '#1A1F2E',
       '--font-display': DISPLAY, '--font-ui': GROTESK, '--font-digits': TERMINAL,
@@ -269,6 +271,106 @@ export const THEMES: Record<string, AppTheme> = {
     },
   },
 };
+
+
+/**
+ * A outra versão de cada tema (clara para os escuros, escura para os claros).
+ * Só troca cores; fontes e formatos continuam os do tema.
+ */
+export const THEME_ALT: Record<string, Record<string, string>> = {
+  classico: {
+    '--bg': '#211B16', '--surface': '#2E2620', '--ink': '#F1E8DA', '--sub': '#BFAF9B', '--rule': '#43382E',
+    '--accent': '#C8955E', '--on-accent': '#211B16', '--accent2': '#6FB28A', '--accent3': '#D9A845', '--score': '#D9A845',
+    '--clock-on': '#F1E8DA', '--clock-on-ink': '#211B16', '--nav': '#2A221C', '--danger': '#E06C5F',
+    '--owl-body': '#E9D9BF', '--owl-face': '#2E2620',
+    '--btn-border': '1px solid #4A3D32', '--btn-shadow': '0 1px 2px rgba(0,0,0,0.4)',
+    '--card-border': '1px solid #3E342B', '--card-shadow': 'none',
+    '--board-frame': '0 0 0 3px #6B4428, 0 3px 12px rgba(0,0,0,0.5)',
+  },
+  torneio: {
+    '--bg': '#F3F4F1', '--surface': '#FFFFFF', '--ink': '#1F2326', '--sub': '#5C625E', '--rule': '#DCDFDA',
+    '--accent': '#5E8F2E', '--on-accent': '#FFFFFF', '--accent2': '#2F6FB0', '--accent3': '#B88A12', '--score': '#5E8F2E',
+    '--clock-on': '#1F2326', '--clock-on-ink': '#FFFFFF', '--nav': '#FFFFFF', '--danger': '#C93A32',
+    '--owl-body': '#1F2326', '--owl-face': '#F3F4F1',
+    '--btn-border': '1px solid #D5D9D3', '--btn-shadow': '0 2px 0 rgba(0,0,0,0.10)',
+    '--card-border': '1px solid #E1E4DF', '--card-shadow': 'none',
+    '--board-frame': '0 3px 14px rgba(0,0,0,0.18)',
+  },
+  fliperama: {
+    '--bg': '#FFF4E6', '--surface': '#FFFFFF', '--ink': '#1E1950', '--sub': '#5A5390', '--rule': '#D9D2F2',
+    '--accent': '#E8336F', '--on-accent': '#FFFFFF', '--accent2': '#139C92', '--accent3': '#D99A00', '--score': '#5D4FB8',
+    '--on-accent3': '#1E1950',
+    '--clock-on': '#139C92', '--clock-on-ink': '#FFFFFF', '--nav': '#FFFFFF', '--danger': '#D93636',
+    '--owl-body': '#1E1950', '--owl-face': '#FFF4E6',
+    '--btn-shadow': `${notch('#1E1950')}, 6px 6px 0 4px #1E1950`,
+    '--board-frame': '0 0 0 3px #1E1950, 0 0 0 6px #E8336F',
+    '--overlay': 'none',
+  },
+  cartucho: {
+    '--bg': '#1B1B1B', '--surface': '#2A2A2A', '--ink': '#F3EAD7', '--sub': '#BDB4A4', '--rule': '#F3EAD7',
+    '--accent': '#FF5A4E', '--on-accent': '#1B1B1B', '--accent2': '#5B8CFF', '--accent3': '#4FC07A', '--score': '#F7C948',
+    '--clock-on': '#F7C948', '--clock-on-ink': '#1B1B1B', '--nav': '#232323', '--danger': '#FF6B5E',
+    '--owl-body': '#F3EAD7', '--owl-face': '#1B1B1B',
+    '--btn-border': '3px solid #F3EAD7', '--btn-shadow': '4px 4px 0 0 #000000',
+    '--card-border': '3px solid #F3EAD7', '--card-shadow': '3px 3px 0 0 #000000',
+    '--board-frame': '0 0 0 4px #F3EAD7',
+  },
+  fosforo: {
+    '--bg': '#0F380F', '--surface': '#1E4A1E', '--ink': '#9BBC0F', '--sub': '#7FA00F', '--rule': '#306230',
+    '--accent': '#9BBC0F', '--on-accent': '#0F380F', '--accent2': '#8BAC0F', '--accent3': '#8BAC0F', '--score': '#9BBC0F',
+    '--clock-on': '#9BBC0F', '--clock-on-ink': '#0F380F', '--nav': '#123F12', '--danger': '#C4D64A',
+    '--owl-body': '#9BBC0F', '--owl-face': '#1E4A1E',
+    '--btn-shadow': notch('#9BBC0F', 3), '--card-shadow': notch('#306230', 2),
+    '--board-frame': '0 0 0 4px #9BBC0F',
+    '--overlay': 'radial-gradient(rgba(155,188,15,0.08) 1px, transparent 1px) 0 0 / 3px 3px',
+  },
+  letreiro: {
+    '--bg': '#FFF8E7', '--surface': '#FFFFFF', '--ink': '#1A1A1A', '--sub': '#5E5240', '--rule': '#E2CF9F',
+    '--accent': '#D99A00', '--on-accent': '#1A1A1A', '--accent2': '#C8303C', '--accent3': '#1E9C90', '--score': '#C8303C',
+    '--clock-on': '#C8303C', '--clock-on-ink': '#FFFFFF', '--nav': '#FFFFFF', '--danger': '#C8303C',
+    '--owl-body': '#1A1A1A', '--owl-face': '#FFC845',
+    '--btn-border': '3px dotted #1A1A1A', '--card-border': '2px dotted #B8A272',
+    '--board-frame': '0 0 0 5px #FFF8E7, 0 0 0 9px #D99A00',
+  },
+  disquete: {
+    '--bg': '#000040', '--surface': '#404040', '--ink': '#FFFFFF', '--sub': '#D0D0D0', '--rule': '#808080',
+    '--accent': '#00AAAA', '--on-accent': '#000000', '--accent2': '#FF55FF', '--accent3': '#FFFF55', '--score': '#55FFFF',
+    '--clock-on': '#00AAAA', '--clock-on-ink': '#000000', '--nav': '#404040', '--danger': '#FF5555',
+    '--owl-body': '#FFFFFF', '--owl-face': '#404040',
+    '--btn-shadow': 'inset -2px -2px 0 0 #000000, inset 2px 2px 0 0 #808080, inset -4px -4px 0 0 #202020, inset 4px 4px 0 0 #606060',
+    '--card-shadow': 'inset 2px 2px 0 0 #000000, inset -2px -2px 0 0 #707070',
+    '--board-frame': '0 0 0 2px #808080, 0 0 0 4px #000000',
+  },
+  ambar: {
+    '--bg': '#FFF6E0', '--surface': '#FFFFFF', '--ink': '#7A4A00', '--sub': '#9A6A10', '--rule': '#E8C887',
+    '--accent': '#B36B00', '--on-accent': '#FFF6E0', '--accent2': '#B36B00', '--accent3': '#8A5200', '--score': '#B36B00',
+    '--clock-on': '#B36B00', '--clock-on-ink': '#FFF6E0', '--nav': '#FFF1D0', '--danger': '#C0441A',
+    '--owl-body': '#7A4A00', '--owl-face': '#FFF6E0',
+    '--btn-border': '2px solid #B36B00', '--card-border': '1px solid #E8C887',
+    '--board-frame': '0 0 0 2px #B36B00',
+    '--overlay': 'none', '--glow': 'none',
+  },
+  bala: {
+    '--bg': '#241C33', '--surface': '#30264A', '--ink': '#FFF1F5', '--sub': '#C8BDE0', '--rule': '#C8B6FF',
+    '--accent': '#FF6FA3', '--on-accent': '#241C33', '--accent2': '#7BDFF2', '--accent3': '#B8F27B', '--score': '#FFE066',
+    '--clock-on': '#C8B6FF', '--clock-on-ink': '#241C33', '--nav': '#2A2140', '--danger': '#FF6F91',
+    '--owl-body': '#FFF1F5', '--owl-face': '#30264A',
+    '--btn-border': '3px solid #C8B6FF', '--btn-shadow': '0 5px 0 0 #120C1C',
+    '--card-border': '3px solid #C8B6FF', '--card-shadow': '0 4px 0 0 #120C1C',
+    '--board-frame': '0 0 0 4px #C8B6FF',
+  },
+  turbo: {
+    '--bg': '#F2F5FB', '--surface': '#FFFFFF', '--ink': '#0B0D14', '--sub': '#4C5670', '--rule': '#D5DCEA',
+    '--accent': '#E8193B', '--on-accent': '#FFFFFF', '--accent2': '#1E6BFF', '--accent3': '#E0A800', '--score': '#1E6BFF',
+    '--on-accent3': '#0B0D14',
+    '--clock-on': '#0B0D14', '--clock-on-ink': '#FFD23F', '--nav': '#FFFFFF', '--danger': '#E8193B',
+    '--owl-body': '#0B0D14', '--owl-face': '#F2F5FB',
+    '--board-frame': '0 0 0 3px #F2F5FB, 0 0 0 6px #E8193B',
+  },
+};
+
+export const MODES = { tema: 'Do tema', claro: 'Claro', escuro: 'Escuro', sistema: 'Do sistema' } as const;
+export type ModeId = keyof typeof MODES;
 
 export const DEFAULT_THEME = 'classico';
 
@@ -326,6 +428,8 @@ export interface Prefs {
   volume: number;
   animation: boolean;
   confirmResign: boolean;
+  /** Claro ou escuro: o do tema, um fixo, ou seguir o celular. */
+  mode: ModeId;
 }
 
 export const DEFAULT_PREFS: Prefs = {
@@ -340,6 +444,7 @@ export const DEFAULT_PREFS: Prefs = {
   volume: 0.8,
   animation: true,
   confirmResign: true,
+  mode: 'tema',
 };
 
 /** Aceita qualquer coisa vinda do servidor ou do armazenamento e devolve preferências válidas. */
@@ -359,6 +464,7 @@ export function sanitizePrefs(raw: unknown): Prefs {
     volume: typeof r.volume === 'number' && r.volume >= 0 && r.volume <= 1 ? r.volume : DEFAULT_PREFS.volume,
     animation: bool(r.animation, DEFAULT_PREFS.animation),
     confirmResign: bool(r.confirmResign, DEFAULT_PREFS.confirmResign),
+    mode: typeof r.mode === 'string' && r.mode in MODES ? (r.mode as ModeId) : DEFAULT_PREFS.mode,
   };
 }
 
@@ -371,13 +477,26 @@ export function boardColors(prefs: Prefs): BoardTheme {
   return { ...base, light: prefs.customLight ?? base.light, dark: prefs.customDark ?? base.dark };
 }
 
+/** O app está escuro agora? `systemDark` é a preferência do celular. */
+export function isDark(prefs: Prefs, systemDark = false): boolean {
+  if (prefs.mode === 'claro') return false;
+  if (prefs.mode === 'escuro') return true;
+  if (prefs.mode === 'sistema') return systemDark;
+  return themeOf(prefs).dark;
+}
+
+/** Variáveis de um tema na versão clara ou escura. */
+export function themeVars(id: string, dark: boolean): Record<string, string> {
+  const t = THEMES[id] ?? THEMES[DEFAULT_THEME]!;
+  const key = id in THEMES ? id : DEFAULT_THEME;
+  return { ...ARCADE_TEXT, ...t.vars, ...(dark !== t.dark ? THEME_ALT[key] : {}) };
+}
+
 /** Variáveis CSS que o app inteiro usa. Trocar uma preferência muda tudo na hora. */
-export function cssVars(prefs: Prefs): Record<string, string> {
-  const t = themeOf(prefs);
+export function cssVars(prefs: Prefs, systemDark = false): Record<string, string> {
   const b = boardColors(prefs);
   return {
-    ...ARCADE_TEXT,
-    ...t.vars,
+    ...themeVars(prefs.theme, isDark(prefs, systemDark)),
     '--sq-light': b.light,
     '--sq-dark': b.dark,
     '--sq-hl-light': b.hlLight,
