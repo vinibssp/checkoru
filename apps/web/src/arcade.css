@@ -1217,8 +1217,18 @@ cg-board square.last-move {
 
 .otb-names {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 10px;
+}
+
+.otb-names input {
+  width: 100%;
+  min-width: 0;
+}
+
+.switch-sub {
+  display: block;
+  font-weight: 400;
 }
 
 .otb .game-body {
@@ -1458,4 +1468,56 @@ cg-board square.last-move {
 
 .row-form .btn {
   height: 52px;
+}
+
+/* ---------- Acessibilidade: lance digitado ou falado ---------- */
+
+.with-input .board-frame {
+  --game-chrome: calc(316px + var(--safe-top) + var(--safe-bottom));
+}
+
+.move-input {
+  padding: 6px 8px 0;
+}
+
+.move-input-row {
+  display: flex;
+  gap: 6px;
+}
+
+.move-input-row input {
+  flex: 1;
+  min-width: 0;
+  height: 44px;
+  padding: 0 12px;
+  border: 1.5px solid var(--ink);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-size: 17px;
+}
+
+.move-input-row .btn {
+  height: 44px;
+  padding: 0 12px;
+}
+
+.move-options {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin: 6px 0 0;
+}
+
+.move-input-status {
+  margin: 4px 0 0;
+  min-height: 1em;
+  max-height: 4.5em;
+  overflow-y: auto;
+  color: var(--sub);
+}
+
+.move-input-status:empty {
+  display: none;
 }

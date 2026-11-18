@@ -94,6 +94,17 @@ Os textos do app são escritos por nós, com nossas palavras; não copiamos trec
   possa dar mate com nenhuma sequência de lances legais, quando é empate (art. 6.9). Na súmula, o app
   aproxima isso pela falta de material para mate.
 
+## Acessibilidade e notação
+
+- **Leis do Xadrez da FIDE, Apêndice C (notação algébrica), C.3**: cada jogador pode abreviar as peças com o nome
+  usado no seu país. Por isso o Checkoru mostra e aceita R, D, T, B, C (rei, dama, torre, bispo, cavalo) e também
+  entende as letras inglesas K, Q, N; peão sem letra; roque como O-O e O-O-O.
+- **Leis do Xadrez da FIDE, Apêndice D (*Rules for play with blind and visually disabled players*)**: base da ideia
+  de anunciar cada lance em voz alta e de jogar dizendo o lance. O app só se inspira nele; não aplica as regras de
+  torneio desse apêndice.
+- Fala e reconhecimento de voz: a voz do próprio aparelho (Web Speech API no navegador; no Android, os plugins
+  `@capacitor-community/text-to-speech` e `@capacitor-community/speech-recognition`, licença MIT).
+
 ## Puzzles
 
 Os puzzles vêm do banco aberto do Lichess (CC0), de partidas reais, com solução conferida por motor. Não há livro

@@ -460,6 +460,10 @@ export interface Prefs {
   mode: ModeId;
   /** Modo leve, para celular simples: sem efeitos de tela e análise mais curta. */
   lite: boolean;
+  /** Acessibilidade: falar cada lance em voz alta. */
+  narrate: boolean;
+  /** Acessibilidade: campo para digitar ou falar o lance, e botão para ouvir a posição. */
+  typedMoves: boolean;
 }
 
 export const DEFAULT_PREFS: Prefs = {
@@ -476,6 +480,8 @@ export const DEFAULT_PREFS: Prefs = {
   confirmResign: true,
   mode: 'tema',
   lite: false,
+  narrate: false,
+  typedMoves: false,
 };
 
 /** Aceita qualquer coisa vinda do servidor ou do armazenamento e devolve preferências válidas. */
@@ -497,6 +503,8 @@ export function sanitizePrefs(raw: unknown): Prefs {
     confirmResign: bool(r.confirmResign, DEFAULT_PREFS.confirmResign),
     mode: typeof r.mode === 'string' && r.mode in MODES ? (r.mode as ModeId) : DEFAULT_PREFS.mode,
     lite: bool(r.lite, DEFAULT_PREFS.lite),
+    narrate: bool(r.narrate, DEFAULT_PREFS.narrate),
+    typedMoves: bool(r.typedMoves, DEFAULT_PREFS.typedMoves),
   };
 }
 

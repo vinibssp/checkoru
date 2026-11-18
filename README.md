@@ -36,6 +36,7 @@ Site e app Android, de código aberto e sem anúncios.
 | Modo leve para celular simples e tema de alto contraste (claro e escuro) | pronto |
 | Modo família: PIN do responsável, limite de tempo por dia, sem chat, só amigos e relatório da semana | pronto |
 | Tabuleiro de verdade: relógio de xadrez com incremento e pausa, súmula no celular e análise depois (sem internet) | pronto |
+| Acessibilidade por voz: lances falados em voz alta, jogar digitando ou falando o lance (“cavalo f três”, “roque pequeno”), ouvir onde estão as peças e anúncio para leitor de tela | pronto |
 | Torneio do clube: sistema suíço simplificado, folga, W.O., desempates (Buchholz, Sonneborn-Berger, vitórias), tabela para compartilhar e rating do clube (Elo) | pronto |
 
 ## Como rodar na sua máquina

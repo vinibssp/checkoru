@@ -14,6 +14,7 @@ import { count, recordGame } from '../wellbeing';
 import { engine } from '../engine';
 import { gameFromUcis } from '../analysis';
 import { openAnalysis } from '../currentAnalysis';
+import { MoveAnnouncer, MoveInput } from '../components/Voice';
 
 type Tc = TimeControlId | 'livre';
 
@@ -296,9 +297,10 @@ export function LocalBoard({ tc, onNew, vs }: { tc: Tc; onNew: () => void; vs?: 
   const sideName = (c: Color) => (vs ? (c === vs.you ? 'Você' : `${vs.bot.name} · ~${vs.bot.elo}`) : undefined);
 
   return (
-    <div className={`page game-page ${blindClass}`}>
+    <div className={`page game-page ${blindClass} ${prefs.typedMoves ? 'with-input' : ''}`}>
       <TopBar title={vs ? `Contra ${vs.bot.art} ${vs.bot.name}` : 'No mesmo aparelho'} sub={timed ? TIME_CONTROLS[tc].label : 'sem relógio'} back={onNew} />
       <MoveList moves={g.moves} />
+      <MoveAnnouncer moves={g.moves} names={names} />
       <div className="game-body">
         <SideBar color={top} ms={left(top)} timed={timed} active={!end && turn === top} name={sideName(top)} status={thinking && top !== vs?.you ? 'pensando…' : undefined} />
         <div className="board-zone">
@@ -367,6 +369,7 @@ export function LocalBoard({ tc, onNew, vs }: { tc: Tc; onNew: () => void; vs?: 
         )}
         </div>
 
+        <MoveInput fen={g.fen} canMove={!end && !thinking && (!vs || turn === vs.you)} onMove={playMove} />
         <div className="actions">
           {vs ? (
             !end && (

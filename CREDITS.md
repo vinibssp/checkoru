@@ -20,6 +20,7 @@ O Checkoru existe graças a projetos abertos.
 | Puzzles ([banco de puzzles](https://database.lichess.org/#puzzles), seleção de ~20 mil) | Lichess e seus jogadores | CC0 1.0 |
 | [React](https://react.dev) | Meta e colaboradores | MIT |
 | [Capacitor](https://capacitorjs.com) | Ionic | MIT |
+| [Capacitor Community Text-to-Speech](https://github.com/capacitor-community/text-to-speech) e [Speech Recognition](https://github.com/capacitor-community/speech-recognition) | Capacitor Community | MIT |
 | [Vite](https://vite.dev) | Evan You e colaboradores | MIT |
 | [Wrangler](https://github.com/cloudflare/workers-sdk) | Cloudflare | MIT / Apache-2.0 |
 

@@ -26,6 +26,7 @@ import { AnalyseCheckoruButton } from './Analyze';
 import { navigate } from '../router';
 import { endSound, moveSound, play } from '../sound';
 import { useStore } from '../store';
+import { MoveAnnouncer, MoveInput } from '../components/Voice';
 
 interface ChatLine {
   from: Color;
@@ -295,7 +296,7 @@ export function Game({ id }: { id: string }) {
   const claimable = playing && you !== null && !view.opponent.connected && view.opponent.claimableAt !== null && now + view.offset >= view.opponent.claimableAt;
 
   return (
-    <div className="page game-page">
+    <div className={`page game-page ${prefs.typedMoves && playing && you ? 'with-input' : ''}`}>
       <TopBar
         title={tc.label}
         sub={`${you ? 'online' : 'assistindo'} · ${game.rated ? 'valendo rating' : 'sem rating'}`}
@@ -312,6 +313,7 @@ export function Game({ id }: { id: string }) {
       />
 
       <MoveList moves={game.moves} />
+      <MoveAnnouncer moves={game.moves} names={{ white: game.white?.username ?? 'Brancas', black: game.black?.username ?? 'Pretas' }} />
       <div className="game-body">
         <PlayerBar
           player={game[opp]}
@@ -388,6 +390,7 @@ export function Game({ id }: { id: string }) {
         {game.status === 'ended' && game.end && (endOpen ? <EndPanel game={game} you={you} send={send} onClose={() => setEndOpen(false)} /> : null)}
         </div>
 
+      {playing && you && <MoveInput fen={game.fen} canMove={myTurn} onMove={playMove} />}
       {playing && you && (
         <div className="actions">
           {confirmResign ? (

@@ -15,6 +15,7 @@ import { loadTournaments, saveTournament, type Result } from '../tournament';
 import { count } from '../wellbeing';
 import { isPawnAt } from './Local';
 import { MoveList, PromotionPicker } from './Game';
+import { MoveAnnouncer, MoveInput } from '../components/Voice';
 
 interface Setup {
   white: string;
@@ -110,15 +111,14 @@ function OtbSetup({ table, onStart }: { table: TableRef | null; onStart: (s: Set
         )}
 
         <label className="switch">
-          <input type="checkbox" checked={record || tc === 'livre'} disabled={tc === 'livre'} onChange={(e) => setRecord(e.target.checked)} />
           <span>
-            <b>Anotar os lances aqui</b>
-            <span className="muted small">
-              {' '}
+            Anotar os lances aqui
+            <span className="muted small switch-sub">
               Repita o lance no tabuleiro da tela: ele já aperta o relógio. No fim dá para analisar a partida.
               {blitz && record ? ' Em blitz pode ficar corrido: talvez seja melhor só o relógio.' : ''}
             </span>
           </span>
+          <input type="checkbox" checked={record || tc === 'livre'} disabled={tc === 'livre'} onChange={(e) => setRecord(e.target.checked)} />
         </label>
 
         <button
@@ -317,9 +317,10 @@ function OtbRun({ setup, table, onNew, onAgain }: { setup: Setup; table: TableRe
   const showClocks = setup.timed || !setup.record;
 
   return (
-    <div className={`page game-page otb ${setup.record ? 'otb-record' : 'otb-only'}`}>
+    <div className={`page game-page otb ${setup.record ? 'otb-record' : 'otb-only'} ${setup.record && prefs.typedMoves ? 'with-input' : ''}`}>
       <TopBar title="Tabuleiro de verdade" sub={setup.timed ? `${setup.minutes}+${setup.inc}` : 'sem relógio'} back={onNew} />
       {setup.record && <MoveList moves={g.moves} />}
+      {setup.record && <MoveAnnouncer moves={g.moves} names={{ white: setup.white, black: setup.black }} />}
       <div className="game-body">
         {showClocks && clockFace('black', true)}
         {setup.record && (
@@ -415,6 +416,7 @@ function OtbRun({ setup, table, onNew, onAgain }: { setup: Setup; table: TableRe
           )}
         </div>
 
+        {setup.record && <MoveInput fen={g.fen} canMove={!end && !paused} onMove={playMove} />}
         <div className="actions">
           {!end && setup.timed && started && (
             <button className="btn" onClick={() => setClock((c) => (c.running ? pause(c, Date.now()) : start(c, Date.now())))}>

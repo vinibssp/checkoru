@@ -168,6 +168,14 @@ export function Customize() {
         {toggle('animation', 'Animar as peças')}
         {toggle('confirmResign', 'Confirmar antes de desistir')}
         {toggle('lite', 'Modo leve (celular simples): sem efeitos de tela e análise mais rápida')}
+
+        <h2 className="h2">Acessibilidade</h2>
+        {toggle('narrate', 'Falar os lances em voz alta')}
+        {toggle('typedMoves', 'Jogar digitando ou falando o lance (e ouvir onde estão as peças)')}
+        <p className="muted small">
+          Funciona nas partidas online, no mesmo aparelho, contra os bots e no tabuleiro de verdade. Exemplos: “e4”, “Cf3”, “cavalo f três”, “peão de e toma
+          d5”, “roque pequeno”. Leitores de tela (TalkBack) também ouvem cada lance.
+        </p>
       </div>
     </Page>
   );
