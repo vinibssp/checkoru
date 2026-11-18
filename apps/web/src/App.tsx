@@ -8,6 +8,7 @@ import { Home } from './screens/Home';
 import { Legal } from './screens/Legal';
 import { Analysis } from './screens/Analysis';
 import { Bots } from './screens/Bots';
+import { PuzzleScreen, Rush, Train } from './screens/Puzzles';
 import { Analyze } from './screens/Analyze';
 import { Local } from './screens/Local';
 import { LoginReturn } from './screens/LoginReturn';
@@ -66,8 +67,13 @@ export function App() {
     case 'partida':
       return arg ? <Game key={arg} id={arg} /> : <Home />;
     case 'treinar':
+      return <Train />;
+    case 'puzzle':
+      return <PuzzleScreen key={route.query.toString()} />;
+    case 'corrida':
+      return <Rush />;
     case 'aprender':
-      return <Soon key={section} section={section} />;
+      return <Soon key={section} section="aprender" />;
     case 'toca':
       return <Toca />;
     case 'personalizar':

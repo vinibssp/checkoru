@@ -24,7 +24,8 @@ Site e app Android, de código aberto e sem anúncios.
 | Análise com Stockfish no aparelho: avaliação, melhor lance, resumo com precisão e revisão dos erros | pronto |
 | Importar partidas: PGN/FEN, arquivo, Lichess, Chess.com e o próprio histórico | pronto |
 | Jogar contra a Oru: 6 bots (~400 a ~2800), dica, desfazer, sem internet | pronto |
-| Puzzles, aulas, jogos famosos | depois |
+| Puzzles sem internet: 20 mil do banco do Lichess, puzzle do dia, por tema, corrida de 3 min e rating de puzzles | pronto |
+| Aulas e jogos famosos | depois |
 
 ## Como rodar na sua máquina
 

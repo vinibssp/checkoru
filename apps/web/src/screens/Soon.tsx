@@ -2,11 +2,6 @@ import { Oru } from '../components/Oru';
 import { Page, TopBar } from '../components/Shell';
 
 const TEXT: Record<string, { title: string; sub: string; items: string[] }> = {
-  treinar: {
-    title: 'Treinar',
-    sub: 'Caça',
-    items: ['Puzzle do dia e puzzles por tema', 'Corrida de puzzles', 'Revisão dos seus erros'],
-  },
   aprender: {
     title: 'Aprender',
     sub: 'Ninho',
@@ -15,7 +10,7 @@ const TEXT: Record<string, { title: string; sub: string; items: string[] }> = {
 };
 
 /** Seções que chegam nas próximas versões. Melhor dizer isso do que mostrar botão que não faz nada. */
-export function Soon({ section }: { section: 'treinar' | 'aprender' }) {
+export function Soon({ section }: { section: 'aprender' }) {
   const t = TEXT[section]!;
   return (
     <Page>

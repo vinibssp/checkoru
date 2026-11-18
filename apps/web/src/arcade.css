@@ -616,3 +616,94 @@ cg-board square.last-move {
 .chat-lines {
   padding-right: 40px;
 }
+
+/* ---------- Puzzles ---------- */
+
+.mode-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.mode-tile {
+  text-decoration: none;
+  margin: 2px 4px 6px 2px;
+}
+
+.tile-a {
+  background: var(--accent2);
+  color: var(--on-accent);
+}
+
+.tile-b {
+  background: var(--accent3);
+  color: var(--on-accent);
+}
+
+.tile-a .choice-sub,
+.tile-b .choice-sub {
+  color: inherit;
+  opacity: 0.85;
+}
+
+.theme-chips {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.theme-chip {
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  text-decoration: none;
+  font-weight: 700;
+}
+
+.puzzle-status {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 56px;
+  padding: 6px 12px;
+  border-bottom: 2px solid var(--rule);
+  font-weight: 700;
+}
+
+.puzzle-status.certo,
+.puzzle-status.resolvido {
+  background: color-mix(in srgb, var(--accent2) 22%, transparent);
+}
+
+.puzzle-status.errado {
+  background: color-mix(in srgb, var(--danger) 25%, transparent);
+}
+
+.puzzle-themes {
+  text-align: center;
+  padding: 6px 10px 0;
+}
+
+.rush-bar {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 12px;
+}
+
+.rush-score {
+  font-family: var(--font-digits);
+  font-size: 40px;
+  color: var(--score);
+  min-width: 60px;
+}
+
+.rush-lives {
+  font-size: 24px;
+  color: var(--danger);
+  letter-spacing: 4px;
+}

@@ -11,11 +11,17 @@ export function Board({ config, onReady }: { config: Config; onReady?: (api: Api
   const cg = useRef<Api | null>(null);
   const { prefs } = useStore();
 
+  // "Só ver" sem o viewOnly do chessground: ele desliga os toques de vez quando o tabuleiro
+  // é redesenhado (ex.: ao virar) e não liga de novo. Então bloqueamos os lances por aqui.
+  const locked = !!config.viewOnly;
   const full: Config = {
     ...config,
+    viewOnly: false,
+    // (só sobrescreve se precisar: o chessground copia até chaves undefined por cima do estado)
+    ...(locked ? { premovable: { enabled: false } } : {}),
     coordinates: prefs.coords,
     animation: { enabled: prefs.animation, duration: 180 },
-    movable: { ...config.movable, showDests: prefs.showDests },
+    movable: locked ? { ...config.movable, color: undefined, dests: new Map(), showDests: prefs.showDests } : { ...config.movable, showDests: prefs.showDests },
     highlight: { lastMove: true, check: true },
     draggable: { showGhost: true },
   };

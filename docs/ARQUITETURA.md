@@ -71,14 +71,22 @@ com força reduzida (`Skill Level`, profundidade e tempo). Os mais fracos às ve
 Sagui prefere capturas, para errar como gente. Vencer um libera o próximo (guardado no aparelho; no APK de teste,
 todos vêm liberados). A força em Elo é aproximada.
 
+## Puzzles
+
+O banco aberto do Lichess (CC0, milhões de puzzles) é baixado pelo workflow `puzzles.yml`, que roda
+`scripts/puzzles/build.py`: fica só com os bem avaliados e jogados (popularidade ≥ 80, ≥ 300 partidas), até 800 por
+faixa de 100 pontos, de 400 a 2999. O resultado (~20 mil puzzles, 2,8 MB) vai em `apps/web/public/puzzles/`, um
+arquivo por faixa, e é carregado sob demanda: funciona sem internet. Um teste confere que todos têm solução válida.
+O rating de puzzles é um Elo simples guardado no aparelho. O puzzle do dia é escolhido pela data, igual para todos.
+
 ## Custos e limites
 
 O plano gratuito da Cloudflare dá 100 mil requisições por dia (mensagens de WebSocket contam 1 a cada 20) e 5 GB no D1. As salas hibernam entre lances, então partidas paradas não gastam CPU. A análise com motor vai rodar no aparelho (Stockfish em WebAssembly), sem custo de servidor.
 
 ## Próximos passos
 
-1. Puzzles (banco aberto do Lichess, CC0) e corrida de puzzles.
-2. Aulas e jogos famosos comentados.
-3. Importar partida a partir de uma foto do tabuleiro.
-4. Revanche, amigos e bloqueio pelo app.
+1. Aulas e jogos famosos comentados.
+2. Importar partida a partir de uma foto do tabuleiro.
+3. Revanche, amigos e bloqueio pelo app.
+4. Rating de puzzles salvo na conta (hoje fica no aparelho).
 5. Anti-trapaça: análise das partidas suspeitas em lote, pelo GitHub Actions.
