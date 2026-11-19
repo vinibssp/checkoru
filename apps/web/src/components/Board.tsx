@@ -39,8 +39,35 @@ export function Board({ config, onReady }: { config: Config; onReady?: (api: Api
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Só manda para o chessground quando algo do tabuleiro mudou. As telas de partida redesenham várias vezes
+  // por segundo por causa do relógio; reaplicar a config a cada vez gastava o celular e podia atrapalhar um
+  // toque no meio do caminho. Depois de um lance do usuário, reaplica sempre (a tela pode ter recusado o lance).
+  const lastKey = useRef('');
+  const touched = useRef(false);
+  const after = config.movable?.events?.after;
+  if (full.movable?.events && after) {
+    full.movable = {
+      ...full.movable,
+      events: {
+        ...full.movable.events,
+        after: (orig, dest, meta) => {
+          touched.current = true;
+          after(orig, dest, meta);
+        },
+      },
+    };
+  }
+  const key = boardKey(full);
   useEffect(() => {
-    cg.current?.set(full);
+    if (!cg.current) return;
+    if (!touched.current && key === lastKey.current) {
+      // A função de lance pode ter mudado (fecha sobre o estado novo da tela): atualiza só ela.
+      if (full.movable?.events) cg.current.state.movable.events = { ...cg.current.state.movable.events, ...full.movable.events };
+      return;
+    }
+    touched.current = false;
+    lastKey.current = key;
+    cg.current.set(full);
   });
 
   // O tabuleiro pode mudar de lugar sem mudar de tamanho (ex.: a barra do adversário aparece).
@@ -65,6 +92,32 @@ export function Board({ config, onReady }: { config: Config; onReady?: (api: Api
       </div>
     </div>
   );
+}
+
+/** Resumo do que importa na config, para saber se o tabuleiro mudou. */
+function boardKey(c: Config): string {
+  const dests = c.movable?.dests ? [...c.movable.dests].map(([k, v]) => k + v.join('')).join(',') : '';
+  const shapes = c.drawable?.autoShapes ? JSON.stringify(c.drawable.autoShapes) : '';
+  return JSON.stringify([
+    c.fen,
+    c.orientation,
+    c.turnColor,
+    c.lastMove,
+    c.check,
+    c.coordinates,
+    c.animation?.enabled,
+    c.movable?.color,
+    c.movable?.free,
+    c.movable?.showDests,
+    dests,
+    c.premovable?.enabled,
+    c.selectable?.enabled,
+    c.draggable?.enabled,
+    c.highlight,
+    shapes,
+    c.drawable?.enabled,
+    c.blockTouchScroll,
+  ]);
 }
 
 export type { Api as BoardApi, Key };

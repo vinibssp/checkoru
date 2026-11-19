@@ -20,3 +20,13 @@ describe('notação', () => {
     expect(formatClock(-5)).toBe('0:00.0');
   });
 });
+
+describe('ritmo do relógio na tela', () => {
+  it('redesenha na virada do segundo, e a cada décimo nos últimos 10 s', async () => {
+    const { tickDelay } = await import('./notation');
+    expect(tickDelay(null)).toBe(1000);
+    expect(tickDelay(9_999)).toBe(100);
+    expect(tickDelay(65_300)).toBe(305);
+    expect(tickDelay(65_000)).toBe(1005);
+  });
+});

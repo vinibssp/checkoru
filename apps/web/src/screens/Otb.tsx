@@ -6,7 +6,7 @@ import { Oru } from '../components/Oru';
 import { Page, TopBar } from '../components/Shell';
 import { gameFromUcis } from '../analysis';
 import { openAnalysis } from '../currentAnalysis';
-import { formatClock } from '../notation';
+import { formatClock, tickDelay } from '../notation';
 import { flagged, giveBack, newClock, OTB_CONTROLS, pause, press, remaining, start, type OtbClock, type Side } from '../otbClock';
 import { navigate, useRoute } from '../router';
 import { endSound, moveSound, play } from '../sound';
@@ -175,9 +175,9 @@ function OtbRun({ setup, table, onNew, onAgain }: { setup: Setup; table: TableRe
 
   useEffect(() => {
     if (!setup.timed || !clock.running) return;
-    const t = window.setInterval(() => setNow(Date.now()), 100);
-    return () => window.clearInterval(t);
-  }, [setup.timed, clock.running]);
+    const t = window.setTimeout(() => setNow(Date.now()), tickDelay(remaining(clock, clock.running, Date.now())));
+    return () => window.clearTimeout(t);
+  }, [setup.timed, clock, now]);
 
   // Bandeira: perde quem ficou sem tempo, a não ser que o outro não tenha material para dar mate (Leis da FIDE, 6.9).
   useEffect(() => {

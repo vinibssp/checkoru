@@ -18,3 +18,15 @@ export function formatClock(ms: number): string {
   const s = total % 60;
   return h > 0 ? `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}` : `${m}:${String(s).padStart(2, '0')}`;
 }
+
+/**
+ * Quanto esperar até o relógio mostrado mudar: abaixo de 10 s mostra décimos (100 ms); acima, só na virada do
+ * segundo. Assim a tela de partida redesenha ~1 vez por segundo, não 10 (o celular agradece).
+ * `ms` = tempo que resta no relógio que corre; null = nenhum relógio correndo.
+ */
+export function tickDelay(ms: number | null): number {
+  if (ms === null) return 1000;
+  if (ms < 10_000) return 100;
+  const r = ms % 1000;
+  return (r === 0 ? 1000 : r) + 5;
+}

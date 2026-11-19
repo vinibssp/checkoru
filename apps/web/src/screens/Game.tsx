@@ -21,7 +21,7 @@ import { loadVisitor, visitorTicket } from '../visitor';
 import { Board, type BoardApi, type Key } from '../components/Board';
 import { Avatar, Oru } from '../components/Oru';
 import { TopBar } from '../components/Shell';
-import { formatClock, sanPt } from '../notation';
+import { formatClock, sanPt, tickDelay } from '../notation';
 import { pieceImage } from '../pieces';
 import { AnalyseCheckoruButton } from './Analyze';
 import { navigate } from '../router';
@@ -205,9 +205,12 @@ export function Game({ id }: { id: string }) {
 
   // Relógio da tela.
   useEffect(() => {
-    const t = window.setInterval(() => setNow(Date.now()), 100);
-    return () => window.clearInterval(t);
-  }, []);
+    const g = view?.game;
+    const running = g && g.status === 'playing' && !g.untimed ? g.clock.running : null;
+    const ms = running && view ? g!.clock[running] - (Date.now() - view.clockAt) : null;
+    const t = window.setTimeout(() => setNow(Date.now()), tickDelay(ms));
+    return () => window.clearTimeout(t);
+  }, [now, view]);
 
   // Pré-lance: quando chega o lance do adversário, executa o que estava guardado.
   const plyCount = view?.game.moves.length ?? 0;

@@ -34,6 +34,17 @@ body,
   height: 100%;
 }
 
+/* Nada pode passar da largura da tela: no celular isso deixa a página "solta" para os lados e a rolagem estranha. */
+#root {
+  overflow-x: clip;
+}
+
+/* Toque direto, sem a espera do toque duplo (zoom) e sem a página "quicar" além do fim. */
+html {
+  touch-action: manipulation;
+  overscroll-behavior-y: none;
+}
+
 body {
   background: var(--bg-image) center / cover fixed no-repeat, var(--bg);
   color: var(--ink);
@@ -467,12 +478,13 @@ p {
 
 .tc-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 8px;
 }
 
 .tc {
-  padding: 10px 4px;
+  min-width: 0;
+  padding: 10px 2px;
   border: 1px solid var(--rule);
   border-radius: 6px;
   background: var(--surface);
@@ -489,7 +501,8 @@ p {
 
 .tc-time {
   font-family: var(--serif);
-  font-size: 22px;
+  font-size: clamp(16px, 5.4vw, 22px);
+  white-space: nowrap;
   font-weight: 800;
 }
 
@@ -1620,7 +1633,7 @@ a.choice {
 }
 
 .tc-grid.five {
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(5, minmax(0, 1fr));
 }
 
 /* ---------- Sons ---------- */

@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Board, type BoardApi, type Key } from '../components/Board';
 import { Oru } from '../components/Oru';
 import { Page, TopBar } from '../components/Shell';
-import { formatClock } from '../notation';
+import { formatClock, tickDelay } from '../notation';
 import { endSound, moveSound, play } from '../sound';
 import { useStore } from '../store';
 import { MoveList, PromotionPicker } from './Game';
@@ -113,9 +113,10 @@ export function LocalBoard({ tc, onNew, vs }: { tc: Tc; onNew: () => void; vs?: 
 
   useEffect(() => {
     if (!timed) return;
-    const t = window.setInterval(() => setNow(Date.now()), 100);
-    return () => window.clearInterval(t);
-  }, [timed]);
+    if (end || clock.since === null) return;
+    const t = window.setTimeout(() => setNow(Date.now()), tickDelay(clock[turn] - (Date.now() - clock.since)));
+    return () => window.clearTimeout(t);
+  }, [timed, now, end, clock, turn]);
 
   // Bandeira caiu?
   useEffect(() => {
