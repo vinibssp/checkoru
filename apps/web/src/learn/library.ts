@@ -42,7 +42,7 @@ const CF = cf("§1 'Some Simple Mates'");
 const CF2 = cf("§2 'Pawn Promotion'");
 const CF3 = cf("§3 'Pawn Endings'");
 
-const ex = (g: Omit<FamousGame, 'place' | 'year' | 'result' | 'sources' | 'white' | 'black'> & { white?: string; black?: string }): FamousGame => ({
+const ex = (g: Omit<FamousGame, 'place' | 'year' | 'result' | 'sources' | 'white' | 'black'> & Partial<Pick<FamousGame, 'white' | 'black' | 'result' | 'sources'>>): FamousGame => ({
   white: 'Brancas',
   black: 'Pretas',
   place: 'Fundamentos do Xadrez',
