@@ -40,7 +40,7 @@ Site e app Android, de código aberto e sem anúncios.
 | Jogar por link sem conta: quem recebe o convite escolhe um apelido e joga (sem rating e sem chat) | pronto |
 | Turmas: o professor cria a turma, os alunos entram com um código, e ele passa aulas e puzzles e acompanha o progresso | pronto |
 | Jogo limpo: análise semanal em lote no GitHub Actions, com método público (docs/JOGO-LIMPO.md) e revisão humana | pronto |
-| Biblioteca de clássicos: Capablanca, Fundamentos do Xadrez (1921), traduzido, com os exemplos no tabuleiro (cap. I, §1) | começando |
+| Biblioteca de clássicos: Capablanca, Fundamentos do Xadrez (1921), traduzido, com os exemplos no tabuleiro (cap. I, §1 a §3: mates simples, promoção e finais de peões) | começando |
 | Torneio do clube: sistema suíço simplificado, folga, W.O., desempates (Buchholz, Sonneborn-Berger, vitórias), tabela para compartilhar e rating do clube (Elo) | pronto |
 
 ## Como rodar na sua máquina
